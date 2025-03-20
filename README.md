@@ -35,6 +35,9 @@ Because I did on it 6 years of experience (from year 2019) and I don't want to l
 **Can I run it on older Windowses? (such as Windows XP etc.?)**
 This shell runs on .NET Framework 4.8, so any Windows who support this, will also be able to run the shell.
 
+**Where can I download the source code?**
+[Here](https://drive.google.com/file/d/1vS45TrJeKuy0pniM4yfe6AqO_hKshyTw/view?usp=sharing), because GitHub doesn't allow me to upload larger files...
+
 ----------
 
 If you still have any questions, please let me know!
