@@ -1,0 +1,154 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+NewShell
+</name>
+</assembly>
+<members>
+<member name="T:NewShell.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._1">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._120">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._121">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._122">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._123">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._124">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._146">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources._3048">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.EmptyWin7Dog">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.FileExplorer">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.FileExplorerSmall">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.fixed1">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.Gradient_Wallpaper_3008832671">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.left">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.main">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.main1">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.Program">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.right">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.RunDialogIcon">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.Settings">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="M:NewShell.TransparentListView.#ctor">
+ <summary>
+ Creates a new TransparentListView object.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="P:NewShell.TransparentListView.ErrorTextColor">
+ <summary>
+ The color to use when a certain ListViewItem has unresolved issues.
+ </summary>
+</member>
+<member name="P:NewShell.TransparentListView.HighlightColor">
+ <summary>
+ The color to use when highlighting an item.
+ </summary>
+</member>
+<member name="P:NewShell.TransparentListView.RedrawInterval">
+ <summary>
+ The intervals at which to redraw the control when scrolling. Higher values are reccomended for less powerful CPUs.
+ Decrease this value if experiencing choppy redraws during scrolling. Values below 5-6ms may result in extreme CPU use.
+ </summary>
+</member>
+<member name="P:NewShell.TransparentListView.RedrawOnMouseMove">
+ <summary>
+ True if the control should be redrawn when the mouse is moved, otherwise False.
+ </summary>
+ <remarks>There have been some issues with the Set method, so it's temporarily disabled and has no effect.</remarks>
+</member>
+</members>
+</doc>

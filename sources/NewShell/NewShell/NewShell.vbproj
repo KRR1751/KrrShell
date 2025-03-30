@@ -1,0 +1,436 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{271252B5-A9A7-440B-9BF7-7269A611ADCB}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>NewShell.My.MyApplication</StartupObject>
+    <RootNamespace>NewShell</RootNamespace>
+    <AssemblyName>KrrShell</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <SupportUrl>https://www.youtube.com/%40krr1751</SupportUrl>
+    <ProductName>KrrShell</ProductName>
+    <PublisherName>KRR1751</PublisherName>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>0.0.1.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>KrrShell.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>KrrShell.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>KrrShell.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>KrrShell.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutDialog.Designer.vb">
+      <DependentUpon>AboutDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AboutDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmProperties.Designer.vb">
+      <DependentUpon>AlarmProperties.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AlarmProperties.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppBar.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppBar.Designer.vb">
+      <DependentUpon>AppBar.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppbarProperties.Designer.vb">
+      <DependentUpon>AppbarProperties.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AppbarProperties.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BlackScreen.Designer.vb">
+      <DependentUpon>BlackScreen.vb</DependentUpon>
+    </Compile>
+    <Compile Include="BlackScreen.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClipboardViewer.Designer.vb">
+      <DependentUpon>ClipboardViewer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ClipboardViewer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Desktop.Designer.vb">
+      <DependentUpon>Desktop.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Desktop.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DesktopProperties.Designer.vb">
+      <DependentUpon>DesktopProperties.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DesktopProperties.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog3.Designer.vb">
+      <DependentUpon>Dialog3.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog3.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FolderCreator.designer.vb">
+      <DependentUpon>FolderCreator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FolderCreator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FolderView.Designer.vb">
+      <DependentUpon>FolderView.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FolderView.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LinkCreator.Designer.vb">
+      <DependentUpon>LinkCreator.vb</DependentUpon>
+    </Compile>
+    <Compile Include="LinkCreator.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MouseLocker.Designer.vb">
+      <DependentUpon>MouseLocker.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MouseLocker.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="NotifyWindow.Designer.vb">
+      <DependentUpon>NotifyWindow.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NotifyWindow.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NotifyWindowD.Designer.vb">
+      <DependentUpon>NotifyWindowD.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NotifyWindowD.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RunDialog.Designer.vb">
+      <DependentUpon>RunDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="RunDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SA.Designer.vb">
+      <DependentUpon>SA.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SA.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScreenLocker.Designer.vb">
+      <DependentUpon>ScreenLocker.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ScreenLocker.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startmenu.designer.vb">
+      <DependentUpon>Startmenu.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Startmenu.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VolumeControl.Designer.vb">
+      <DependentUpon>VolumeControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="VolumeControl.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WAT.Designer.vb">
+      <DependentUpon>WAT.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WAT.vb">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AboutDialog.resx">
+      <DependentUpon>AboutDialog.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AlarmProperties.resx">
+      <DependentUpon>AlarmProperties.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AppBar.resx">
+      <DependentUpon>AppBar.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AppbarProperties.resx">
+      <DependentUpon>AppbarProperties.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BlackScreen.resx">
+      <DependentUpon>BlackScreen.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClipboardViewer.resx">
+      <DependentUpon>ClipboardViewer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Desktop.resx">
+      <DependentUpon>Desktop.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DesktopProperties.resx">
+      <DependentUpon>DesktopProperties.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog3.resx">
+      <DependentUpon>Dialog3.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FolderCreator.resx">
+      <DependentUpon>FolderCreator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FolderView.resx">
+      <DependentUpon>FolderView.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LinkCreator.resx">
+      <DependentUpon>LinkCreator.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MouseLocker.resx">
+      <DependentUpon>MouseLocker.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NotifyWindow.resx">
+      <DependentUpon>NotifyWindow.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NotifyWindowD.resx">
+      <DependentUpon>NotifyWindowD.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RunDialog.resx">
+      <DependentUpon>RunDialog.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SA.resx">
+      <DependentUpon>SA.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ScreenLocker.resx">
+      <DependentUpon>ScreenLocker.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Startmenu.resx">
+      <DependentUpon>Startmenu.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VolumeControl.resx">
+      <DependentUpon>VolumeControl.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WAT.resx">
+      <DependentUpon>WAT.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\app.manifest" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#120.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#121.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#122.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#123.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#124.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\#3048.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fixed1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Gradient-Wallpaper-3008832671.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\EmptyWin7Dog.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Program.ico" />
+    <None Include="Resources\Program.bmp" />
+    <None Include="Resources\Program.png" />
+    <None Include="Resources\FileExplorer.png" />
+    <None Include="Resources\FileExplorerSmall.png" />
+    <None Include="Resources\146.png" />
+    <None Include="Resources\Settings.png" />
+    <None Include="Resources\left.png" />
+    <None Include="Resources\Clock.png" />
+    <None Include="Resources\Information.png" />
+    <None Include="Resources\mainTransparent.png" />
+    <None Include="Resources\mainTransparent1.png" />
+    <Content Include="RunDialogIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
