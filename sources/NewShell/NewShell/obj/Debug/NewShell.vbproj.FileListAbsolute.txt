@@ -1,0 +1,36 @@
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\bin\Debug\NewShell.exe.config
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\bin\Debug\NewShell.exe
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\bin\Debug\NewShell.pdb
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\bin\Debug\NewShell.xml
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.Form1.resources
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.Resources.resources
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.vbproj.GenerateResource.Cache
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.exe
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.xml
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.pdb
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\bin\Debug\AxInterop.Microsoft.Vbe.Interop.Forms.dll
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\AxInterop.Microsoft.Vbe.Interop.Forms.dll
+C:\Users\Kristian\AppData\Local\Temporary Projects\NewShell\obj\Debug\NewShell.vbproj.ResolveComReference.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\Debug\NewShell.exe.config
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.vbproj.ResolveComReference.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.exe
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.xml
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.pdb
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\Debug\NewShell.exe
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\Debug\NewShell.pdb
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\Debug\NewShell.xml
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.vbproj.AssemblyReference.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.AppBar.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.BlackScreen.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.Desktop.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.NFD.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.LinkCreator.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.Resources.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.RunDialog.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.SA.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.Startmenu.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.VolumeControl.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.WAT.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.vbproj.GenerateResource.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.vbproj.CoreCompileInputs.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\Debug\NewShell.TransparentListView.resources

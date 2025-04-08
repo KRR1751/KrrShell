@@ -1,0 +1,4 @@
+﻿[*.vb]
+
+# IDE0081: 'ByVal' keyword is unnecessary and can be removed.
+dotnet_diagnostic.IDE0081.severity = none
