@@ -1,0 +1,176 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|NewShell||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|c:\\users\\kristian\\documents\\!osobn\u00ED\\!main\\krrshell\\source\\newshell\\newshell\\rundialog.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\rundialog.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\rundialog.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\rundialog.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\appbarproperties.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\appbarproperties.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\appbarproperties.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\appbarproperties.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\newshell\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|solutionrelative:newshell\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{271252B5-A9A7-440B-9BF7-7269A611ADCB}|NewShell\\NewShell.vbproj|c:\\users\\kristian\\documents\\!osobn\u00ED\\!main\\krrshell\\source\\newshell\\newshell\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|8998e48e-b89a-4034-b66e-353d8c1fdc2e"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NewShell",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\NewShell.vbproj",
+              "RelativeDocumentMoniker": "NewShell\\NewShell.vbproj",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\NewShell.vbproj",
+              "RelativeToolTip": "NewShell\\NewShell.vbproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-12-03T16:34:45.122Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AppbarProperties.vb",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppbarProperties.vb",
+              "RelativeDocumentMoniker": "NewShell\\AppbarProperties.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppbarProperties.vb",
+              "RelativeToolTip": "NewShell\\AppbarProperties.vb",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAAAGYAAABtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-03T11:05:53.769Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AppbarProperties.vb [N\u00E1vrh]",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppbarProperties.vb",
+              "RelativeDocumentMoniker": "NewShell\\AppbarProperties.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppbarProperties.vb [N\u00E1vrh]",
+              "RelativeToolTip": "NewShell\\AppbarProperties.vb [N\u00E1vrh]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-03T11:05:19.689Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Desktop.vb [N\u00E1vrh]",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\Desktop.vb",
+              "RelativeDocumentMoniker": "NewShell\\Desktop.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\Desktop.vb [N\u00E1vrh]",
+              "RelativeToolTip": "NewShell\\Desktop.vb [N\u00E1vrh]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-03T09:05:59.934Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RunDialog.vb",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\RunDialog.vb",
+              "RelativeDocumentMoniker": "NewShell\\RunDialog.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\RunDialog.vb",
+              "RelativeToolTip": "NewShell\\RunDialog.vb",
+              "ViewState": "AgIAADQAAAAAAAAAAAAcwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-02T23:09:53.927Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Desktop.vb",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\Desktop.vb",
+              "RelativeDocumentMoniker": "NewShell\\Desktop.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\Desktop.vb",
+              "RelativeToolTip": "NewShell\\Desktop.vb",
+              "ViewState": "AgIAADUCAAAAAAAAAAAuwEkCAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-03T09:06:03.888Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AppBar.vb",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppBar.vb",
+              "RelativeDocumentMoniker": "NewShell\\AppBar.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppBar.vb",
+              "RelativeToolTip": "NewShell\\AppBar.vb",
+              "ViewState": "AgIAANMDAAAAAAAAAAAwwOIDAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2024-10-28T14:00:06.237Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RunDialog.vb [N\u00E1vrh]",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\RunDialog.vb",
+              "RelativeDocumentMoniker": "NewShell\\RunDialog.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\RunDialog.vb [N\u00E1vrh]",
+              "RelativeToolTip": "NewShell\\RunDialog.vb [N\u00E1vrh]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-12-02T23:09:41.275Z",
+              "EditorCaption": " [N\u00E1vrh]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AppBar.vb [N\u00E1vrh]",
+              "DocumentMoniker": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppBar.vb",
+              "RelativeDocumentMoniker": "NewShell\\AppBar.vb",
+              "ToolTip": "C:\\Users\\Kristian\\Documents\\!Osobn\u00ED\\!MAIN\\KrrShell\\Source\\NewShell\\NewShell\\AppBar.vb [N\u00E1vrh]",
+              "RelativeToolTip": "NewShell\\AppBar.vb [N\u00E1vrh]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2025-03-26T22:03:05.755Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

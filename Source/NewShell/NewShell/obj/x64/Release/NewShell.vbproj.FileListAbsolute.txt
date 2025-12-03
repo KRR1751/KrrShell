@@ -1,0 +1,70 @@
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\x64\Release\KrrShell.exe.config
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\x64\Release\KrrShell.exe
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\x64\Release\KrrShell.pdb
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\bin\x64\Release\KrrShell.xml
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.AssemblyReference.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.ResolveComReference.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.AboutDialog.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.APD.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.AppBar.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.AppbarProperties.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.BlackScreen.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.ClipboardViewer.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.Desktop.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.DesktopProperties.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.Dialog3.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.NFD.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.FolderView.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.LinkCreator.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.MLf.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.Resources.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.NW.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.NotifyWindowD.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.RunDialog.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.SA.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.ScreenLocker.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.Startmenu.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.VolumeControl.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.WAT.resources
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.GenerateResource.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.CoreCompileInputs.cache
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\KrrShell.exe
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\KrrShell.xml
+C:\Users\Kristian\Documents\Visual Studio 2013\Projects\NewShell\NewShell\obj\x64\Release\KrrShell.pdb
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.exe.config
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.exe
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.pdb
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.xml
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.AssemblyReference.cache
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.ResolveComReference.cache
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AboutDialog.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.APD.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AppbarProperties.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.BlackScreen.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.ClipboardViewer.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.Desktop.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DesktopProperties.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.Dialog3.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.NFD.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.LinkCreator.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.MLf.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.Resources.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.NW.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.NotifyWindowD.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.RunDialog.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.SA.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.ScreenLocker.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.Startmenu.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.VolumeControl.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.WAT.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.GenerateResource.cache
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.vbproj.CoreCompileInputs.cache
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\KrrShell.exe
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\KrrShell.xml
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\KrrShell.pdb
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.StartmenuProperties.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.TileCreator.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AppBar.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AltTab.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.ClockTray.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\Interop.Shell32.dll

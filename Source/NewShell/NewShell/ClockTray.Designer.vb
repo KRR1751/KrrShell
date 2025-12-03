@@ -1,0 +1,95 @@
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Partial Class ClockTray
+    Inherits System.Windows.Forms.Form
+
+    'Form overrides dispose to clean up the component list.
+    <System.Diagnostics.DebuggerNonUserCode()> _
+    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+        Try
+            If disposing AndAlso components IsNot Nothing Then
+                components.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.  
+    'Do not modify it using the code editor.
+    <System.Diagnostics.DebuggerStepThrough()> _
+    Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Me.DayLabel = New System.Windows.Forms.Label()
+        Me.DateLabel = New System.Windows.Forms.Label()
+        Me.TimeLabel = New System.Windows.Forms.Label()
+        Me.Controller = New System.Windows.Forms.Timer(Me.components)
+        Me.SuspendLayout()
+        '
+        'DayLabel
+        '
+        Me.DayLabel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.DayLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.DayLabel.ForeColor = System.Drawing.Color.White
+        Me.DayLabel.Location = New System.Drawing.Point(0, 13)
+        Me.DayLabel.Name = "DayLabel"
+        Me.DayLabel.Size = New System.Drawing.Size(80, 12)
+        Me.DayLabel.TabIndex = 5
+        Me.DayLabel.Text = "Wednesday"
+        Me.DayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'DateLabel
+        '
+        Me.DateLabel.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.DateLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.DateLabel.ForeColor = System.Drawing.Color.White
+        Me.DateLabel.Location = New System.Drawing.Point(0, 25)
+        Me.DateLabel.Name = "DateLabel"
+        Me.DateLabel.Size = New System.Drawing.Size(80, 12)
+        Me.DateLabel.TabIndex = 6
+        Me.DateLabel.Text = "01. 01. 1661"
+        Me.DateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'TimeLabel
+        '
+        Me.TimeLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.TimeLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.TimeLabel.ForeColor = System.Drawing.Color.White
+        Me.TimeLabel.Location = New System.Drawing.Point(0, 0)
+        Me.TimeLabel.Name = "TimeLabel"
+        Me.TimeLabel.Size = New System.Drawing.Size(80, 13)
+        Me.TimeLabel.TabIndex = 4
+        Me.TimeLabel.Text = "00:00:00"
+        Me.TimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'Controller
+        '
+        Me.Controller.Interval = 1
+        '
+        'ClockTray
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.BackColor = System.Drawing.SystemColors.Control
+        Me.ClientSize = New System.Drawing.Size(80, 37)
+        Me.Controls.Add(Me.DayLabel)
+        Me.Controls.Add(Me.DateLabel)
+        Me.Controls.Add(Me.TimeLabel)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+        Me.MinimumSize = New System.Drawing.Size(80, 37)
+        Me.Name = "ClockTray"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.Manual
+        Me.Text = "ClockTray"
+        Me.TopMost = True
+        Me.ResumeLayout(False)
+
+    End Sub
+
+    Friend WithEvents DayLabel As Label
+    Friend WithEvents DateLabel As Label
+    Friend WithEvents TimeLabel As Label
+    Friend WithEvents Controller As Timer
+End Class
