@@ -731,10 +731,12 @@ Public Class AppBar
                 Splitter3.Visible = True
             Else
                 Panel6.Visible = True
+                Splitter3.Visible = False
             End If
         End If
 
         ' Start button
+
         Button1.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "StartButton", True)
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 0 Then
             AppbarProperties.RadioButton8.Checked = True
@@ -755,10 +757,15 @@ Public Class AppBar
             'ORB Code Here
         End If
 
+        '--------EMERGE-TRAY---------
+
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 0 Then
+            ' If emerge Desktop is not installed:
+
             If Not Me.Width = SystemInformation.PrimaryMonitorSize.Width Then
                 Me.Width = SystemInformation.PrimaryMonitorSize.Width
             End If
+
             AppbarProperties.CheckBox9.Checked = False
             Panel4.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "MenuBar", True)
             ClockTray.Hide()
@@ -779,25 +786,37 @@ Public Class AppBar
 
                 wp2.flags = wp.flags
                 wp2.Length = Marshal.SizeOf(wp2)
+
                 SetWindowPlacement(FindWindow("EmergeDesktopApplet", ""), wp2)
                 SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+
                 For Each pr As Process In Process.GetProcesses
-                    If pr.ProcessName = "emergeWorkspace" AndAlso "emergeCore" Then
+                    If pr.ProcessName = "emergeCore" Then
                         pr.Kill()
+                    End If
+
+                    If pr.ProcessName = "emergeWorkspace" Then
+                        ShowWindow(pr.MainWindowHandle, SHOW_WINDOW.SW_HIDE)
                     End If
                 Next
             Catch ex As Exception
             End Try
 
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 1 Then
+            ' If emerge desktop is installed:
+
             Dim ValueW As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", SystemInformation.PrimaryMonitorSize.Width / 2 + SystemInformation.PrimaryMonitorSize.Width / 4)
+
             AppbarProperties.CheckBox9.Checked = True
             SizeLocked = False
+
             If Not Me.Width = ValueW Then
                 Me.Width = ValueW
             End If
+
             Panel4.Visible = False
             ClockTray.Show()
+
             Try
                 Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
                 If hWnd <> IntPtr.Zero Then
@@ -812,8 +831,12 @@ Public Class AppBar
                 End If
 
                 For Each pr As Process In Process.GetProcesses
-                    If pr.ProcessName = "emergeWorkspace" OrElse "emergeCore" Then
+                    If pr.ProcessName = "emergeCore" AndAlso pr.ProcessName = "Explorer.exe" Then
                         pr.Kill()
+                    End If
+
+                    If pr.ProcessName = "emergeWorkspace" Then
+                        ShowWindow(pr.MainWindowHandle, SHOW_WINDOW.SW_HIDE)
                     End If
                 Next
             Catch ex As Exception
@@ -840,6 +863,7 @@ Public Class AppBar
         AddHandler GlobalKeyboardHook.HotkeyPressed, AddressOf GlobalKeyboardHook_HotkeyPressed
 
         ' AppStrip
+
         Panel1.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "PinnedBar", True)
         PinnedBarToolStripMenuItem.Checked = Panel1.Visible
         Try
@@ -926,6 +950,7 @@ CheckAgainIfFileExist:
         ' Alarms
 
         StartClockUpdate()
+
         Try
 0:
             For Each i In My.Computer.Registry.CurrentUser.OpenSubKey("ALARMS\", True).GetSubKeyNames
@@ -1660,6 +1685,7 @@ CheckAgainIfFileExist:
                 Splitter3.Visible = True
             Else
                 Panel6.Visible = True
+                Splitter3.Visible = False
             End If
         End If
     End Sub
@@ -3668,33 +3694,6 @@ CheckAgainIfFileExist:
         End If
     End Sub
 
-    Public SizeLocked As Boolean = True
-    Private lastMousePos As Point
-    Private Sub Panel6_MouseMove(sender As Object, e As MouseEventArgs) Handles Panel6.MouseMove
-        If Panel6.Visible = True Then
-            If e.Button = MouseButtons.Left Then
-                SizeLocked = False
-                Me.Width = e.X
-            ElseIf e.Button = MouseButtons.None Then
-                SizeLocked = True
-                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", Me.Width, Microsoft.Win32.RegistryValueKind.DWord)
-                Try
-                    Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
-                    If hWnd <> IntPtr.Zero Then
-                        Dim newX As Integer = Me.Width
-                        Dim newY As Integer = Me.Location.Y
-                        Dim newWidth As Integer = SystemInformation.PrimaryMonitorSize.Width - Me.Width - ClockTray.Width
-                        Dim newHeight As Integer = Me.Height
-
-                        MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                    Else
-                    End If
-                Catch ex As Exception
-                End Try
-            End If
-        End If
-    End Sub
-
     Private Sub ProcessStrip_MouseUp(sender As Object, e As MouseEventArgs) Handles ProcessStrip.MouseUp
         SaveToolStripOrder()
 
@@ -3704,6 +3703,7 @@ CheckAgainIfFileExist:
 
     Private Sub ReloadAppsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReloadAppsToolStripMenuItem.Click
         LoadApps()
+        ClockTray.SyncAppearance()
 
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "UseSystemColor", 1) = 1 Then
             Dim accentColor As Color = GetAccentColor()
@@ -3745,6 +3745,44 @@ CheckAgainIfFileExist:
     Private Sub ProcessStrip_KeyUp(sender As Object, e As KeyEventArgs) Handles ProcessStrip.KeyUp
         If e.KeyCode = Keys.Enter Then
             ' Keyboard settings here!
+        End If
+    End Sub
+
+    Private Sub Panel6_Paint(sender As Object, e As PaintEventArgs) Handles Panel6.Paint
+
+    End Sub
+    Public SizeLocked As Boolean = True
+    Private lastMousePos As Point
+    Private Sub Panel6_MouseMove(sender As Object, e As MouseEventArgs) Handles Panel6.MouseMove
+
+        If Panel6.Visible = True Then
+            If e.Button = MouseButtons.Left Then
+                Panel6.Capture = True
+
+                Me.Width = MousePosition.X
+
+                SizeLocked = False
+
+            ElseIf e.Button = MouseButtons.None Then
+                Panel6.Capture = False
+
+                SizeLocked = True
+
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", Me.Width, Microsoft.Win32.RegistryValueKind.DWord)
+                Try
+                    Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
+                    If hWnd <> IntPtr.Zero Then
+                        Dim newX As Integer = Me.Width
+                        Dim newY As Integer = Me.Location.Y
+                        Dim newWidth As Integer = SystemInformation.PrimaryMonitorSize.Width - Me.Width - ClockTray.Width
+                        Dim newHeight As Integer = Me.Height
+
+                        MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
+                    Else
+                    End If
+                Catch ex As Exception
+                End Try
+            End If
         End If
     End Sub
 End Class
@@ -3830,14 +3868,14 @@ Module GlobalKeyboardHook
     Private Function GetWindowPlacement(ByVal hWnd As IntPtr, ByRef lpwndpl As WINDOWPLACEMENT) As Boolean
     End Function
 
-    Private Const SW_SHOWNORMAL As UInteger = 1 ' Normální stav (obnovené)
-    Private Const SW_SHOWMAXIMIZED As UInteger = 3 ' Maximalizované
-    Private Const SW_SHOWMINIMIZED As UInteger = 2 ' Minimalizované
+    Private Const SW_SHOWNORMAL As UInteger = 1
+    Private Const SW_SHOWMAXIMIZED As UInteger = 3
+    Private Const SW_SHOWMINIMIZED As UInteger = 2
 
     ' Function for detecting WindowState
     Public Function GetWindowState(ByVal hWnd As IntPtr) As String
         Dim wp As WINDOWPLACEMENT
-        wp.length = CType(Marshal.SizeOf(wp), UInteger) ' Musíme nastavit délku struktury
+        wp.length = CType(Marshal.SizeOf(wp), UInteger)
 
         If GetWindowPlacement(hWnd, wp) Then
             Select Case wp.showCmd
