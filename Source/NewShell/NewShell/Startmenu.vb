@@ -170,8 +170,10 @@ Public Class Startmenu
     End Sub
 
     Private Sub Startmenu_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-        If e.CloseReason = CloseReason.None OrElse e.CloseReason = CloseReason.UserClosing Then
+        If Not e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown Then
             e.Cancel = True
+        Else
+            e.Cancel = False
         End If
     End Sub
 

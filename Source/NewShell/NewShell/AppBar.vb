@@ -1654,14 +1654,23 @@ CheckAgainIfFileExist:
     End Sub
     Public CanClose As Boolean = False
     Private Sub AppBar_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        If CanClose = False Then
-            e.Cancel = True
-            SA.ShowDialog()
-        Else
+        If e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown Then
+            e.Cancel = False
             If GlobalKeyboardHook.Unhook() Then
                 Debug.WriteLine("Hook ended.")
             Else
                 Debug.WriteLine("Hook ending failed.")
+            End If
+        Else
+            If CanClose = False Then
+                e.Cancel = True
+                SA.ShowDialog()
+            Else
+                If GlobalKeyboardHook.Unhook() Then
+                    Debug.WriteLine("Hook ended.")
+                Else
+                    Debug.WriteLine("Hook ending failed.")
+                End If
             End If
         End If
         'For Each pr As Process In Process.GetProcesses
@@ -2913,7 +2922,7 @@ CheckAgainIfFileExist:
         End If
     End Sub
 
-    Private Sub TimeLabel_Click(sender As Object, e As MouseEventArgs) Handles TimeLabel.MouseUp, DayLabel.MouseUp, DateLabel.MouseUp
+    Private Sub TimeLabel_Click(sender As Object, e As MouseEventArgs) Handles TimeLabel.MouseUp, DayLabel.MouseUp, DateLabel.MouseUp, TimeLabel.Click
         If e.Button = MouseButtons.Left Then
             Dialog3.Show()
         ElseIf e.Button = MouseButtons.Right Then

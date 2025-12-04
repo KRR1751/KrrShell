@@ -89,12 +89,12 @@ Partial Class ClockTray
         Me.Controls.Add(Me.TimeLabel)
         Me.Controls.Add(Me.Button1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
-        Me.MinimumSize = New System.Drawing.Size(80, 37)
+        Me.MaximumSize = New System.Drawing.Size(93, 37)
+        Me.MinimumSize = New System.Drawing.Size(93, 37)
         Me.Name = "ClockTray"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.Manual
-        Me.Text = "ClockTray"
         Me.TopMost = True
         Me.ResumeLayout(False)
 

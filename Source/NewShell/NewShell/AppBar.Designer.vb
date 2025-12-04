@@ -788,7 +788,7 @@ Partial Class AppBar
         Me.ProcessStrip.Location = New System.Drawing.Point(0, 0)
         Me.ProcessStrip.Name = "ProcessStrip"
         Me.ProcessStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
-        Me.ProcessStrip.Size = New System.Drawing.Size(679, 39)
+        Me.ProcessStrip.Size = New System.Drawing.Size(823, 39)
         Me.ProcessStrip.TabIndex = 6
         Me.ProcessStrip.Text = "ToolStrip2"
         '
@@ -809,7 +809,7 @@ Partial Class AppBar
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel3.Location = New System.Drawing.Point(167, 0)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(679, 37)
+        Me.Panel3.Size = New System.Drawing.Size(823, 37)
         Me.Panel3.TabIndex = 6
         '
         'Panel6
@@ -817,7 +817,7 @@ Partial Class AppBar
         Me.Panel6.BackColor = System.Drawing.SystemColors.Control
         Me.Panel6.Cursor = System.Windows.Forms.Cursors.VSplit
         Me.Panel6.Dock = System.Windows.Forms.DockStyle.Right
-        Me.Panel6.Location = New System.Drawing.Point(674, 0)
+        Me.Panel6.Location = New System.Drawing.Point(818, 0)
         Me.Panel6.Name = "Panel6"
         Me.Panel6.Size = New System.Drawing.Size(5, 37)
         Me.Panel6.TabIndex = 7
@@ -1075,7 +1075,7 @@ Partial Class AppBar
         Me.Panel4.Controls.Add(Me.TimeDate)
         Me.Panel4.Controls.Add(Me.Button2)
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Right
-        Me.Panel4.Location = New System.Drawing.Point(851, 0)
+        Me.Panel4.Location = New System.Drawing.Point(995, 0)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(164, 37)
         Me.Panel4.TabIndex = 7
@@ -1190,7 +1190,7 @@ Partial Class AppBar
         '
         Me.Splitter3.BackColor = System.Drawing.Color.Black
         Me.Splitter3.Dock = System.Windows.Forms.DockStyle.Right
-        Me.Splitter3.Location = New System.Drawing.Point(846, 0)
+        Me.Splitter3.Location = New System.Drawing.Point(990, 0)
         Me.Splitter3.Name = "Splitter3"
         Me.Splitter3.Size = New System.Drawing.Size(5, 37)
         Me.Splitter3.TabIndex = 8
@@ -1511,7 +1511,7 @@ Partial Class AppBar
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(122, Byte), Integer), CType(CType(88, Byte), Integer), CType(CType(50, Byte), Integer))
         Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.ClientSize = New System.Drawing.Size(1015, 37)
+        Me.ClientSize = New System.Drawing.Size(1159, 37)
         Me.ContextMenuStrip = Me.CMMAIN
         Me.ControlBox = False
         Me.Controls.Add(Me.Panel3)
@@ -1525,7 +1525,7 @@ Partial Class AppBar
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(37, 37)
+        Me.MinimumSize = New System.Drawing.Size(0, 37)
         Me.Name = "AppBar"
         Me.Opacity = 0.9R
         Me.ShowIcon = False

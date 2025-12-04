@@ -42,6 +42,7 @@ Public Class ClockTray
     End Sub
 
     Public Sub SyncAppearance()
+        Me.Height = AppBar.Height
 
         Me.BackColor = AppBar.BackColor
         Me.ForeColor = AppBar.ForeColor
@@ -65,14 +66,23 @@ Public Class ClockTray
     End Sub
 
     Private Sub ClockTray_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        If AppBar.CanClose = False Then
-            e.Cancel = True
-            SA.ShowDialog()
-        Else
+        If e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown Then
+            e.Cancel = False
             If GlobalKeyboardHook.Unhook() Then
                 Debug.WriteLine("Hook ended.")
             Else
-                Debug.WriteLine("Hook ended failed.")
+                Debug.WriteLine("Hook ending failed.")
+            End If
+        Else
+            If AppBar.CanClose = False Then
+                e.Cancel = True
+                SA.ShowDialog()
+            Else
+                If GlobalKeyboardHook.Unhook() Then
+                    Debug.WriteLine("Hook ended.")
+                Else
+                    Debug.WriteLine("Hook ending failed.")
+                End If
             End If
         End If
     End Sub
@@ -95,5 +105,11 @@ Public Class ClockTray
             DateLabel.ForeColor = Color.White
             Button1.FlatAppearance.BorderColor = Color.Black
         End If
+    End Sub
+
+    Private Sub ClockTray_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
+        Me.WindowState = FormWindowState.Normal
+
+        Me.Location = New Point(SystemInformation.PrimaryMonitorSize.Width - Me.Width, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
     End Sub
 End Class

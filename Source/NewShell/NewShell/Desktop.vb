@@ -217,9 +217,24 @@ Public Class Desktop
     End Sub
     Public CanClose As Boolean = False
     Private Sub Desktop_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        If CanClose = False Then
-            e.Cancel = True
-            SA.ShowDialog(Me)
+        If e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown Then
+            e.Cancel = False
+            If GlobalKeyboardHook.Unhook() Then
+                Debug.WriteLine("Hook ended.")
+            Else
+                Debug.WriteLine("Hook ending failed.")
+            End If
+        Else
+            If CanClose = False Then
+                e.Cancel = True
+                SA.ShowDialog(AppBar)
+            Else
+                If GlobalKeyboardHook.Unhook() Then
+                    Debug.WriteLine("Hook ended.")
+                Else
+                    Debug.WriteLine("Hook ending failed.")
+                End If
+            End If
         End If
     End Sub
 
