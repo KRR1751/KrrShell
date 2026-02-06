@@ -5,6 +5,8 @@ Imports System.IO
 Imports System.Net.Security
 Imports System.Reflection.Emit
 Imports System.Runtime.InteropServices
+Imports System.Security.Cryptography
+Imports System.Text
 Imports System.Threading
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Button
@@ -681,15 +683,47 @@ Public Class AppBar
 
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "UseSystemColor", 1) = 1 Then
 
-            Dim accentColor As Color = GetAccentColor
+            Dim accentColor As Color = GetAccentColor()
 
             Me.BackColor = accentColor
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", ColorTranslator.ToHtml(accentColor))
 
         End If
 
-        fBarRegistered = False
-        RegisterBar()
+        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Enabled", False) = 1 Then
+            Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Type", 0)
+
+                Case 0 ' Explorer WorkingArea
+
+                    fBarRegistered = False
+                    RegisterBar()
+
+                Case 1 ' User32.dll WorkingArea
+
+                    Dim workspace As New WorkspaceManager()
+
+                    Try
+                        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "CurrentPreset", "Default") Is Nothing Then Exit Try
+
+                        Dim workdata As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets\", My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "CurrentPreset", "Default"), "Default")
+                        Dim parts As String() = workdata.Split(" "c)
+
+                        If parts.Length >= 4 Then
+                            Dim workTop As String = parts(0)
+                            Dim workBottom As String = parts(1)
+                            Dim workLeft As String = parts(2)
+                            Dim workRight As String = parts(3)
+
+                            workspace.UpdateWorkingArea(workTop, workBottom, workLeft, workRight)
+                        End If
+
+                    Catch ex As Exception
+                        workspace.UpdateWorkingArea(AppbarProperties.defWorkTop, AppbarProperties.defWorkBottom, AppbarProperties.defWorkLeft, AppbarProperties.defWorkRight)
+                    End Try
+
+            End Select
+        End If
+
         Me.BringToFront()
         Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
 
@@ -700,13 +734,13 @@ Public Class AppBar
                     AppbarProperties.PictureBox1.Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackImage", ""))
                     AppbarProperties.ComboBox2.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackImage", "")
                 Catch ex As Exception
-                    Me.BackgroundImage = My.Resources.AppBarMainTransparent1
-                    AppbarProperties.PictureBox1.Image = My.Resources.AppBarMainTransparent1
+                    Me.BackgroundImage = My.Resources.AppBarMainTransparent
+                    AppbarProperties.PictureBox1.Image = My.Resources.AppBarMainTransparent
                     AppbarProperties.ComboBox2.Text = ""
                 End Try
             Else
-                Me.BackgroundImage = My.Resources.AppBarMainTransparent1
-                AppbarProperties.PictureBox1.Image = My.Resources.AppBarMainTransparent1
+                Me.BackgroundImage = My.Resources.AppBarMainTransparent
+                AppbarProperties.PictureBox1.Image = My.Resources.AppBarMainTransparent
                 AppbarProperties.ComboBox2.Text = ""
             End If
             Me.BackgroundImageLayout = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackImageLayout", "1")
@@ -739,22 +773,38 @@ Public Class AppBar
 
         Button1.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "StartButton", True)
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 0 Then
+
             AppbarProperties.RadioButton8.Checked = True
             Button1.BackgroundImage = My.Resources.StartRight
+
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             AppbarProperties.RadioButton9.Checked = True
+
             Try
                 Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
             Catch ex As Exception
                 Button1.BackgroundImage = My.Resources.StartRight
             End Try
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Layout", "0") = 0 Then
-                Button1.BackgroundImageLayout = ImageLayout.Stretch
-            Else
-                Button1.BackgroundImageLayout = ImageLayout.Center
-            End If
+
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
             'ORB Code Here
+            Dim orbPath As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomORB", "")
+
+            If orbPath IsNot Nothing AndAlso File.Exists(orbPath) Then
+                Try
+                    LoadAndSplitOrb(orbPath)
+
+                    Button1.BackgroundImage = OrbNormal
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartRight
+                End Try
+            End If
+        End If
+
+        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Layout", "0") = 0 Then
+            Button1.BackgroundImageLayout = ImageLayout.Stretch
+        Else
+            Button1.BackgroundImageLayout = ImageLayout.Center
         End If
 
         '--------EMERGE-TRAY---------
@@ -769,14 +819,13 @@ Public Class AppBar
             AppbarProperties.CheckBox9.Checked = False
             Panel4.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "MenuBar", True)
             ClockTray.Hide()
-            'Controller.Enabled = True
-            'ClockTray.Controller.Enabled = False
+
             Try
                 Dim hWnd As Long
                 hWnd = FindWindow("EmergeDesktopApplet", vbNullString)
                 Dim wp As WINDOWPLACEMENT
                 wp.Length = Marshal.SizeOf(wp)
-                GetWindowPlacement(FindWindow("EmergeDesktopApplet", ""), wp)
+                GetWindowPlacement(hWnd, wp)
 
                 Dim wp2 As WINDOWPLACEMENT
                 wp2.showCmd = ShowWindowCommands.ShowNoActivate
@@ -954,13 +1003,13 @@ CheckAgainIfFileExist:
         Try
 0:
             For Each i In My.Computer.Registry.CurrentUser.OpenSubKey("ALARMS\", True).GetSubKeyNames
-                Dialog3.AlarmList.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
+                TimeDate.AlarmList.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
             Next
         Catch ex As Exception
             My.Computer.Registry.CurrentUser.CreateSubKey("ALARMS", True)
             GoTo 0
         End Try
-        ALC.Items.AddRange(Dialog3.AlarmList.Items)
+        ALC.Items.AddRange(TimeDate.AlarmList.Items)
         Dim rvA = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\", "DisableAlarms", "0")
         If rvA = "0" Then
             DisableAlarmOption.Checked = False
@@ -1347,9 +1396,9 @@ CheckAgainIfFileExist:
     End Sub
 
     Private Sub HIDEToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HIDEToolStripMenuItem.Click
-        If MsgBox("Are you sure do you want to hide this window process? [" & Process.GetProcessById(TPCM.Tag).ProcessName & "]", MsgBoxStyle.YesNo, "Confirm Box") = MsgBoxResult.Yes Then
-            If Not TPCM.Tag Is Nothing AndAlso TypeOf TPCM.Tag Is IntPtr Then
-                Dim windowHandle As IntPtr = CType(TPCM.Tag, IntPtr)
+        If Not TPCM.Tag Is Nothing AndAlso TypeOf TPCM.Tag Is IntPtr Then
+            Dim windowHandle As IntPtr = CType(TPCM.Tag, IntPtr)
+            If MsgBox("Are you sure do you want to hide this window process? [" & GetProcessFromWindowHandle(windowHandle).ProcessName & "]", MsgBoxStyle.YesNo, "Confirm Box") = MsgBoxResult.Yes Then
                 ShowWindow(windowHandle, SHOW_WINDOW.SW_HIDE)
             End If
         End If
@@ -1358,14 +1407,16 @@ CheckAgainIfFileExist:
     Private Sub SwitchToToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SwitchToToolStripMenuItem.Click
         If Not TPCM.Tag Is Nothing AndAlso TypeOf TPCM.Tag Is IntPtr Then
             Dim windowHandle As IntPtr = CType(TPCM.Tag, IntPtr)
-            ShowWindow(windowHandle, SHOW_WINDOW.SW_SHOW)
+            SetForegroundWindow(windowHandle)
+            'ShowWindow(windowHandle, SHOW_WINDOW.SW_SHOW)
+            ActiveWindowHandle = windowHandle
         End If
     End Sub
 
     Private Sub SwitchButNotActiveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SwitchButNotActiveToolStripMenuItem.Click
         If Not TPCM.Tag Is Nothing AndAlso TypeOf TPCM.Tag Is IntPtr Then
             Dim windowHandle As IntPtr = CType(TPCM.Tag, IntPtr)
-            ShowWindow(windowHandle, SHOW_WINDOW.SW_SHOWNOACTIVATE)
+            ShowWindow(windowHandle, SHOW_WINDOW.SW_SHOWNA)
         End If
     End Sub
 
@@ -1598,8 +1649,23 @@ CheckAgainIfFileExist:
                     End Try
                 End If
 
-            ' ORB Start menu look (working in progress...)
+            ' ORB Start menu look
             Case 2
+                If Startmenu.Visible = True Then
+                    Startmenu.Visible = False
+                    Try
+                        Button1.BackgroundImage = OrbNormal
+                    Catch ex As Exception
+                        Button1.BackgroundImage = My.Resources.StartRight
+                    End Try
+                Else
+                    Startmenu.Visible = True
+                    Try
+                        Button1.BackgroundImage = OrbPressed
+                    Catch ex As Exception
+                        Button1.BackgroundImage = My.Resources.StartLeft
+                    End Try
+                End If
 
             Case Else
                 If Startmenu.Visible = True Then
@@ -1628,11 +1694,6 @@ CheckAgainIfFileExist:
         ElseIf e.Button = MouseButtons.Right Then
             VCM.Show(MousePosition)
         End If
-    End Sub
-
-    Private Sub RunDialogToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunDialogToolStripMenuItem.Click
-        RunDialog.Show()
-        RunDialog.Activate()
     End Sub
 
     Private Sub Panel4_Resize(sender As Object, e As EventArgs) Handles Panel4.Resize
@@ -1795,36 +1856,37 @@ CheckAgainIfFileExist:
         End If
         DisposeIconCache()
 
-        Dim applications As List(Of TaskbarWindowInfo) = GetTaskbarApplications()
-        Dim groupedWindows As List(Of IGrouping(Of Integer, TaskbarWindowInfo)) = applications.GroupBy(Function(w) w.PID).ToList()
 
-        Dim savedOrderString As String = My.Settings.ToolStripOrder
-        Dim savedOrderPids As New List(Of Integer)
-        If Not String.IsNullOrEmpty(savedOrderString) Then
-            For Each pidStr In savedOrderString.Split(","c)
-                Dim pid As Integer
-                If Integer.TryParse(pidStr, pid) Then
-                    savedOrderPids.Add(pid)
+        Dim applications As List(Of TaskbarWindowInfo) = GetTaskbarApplications()
+            Dim groupedWindows As List(Of IGrouping(Of Integer, TaskbarWindowInfo)) = applications.GroupBy(Function(w) w.PID).ToList()
+
+            Dim savedOrderString As String = My.Settings.ToolStripOrder
+            Dim savedOrderPids As New List(Of Integer)
+            If Not String.IsNullOrEmpty(savedOrderString) Then
+                For Each pidStr In savedOrderString.Split(","c)
+                    Dim pid As Integer
+                    If Integer.TryParse(pidStr, pid) Then
+                        savedOrderPids.Add(pid)
+                    End If
+                Next
+            End If
+
+            Dim sortedGroups As New List(Of IGrouping(Of Integer, TaskbarWindowInfo))
+            Dim usedPids As New HashSet(Of Integer)()
+
+            For Each pid In savedOrderPids
+                Dim group = groupedWindows.FirstOrDefault(Function(g) g.Key = pid)
+                If Not group Is Nothing AndAlso Not usedPids.Contains(pid) Then
+                    sortedGroups.Add(group)
+                    usedPids.Add(pid)
                 End If
             Next
-        End If
 
-        Dim sortedGroups As New List(Of IGrouping(Of Integer, TaskbarWindowInfo))
-        Dim usedPids As New HashSet(Of Integer)()
+            Dim newGroups = groupedWindows.Where(Function(g) Not usedPids.Contains(g.Key)).ToList()
 
-        For Each pid In savedOrderPids
-            Dim group = groupedWindows.FirstOrDefault(Function(g) g.Key = pid)
-            If Not group Is Nothing AndAlso Not usedPids.Contains(pid) Then
-                sortedGroups.Add(group)
-                usedPids.Add(pid)
-            End If
-        Next
+            Dim reliablyOrderedNewGroups = newGroups.OrderBy(Function(g) g.First().Title).ToList()
 
-        Dim newGroups = groupedWindows.Where(Function(g) Not usedPids.Contains(g.Key)).ToList()
-
-        Dim reliablyOrderedNewGroups = newGroups.OrderBy(Function(g) g.First().Title).ToList()
-
-        sortedGroups.AddRange(reliablyOrderedNewGroups)
+            sortedGroups.AddRange(reliablyOrderedNewGroups)
 
         For Each group In sortedGroups
             Try
@@ -1964,6 +2026,7 @@ CheckAgainIfFileExist:
                 ProcessStrip.Items.Add(errorItem)
             End Try
         Next
+
     End Sub
 
     Private Sub ProcessStripItemMouseEnter(sender As Object, e As EventArgs)
@@ -1982,6 +2045,8 @@ CheckAgainIfFileExist:
                 TPCM.Tag = windowHandle
 
                 WAT.Label1.Text = item.Text
+
+                WAT.Button4.Image = Nothing
 
                 If renderedImage IsNot Nothing Then
                     WAT.Button4.BackgroundImage = renderedImage
@@ -2052,7 +2117,7 @@ CheckAgainIfFileExist:
         DateLabel.Text = DateTime.Now.ToString("dd. MM. yyyy")
     End Sub
 
-    Private Sub AutoHideToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AutoHideToolStripMenuItem.Click
+    Public Sub AutoHideOnOff()
         fBarRegistered = AutoHideToolStripMenuItem.Checked
         RegisterBar()
         If AutoHideToolStripMenuItem.Checked = True Then
@@ -2062,6 +2127,10 @@ CheckAgainIfFileExist:
             Hidden = False
             Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
         End If
+    End Sub
+
+    Private Sub AutoHideToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AutoHideToolStripMenuItem.Click
+        AutoHideOnOff()
     End Sub
     Public Hidden As Boolean = False
     Private Sub AppBar_LocationChanged(sender As Object, e As EventArgs) Handles Me.LocationChanged
@@ -2081,7 +2150,8 @@ CheckAgainIfFileExist:
     Private Sub ProcessStrip_MouseLeave1(sender As Object, e As EventArgs) Handles ProcessStrip.MouseLeave, AppStrip.MouseLeave, TimeLabel.MouseLeave, DateLabel.MouseLeave, DayLabel.MouseLeave
         Hidden = True
         MouseAway = True
-        Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - 2)
+        'Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - 2)
+        AutoHideOnOff()
     End Sub
 
     Private Sub ProcessStrip_MouseLeave(sender As Object, e As EventArgs) Handles ProcessStrip.MouseLeave
@@ -2093,7 +2163,8 @@ CheckAgainIfFileExist:
         Hidden = False
         MouseAway = False
         Startmenu.FST = False
-        Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
+        'Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
+        AutoHideOnOff()
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click, ShowDesktopToolStripMenuItem.Click
@@ -2101,7 +2172,8 @@ CheckAgainIfFileExist:
     End Sub
 
     Private Sub PropertiesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PropertiesToolStripMenuItem.Click
-        AppbarProperties.ShowDialog(Me)
+        On Error Resume Next
+        AppbarProperties.Show(Me)
     End Sub
 
     Private Sub BlockingProcesses_Tick(sender As Object, e As EventArgs) Handles BlockingProcesses.Tick
@@ -2564,7 +2636,7 @@ CheckAgainIfFileExist:
     Private Sub AlarmController_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AlarmController.Tick
         On Error Resume Next
 0:
-        If Not Dialog3.AlarmList.Items.Count = 0 Then
+        If Not TimeDate.AlarmList.Items.Count = 0 Then
             If ALC.SelectedIndex = ALC.Items.Count - 1 Then
                 If My.Computer.Registry.CurrentUser.OpenSubKey("ALARMS\" & ALC.SelectedItem & "\Repeat\", False) Is Nothing Then
                     Dim RV = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & ALC.SelectedItem, "Date", Nothing)
@@ -2576,9 +2648,9 @@ CheckAgainIfFileExist:
                             If RVm = System.DateTime.Now.Minute Then
                                 If RVs = System.DateTime.Now.Second Then
                                     System.Threading.Thread.Sleep(1050)
-                                    Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                    TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                     ALACT()
-                                    Dialog3.ACTION()
+                                    TimeDate.ACTION()
                                 End If
                             End If
                         End If
@@ -2593,9 +2665,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2607,9 +2679,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2621,9 +2693,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2635,9 +2707,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2649,9 +2721,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2663,9 +2735,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2677,9 +2749,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2698,9 +2770,9 @@ CheckAgainIfFileExist:
                             If RVm = System.DateTime.Now.Minute Then
                                 If RVs = System.DateTime.Now.Second Then
                                     System.Threading.Thread.Sleep(1050)
-                                    Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                    TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                     ALACT()
-                                    Dialog3.ACTION()
+                                    TimeDate.ACTION()
                                 End If
                             End If
                         End If
@@ -2715,9 +2787,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2729,9 +2801,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2743,9 +2815,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2757,9 +2829,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2771,9 +2843,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2785,9 +2857,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2799,9 +2871,9 @@ CheckAgainIfFileExist:
                                 If RVm = System.DateTime.Now.Minute Then
                                     If RVs = System.DateTime.Now.Second Then
                                         System.Threading.Thread.Sleep(1005)
-                                        Dialog3.AlarmList.SelectedIndex = ALC.SelectedIndex
+                                        TimeDate.AlarmList.SelectedIndex = ALC.SelectedIndex
                                         ALACT()
-                                        Dialog3.ACTION()
+                                        TimeDate.ACTION()
                                     End If
                                 End If
                             End If
@@ -2848,14 +2920,14 @@ CheckAgainIfFileExist:
                         Media.SystemSounds.Question.Play()
                     End If
                 ElseIf RV17 = "1" Then
-                    Dialog3.AlCol.Items.Clear()
+                    TimeDate.AlCol.Items.Clear()
                     Dim i As String
                     If My.Computer.FileSystem.DirectoryExists("C:\Windows\Media\Alarms\") Then
                         For Each i In My.Computer.FileSystem.GetFiles("C:\Windows\Media\Alarms\")
-                            Dialog3.AlCol.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
+                            TimeDate.AlCol.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
                         Next
                     End If
-                    Dim alrpath As String = "C:\Windows\Media\Alarms\" & Dialog3.AlCol.Items.Item(RV18)
+                    Dim alrpath As String = "C:\Windows\Media\Alarms\" & TimeDate.AlCol.Items.Item(RV18)
                     alarm = New Media.SoundPlayer(alrpath)
                     If RV1b = "1" Then
                         alarm.PlayLooping()
@@ -2892,14 +2964,14 @@ CheckAgainIfFileExist:
                     Media.SystemSounds.Question.Play()
                 End If
             ElseIf RV117 = "1" Then
-                Dialog3.AlCol.Items.Clear()
+                TimeDate.AlCol.Items.Clear()
                 Dim i As String
                 If My.Computer.FileSystem.DirectoryExists("C:\Windows\Media\Alarms\") Then
                     For Each i In My.Computer.FileSystem.GetFiles("C:\Windows\Media\Alarms\")
-                        Dialog3.AlCol.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
+                        TimeDate.AlCol.Items.Add(i.Substring(i.LastIndexOf("\") + 1))
                     Next
                 End If
-                Dim alrpath As String = "C:\Windows\Media\Alarms\" & Dialog3.AlCol.Items.Item(RV118)
+                Dim alrpath As String = "C:\Windows\Media\Alarms\" & TimeDate.AlCol.Items.Item(RV118)
                 alarm = New Media.SoundPlayer(alrpath)
                 If RV11b = "1" Then
                     alarm.PlayLooping()
@@ -2924,7 +2996,7 @@ CheckAgainIfFileExist:
 
     Private Sub TimeLabel_Click(sender As Object, e As MouseEventArgs) Handles TimeLabel.MouseUp, DayLabel.MouseUp, DateLabel.MouseUp, TimeLabel.Click
         If e.Button = MouseButtons.Left Then
-            Dialog3.Show()
+            TimeDate.Show()
         ElseIf e.Button = MouseButtons.Right Then
             TaDCM.Show(MousePosition)
         End If
@@ -2932,33 +3004,33 @@ CheckAgainIfFileExist:
 
     Private Sub ALARMSTOPToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ALARMSTOPToolStripMenuItem.Click
         On Error Resume Next
-        Dialog3.ComboBox5.Enabled = True
-        Dialog3.Button19.Enabled = True
-        Dialog3.Button20.Enabled = True
-        Dialog3.AlarmList.Enabled = True
-        Dialog3.Button18.Enabled = True
-        Dialog3.CheckBox15.Enabled = True
-        Dialog3.alarm.Stop()
+        TimeDate.ComboBox5.Enabled = True
+        TimeDate.Button19.Enabled = True
+        TimeDate.Button20.Enabled = True
+        TimeDate.AlarmList.Enabled = True
+        TimeDate.Button18.Enabled = True
+        TimeDate.CheckBox15.Enabled = True
+        TimeDate.alarm.Stop()
         alarm.Stop()
-        Dialog3.Button17.Text = "TEST"
+        TimeDate.Button17.Text = "TEST"
         ALARMSTOPToolStripMenuItem.Visible = False
         ToolStripSeparator20.Visible = False
     End Sub
 
     Private Sub ShowTimeAndDateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShowTimeAndDateToolStripMenuItem.Click
-        Dialog3.Show()
+        TimeDate.Show()
     End Sub
 
     Private Sub CMMAIN_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles CMMAIN.Opening
         CMMAIN.RightToLeft = RightToLeft.No
     End Sub
     Private Sub WithSecondsToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WithSecondsToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = TimeLabel.Text
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, Me.DayLabel.Width / 2 + Me.DayLabel.Location.X, 2 + Me.DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = TimeLabel.Text
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, Me.DayLabel.Width / 2 + Me.DayLabel.Location.X, 2 + Me.DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
     Dim fixdayofweek As String
     Private Sub CopyCurrentDayToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CopyCurrentDayToolStripMenuItem.Click
@@ -2983,30 +3055,30 @@ CheckAgainIfFileExist:
         Else
             fixdayofweek = DateTime.Now.DayOfWeek
         End If
-        Dialog3.DateToCopy.Text = fixdayofweek
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = fixdayofweek
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub CopyEVERYTHINGToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CopyEVERYTHINGToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = TimeLabel.Text & " " & DayLabel.Text & " " & DateLabel.Text
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = TimeLabel.Text & " " & DayLabel.Text & " " & DateLabel.Text
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub CopyDateToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CopyDateToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = DateLabel.Text
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = DateLabel.Text
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
     Dim fixsec As String
     Dim fixmin As String
@@ -3081,87 +3153,88 @@ CheckAgainIfFileExist:
         Else
             fixhour = DateTime.Now.Hour
         End If
-        Dialog3.DateToCopy.Text = DateTime.Now.Hour & ":" & fixmin
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = DateTime.Now.Hour & ":" & fixmin
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub WithMilisecondsToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WithMilisecondsToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = TimeLabel.Text & "." & DateTime.Now.Millisecond
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = TimeLabel.Text & "." & DateTime.Now.Millisecond
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub HoursToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles HoursToolStripMenuItem.Click
-        Dialog3.TimeToCopy.Text = DateTime.Now.Hour
-        Dialog3.TimeToCopy.SelectAll()
-        Dialog3.TimeToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.TimeToCopy.Text = DateTime.Now.Hour
+        TimeDate.TimeToCopy.SelectAll()
+        TimeDate.TimeToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub MinutesToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MinutesToolStripMenuItem.Click
-        Dialog3.TimeToCopy.Text = DateTime.Now.Minute
-        Dialog3.TimeToCopy.SelectAll()
-        Dialog3.TimeToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.TimeToCopy.Text = DateTime.Now.Minute
+        TimeDate.TimeToCopy.SelectAll()
+        TimeDate.TimeToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub SecondsToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SecondsToolStripMenuItem.Click
-        Dialog3.TimeToCopy.Text = DateTime.Now.Second
-        Dialog3.TimeToCopy.SelectAll()
-        Dialog3.TimeToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.TimeToCopy.Text = DateTime.Now.Second
+        TimeDate.TimeToCopy.SelectAll()
+        TimeDate.TimeToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub MilisecondsToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MilisecondsToolStripMenuItem.Click
-        Dialog3.TimeToCopy.Text = DateTime.Now.Millisecond
-        Dialog3.TimeToCopy.SelectAll()
-        Dialog3.TimeToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.TimeToCopy.Text = DateTime.Now.Millisecond
+        TimeDate.TimeToCopy.SelectAll()
+        TimeDate.TimeToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub DayToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DayToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = DateTime.Now.Day
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = DateTime.Now.Day
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub MonthToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MonthToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = DateTime.Now.Month
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = DateTime.Now.Month
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub YearToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles YearToolStripMenuItem.Click
-        Dialog3.DateToCopy.Text = DateTime.Now.Year
-        Dialog3.DateToCopy.SelectAll()
-        Dialog3.DateToCopy.Copy()
-        Dialog3.ToolTip1.Active = True
-        Dialog3.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
-        Dialog3.ToolTipHider.Enabled = True
+        TimeDate.DateToCopy.Text = DateTime.Now.Year
+        TimeDate.DateToCopy.SelectAll()
+        TimeDate.DateToCopy.Copy()
+        TimeDate.ToolTip1.Active = True
+        TimeDate.ToolTip1.Show("Successfully Copied!", Me, DayLabel.Width / 2 + DayLabel.Location.X, 2 + DayLabel.Location.Y)
+        TimeDate.ToolTipHider.Enabled = True
     End Sub
 
     Private Sub TimeAndDateSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TimeAndDateSettingsToolStripMenuItem.Click
+        On Error Resume Next
         System.Diagnostics.Process.Start("C:\Windows\System32\timedate.cpl")
     End Sub
 
@@ -3349,9 +3422,26 @@ CheckAgainIfFileExist:
             Dim pr As Process = GetProcessFromWindowHandle(windowHandle)
 
             If IO.File.Exists(pr.MainModule.FileName) = True Then
-                Dim fi As New IO.FileInfo(Process.GetProcessById(TPCM.Tag).MainModule.FileName)
+                Dim fi As New IO.FileInfo(pr.MainModule.FileName)
                 Process.Start("explorer.exe", fi.DirectoryName)
             End If
+        End If
+    End Sub
+
+    Private Sub MoreOptionsDropDownLol(sender As Object, e As EventArgs) Handles MoreOptionsToolStripMenuItem.DropDownOpening
+        If Not TPCM.Tag Is Nothing AndAlso TypeOf TPCM.Tag Is IntPtr Then
+            Dim windowHandle As IntPtr = CType(TPCM.Tag, IntPtr)
+            Dim pr As Process = GetProcessFromWindowHandle(windowHandle)
+
+            If IO.Directory.Exists(pr.StartInfo.WorkingDirectory) = False Then
+                OpenProgramsWorkingDirectoryToolStripMenuItem.Enabled = False
+                OpenProgramsWorkingDirectoryToolStripMenuItem.ToolTipText = "This process hasn't associated any custom Working directory."
+            Else
+                OpenProgramsWorkingDirectoryToolStripMenuItem.Enabled = True
+                OpenProgramsWorkingDirectoryToolStripMenuItem.ToolTipText = ""
+            End If
+
+            BlockProcessToolStripMenuItem.Enabled = BlockingProcesses.Enabled
         End If
     End Sub
 
@@ -3361,7 +3451,7 @@ CheckAgainIfFileExist:
             Dim pr As Process = GetProcessFromWindowHandle(windowHandle)
 
             If IO.Directory.Exists(pr.StartInfo.WorkingDirectory) = True Then
-                Dim fi As New IO.DirectoryInfo(Process.GetProcessById(TPCM.Tag).StartInfo.WorkingDirectory)
+                Dim fi As New IO.DirectoryInfo(pr.StartInfo.WorkingDirectory)
                 Process.Start("explorer.exe", fi.FullName)
             End If
         End If
@@ -3426,7 +3516,12 @@ CheckAgainIfFileExist:
     End Sub
 
     Private Sub ClipboardViewerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClipboardViewerToolStripMenuItem.Click
-        ClipboardViewer.Show()
+        If ClipboardViewer.Visible = True Then
+            ClipboardViewer.BringToFront()
+            ClipboardViewer.Focus()
+        Else
+            ClipboardViewer.Show()
+        End If
     End Sub
     Public PinnedAppsDir As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Internet Explorer\Quick Launch"
     Public Sub LoadPinnedApps()
@@ -3605,6 +3700,47 @@ CheckAgainIfFileExist:
         End If
     End Sub
 
+    Public OrbNormal As Bitmap = Nothing
+    Public OrbHover As Bitmap = Nothing
+    Public OrbPressed As Bitmap = Nothing
+    Public Sub LoadAndSplitOrb(filePath As String)
+
+        Try
+            Dim sourceImage As New Bitmap(filePath)
+            Dim partHeight As Integer = sourceImage.Height \ 3
+            Dim partWidth As Integer = sourceImage.Width
+
+            For i As Integer = 0 To 2
+
+                Dim rect As New Rectangle(0, i * partHeight, partWidth, partHeight)
+                Dim part As New Bitmap(partWidth, partHeight)
+
+                Using g As Graphics = Graphics.FromImage(part)
+                    g.DrawImage(sourceImage, New Rectangle(0, 0, partWidth, partHeight), rect, GraphicsUnit.Pixel)
+                End Using
+
+                Select Case i
+                    Case 0
+                        If OrbNormal IsNot Nothing Then OrbNormal.Dispose()
+
+                        OrbNormal = part
+                    Case 1
+                        If OrbHover IsNot Nothing Then OrbHover.Dispose()
+
+                        OrbHover = part
+                    Case 2
+                        If OrbPressed IsNot Nothing Then OrbPressed.Dispose()
+
+                        OrbPressed = part
+                End Select
+            Next
+
+            sourceImage.Dispose()
+        Catch ex As Exception
+            MessageBox.Show("Error: " & ex.Message)
+        End Try
+    End Sub
+
     Private Sub AppBar_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged, Me.Resize
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 0 Then
             If Not Me.Width = SystemInformation.PrimaryMonitorSize.Width Then
@@ -3618,9 +3754,8 @@ CheckAgainIfFileExist:
                 End If
             End If
         End If
-        If Not Me.WindowState = FormWindowState.Normal Then
-            Me.WindowState = FormWindowState.Normal
-        End If
+
+        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
     End Sub
 
     Private Sub AppBar_StyleChanged(sender As Object, e As EventArgs) Handles Me.StyleChanged
@@ -3643,7 +3778,19 @@ CheckAgainIfFileExist:
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-            'ORB Code here
+            If Startmenu.Visible = False Then
+                Try
+                    Button1.BackgroundImage = OrbHover
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartRight
+                End Try
+            Else
+                Try
+                    Button1.BackgroundImage = OrbPressed
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartLeft
+                End Try
+            End If
         End If
     End Sub
 
@@ -3669,7 +3816,19 @@ CheckAgainIfFileExist:
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-            'ORB Code here
+            If Startmenu.Visible = False Then
+                Try
+                    Button1.BackgroundImage = OrbNormal
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartRight
+                End Try
+            Else
+                Try
+                    Button1.BackgroundImage = OrbPressed
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartLeft
+                End Try
+            End If
         End If
     End Sub
 
@@ -3699,7 +3858,19 @@ CheckAgainIfFileExist:
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-            'ORB Code here
+            If Startmenu.Visible = False Then
+                Try
+                    Button1.BackgroundImage = OrbHover
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartRight
+                End Try
+            Else
+                Try
+                    Button1.BackgroundImage = OrbPressed
+                Catch ex As Exception
+                    Button1.BackgroundImage = My.Resources.StartLeft
+                End Try
+            End If
         End If
     End Sub
 
@@ -3794,6 +3965,69 @@ CheckAgainIfFileExist:
             End If
         End If
     End Sub
+
+    Private Sub ProcessStrip_MouseMove(sender As Object, e As MouseEventArgs) 'Handles ProcessStrip.MouseMove
+        If AppbarProperties.CheckBox9.Checked = True Then
+            Try
+                Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
+                If hWnd <> IntPtr.Zero Then
+                    Dim newX As Integer = Me.Width
+                    Dim newY As Integer = Me.Location.Y
+                    Dim newWidth As Integer = SystemInformation.PrimaryMonitorSize.Width - Me.Width - ClockTray.Width
+                    Dim newHeight As Integer = Me.Height
+
+                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
+                Else
+                End If
+            Catch ex As Exception
+            End Try
+        End If
+    End Sub
+End Class
+
+Public Class WorkspaceManager
+
+    <StructLayout(LayoutKind.Sequential)>
+    Public Structure RECT
+        Public Left As Integer
+        Public Top As Integer
+        Public Right As Integer
+        Public Bottom As Integer
+    End Structure
+
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function SystemParametersInfo(
+        ByVal uiAction As UInteger,
+        ByVal uiParam As UInteger,
+        ByRef pvParam As RECT,
+        ByVal fWinIni As UInteger) As Boolean
+    End Function
+
+    Private Const SPI_SETWORKAREA As UInteger = 47
+    Private Const SPIF_UPDATEINIFILE As UInteger = &H1
+    Private Const SPIF_SENDCHANGE As UInteger = &H2
+
+    Public Sub UpdateWorkingArea(ByVal topOffset As Integer, ByVal bottomOffset As Integer, ByVal leftOffset As Integer, ByVal rightOffset As Integer)
+        Dim screenBounds As Rectangle = Screen.PrimaryScreen.Bounds
+        Dim newWorkArea As New RECT()
+
+        newWorkArea.Left = leftOffset
+        newWorkArea.Top = topOffset
+        newWorkArea.Right = screenBounds.Width - rightOffset
+        newWorkArea.Bottom = screenBounds.Height - bottomOffset
+
+        Dim success As Boolean = SystemParametersInfo(
+            SPI_SETWORKAREA,
+            0,
+            newWorkArea,
+            SPIF_UPDATEINIFILE Or SPIF_SENDCHANGE)
+
+        If Not success Then
+            Dim errorCode As Integer = Marshal.GetLastWin32Error()
+            MessageBox.Show($"Failed to set Working Area. Error code: {errorCode}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
+    End Sub
+
 End Class
 
 Module GlobalKeyboardHook
@@ -3882,23 +4116,31 @@ Module GlobalKeyboardHook
     Private Const SW_SHOWMINIMIZED As UInteger = 2
 
     ' Function for detecting WindowState
-    Public Function GetWindowState(ByVal hWnd As IntPtr) As String
+    Public Function GetWindowState(ByVal hWnd As IntPtr, Optional toInt As Boolean = False) As String
         Dim wp As WINDOWPLACEMENT
         wp.length = CType(Marshal.SizeOf(wp), UInteger)
 
-        If GetWindowPlacement(hWnd, wp) Then
-            Select Case wp.showCmd
-                Case SW_SHOWNORMAL
-                    Return "Normal"
-                Case SW_SHOWMAXIMIZED
-                    Return "Maximized"
-                Case SW_SHOWMINIMIZED
-                    Return "Minimized"
-                Case Else
-                    Return "Unknown"
-            End Select
+        If toInt = False Then
+            If GetWindowPlacement(hWnd, wp) Then
+                Select Case wp.showCmd
+                    Case SW_SHOWNORMAL
+                        Return "Normal"
+                    Case SW_SHOWMAXIMIZED
+                        Return "Maximized"
+                    Case SW_SHOWMINIMIZED
+                        Return "Minimized"
+                    Case Else
+                        Return "Unknown"
+                End Select
+            Else
+                Return "Error by getting Information."
+            End If
         Else
-            Return "Error by getting Information."
+            If GetWindowPlacement(hWnd, wp) Then
+                Return wp.showCmd
+            Else
+                Return "Error by getting Information."
+            End If
         End If
     End Function
 
@@ -4008,383 +4250,184 @@ Module GlobalKeyboardHook
 
     Public Event HotkeyPressed As EventHandler
 
-    Private Function KeyboardHookProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
-        If nCode >= 0 AndAlso wParam = CType(WM_KEYUP, IntPtr) Then ' Změněno na WM_KEYUP
-            Dim hookStruct As KBDLLHOOKSTRUCT = Marshal.PtrToStructure(lParam, GetType(KBDLLHOOKSTRUCT))
+    Private Const WM_SYSKEYDOWN As Integer = &H104
+    Private Const WM_SYSKEYUP As Integer = &H105
 
-            'Win key pressed Events
-            If hookStruct.vkCode = VK_WIN_LEFT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                    WinKeyPressed = False
-                Else
-                    WinKeyPressed = False
-                    RaiseEvent HotkeyPressed(Nothing, EventArgs.Empty)
-                End If
-            ElseIf hookStruct.vkCode = VK_WIN_RIGHT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                    WinKeyPressed = False
-                Else
-                    WinKeyPressed = False
-                    RaiseEvent HotkeyPressed(Nothing, EventArgs.Empty)
-                End If
-            End If
+    Private Const WM_SYSCOMMAND As Integer = &H112
+    Private Const SC_SIZE As Integer = &HF000
+    Private Const GWL_STYLE As Integer = -16
+    Private Const WS_THICKFRAME As Integer = &H40000
+    Private Const WS_MAXIMIZEBOX As Integer = &H10000
 
-            'Ctrl key pressed Events
-            If hookStruct.vkCode = VK_CTRL_LEFT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    CtrlKeyPressed = False
-                End If
-            ElseIf hookStruct.vkCode = VK_CTRL_RIGHT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    CtrlKeyPressed = False
-                End If
-            End If
+    Private windowRestoreBounds As New Dictionary(Of IntPtr, Rectangle)
 
-            'Shift key pressed Events
-            If hookStruct.vkCode = VK_SHIFT_LEFT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    ShiftKeyPressed = False
-                End If
-            ElseIf hookStruct.vkCode = VK_SHIFT_RIGHT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    ShiftKeyPressed = False
-                End If
-            End If
+    Private Function CanSnapWindow(ByVal hWnd As IntPtr) As Boolean
+        Dim style As Integer = GetWindowLong(hWnd, GWL_STYLE)
+        If (style And WS_THICKFRAME) = 0 Then Return False
 
-            'Alt key pressed Events
-            If hookStruct.vkCode = VK_ALT_LEFT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    AltKeyPressed = False
-                End If
-            ElseIf hookStruct.vkCode = VK_ALT_RIGHT <> 0 Then
-                If UsedMultipleKey = True Then
-                    UsedMultipleKey = False
-                Else
-                    AltKeyPressed = False
-                    AltTab.Close()
-                End If
-            End If
-        ElseIf nCode >= 0 AndAlso wParam = CType(WM_KEYDOWN, IntPtr) Then
-            Dim hookStruct As KBDLLHOOKSTRUCT = Marshal.PtrToStructure(lParam, GetType(KBDLLHOOKSTRUCT))
+        Dim title As String = GetWindowTitle(hWnd)
+        If String.IsNullOrEmpty(title) Then Return False
 
-            If hookStruct.vkCode = VK_WIN_LEFT <> 0 Then
-                'RaiseEvent HotkeyPressed(Nothing, EventArgs.Empty)
-                WinKeyPressed = True
-            ElseIf hookStruct.vkCode = VK_WIN_RIGHT <> 0 Then
-                WinKeyPressed = True
-            End If
+        If hWnd = AppBar.Handle Then Return False
 
-            If hookStruct.vkCode = VK_CTRL_LEFT <> 0 Then
-                CtrlKeyPressed = True
-            ElseIf hookStruct.vkCode = VK_CTRL_RIGHT <> 0 Then
-                CtrlKeyPressed = True
-            End If
+        Return True
+    End Function
 
-            If hookStruct.vkCode = VK_SHIFT_LEFT <> 0 Then
-                ShiftKeyPressed = True
-            ElseIf hookStruct.vkCode = VK_SHIFT_RIGHT <> 0 Then
-                ShiftKeyPressed = True
-            End If
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Function GetWindowRect(ByVal hWnd As IntPtr, ByRef lpRect As RECT) As Boolean
+    End Function
 
-            If hookStruct.vkCode = 164 <> 0 Then
-                AltKeyPressed = True
-            ElseIf hookStruct.vkCode = 165 <> 0 Then
-                AltKeyPressed = True
-            End If
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Private Function GetWindowText(ByVal hWnd As IntPtr, ByVal lpString As StringBuilder, ByVal nMaxCount As Integer) As Integer
+    End Function
 
-            'Actual key events:
-            If WinKeyPressed = True Then
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Function GetWindowTextLength(ByVal hWnd As IntPtr) As Integer
+    End Function
 
-                If hookStruct.vkCode = 37 <> 0 Then
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    If hWnd <> IntPtr.Zero Then
-                        Dim processId As UInteger = 0
-                        GetWindowThreadProcessId(hWnd, processId)
-                        Dim process As Process = Process.GetProcessById(CInt(processId))
-                        If Not process.ProcessName = "KrrShell" Then
-                            Dim currentState As String = GetWindowState(hWnd)
-
-                            Select Case currentState
-                                Case "Normal"
-                                    Dim newX As Integer = 0
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case "Max"
-                                    RestoreWindow(hWnd)
-                                    Dim newX As Integer = 0
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case "Min"
-                                    RestoreWindow(hWnd)
-                                    Dim newX As Integer = 0
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case Else
-
-                            End Select
-                        Else
-
-                        End If
-                    End If
-                    'WinKeyPressed = False
-                ElseIf hookStruct.vkCode = 38 <> 0 Then
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    Dim processId As UInteger = 0
-                    GetWindowThreadProcessId(hWnd, processId)
-                    Dim process As Process = Process.GetProcessById(CInt(processId))
-                    If Not process.ProcessName = "KrrShell" Then
-
-                        If hWnd <> IntPtr.Zero Then
-                            Dim currentState As String = GetWindowState(hWnd)
-
-                            Select Case currentState
-                                Case "Normal"
-                                    MaximizeWindow(hWnd)
-                                Case "Max"
-                                    RestoreWindow(hWnd)
-                                Case "Min"
-                                    RestoreWindow(hWnd)
-                                Case Else
-
-                            End Select
-                        Else
-
-                        End If
-                    End If
-                    'WinKeyPressed = False
-                ElseIf hookStruct.vkCode = 39 <> 0 Then
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    Dim processId As UInteger = 0
-                    GetWindowThreadProcessId(hWnd, processId)
-                    Dim process As Process = Process.GetProcessById(CInt(processId))
-                    If Not process.ProcessName = "KrrShell" Then
-
-                        If hWnd <> IntPtr.Zero Then
-                            Dim currentState As String = GetWindowState(hWnd)
-
-                            Select Case currentState
-                                Case "Normal"
-                                    Dim newX As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case "Max"
-                                    RestoreWindow(hWnd)
-                                    Dim newX As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case "Min"
-                                    RestoreWindow(hWnd)
-                                    Dim newX As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newY As Integer = 0
-                                    Dim newWidth As Integer = My.Computer.Screen.WorkingArea.Width / 2
-                                    Dim newHeight As Integer = My.Computer.Screen.WorkingArea.Height
-                                    MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                                Case Else
-
-                            End Select
-                        Else
-
-                        End If
-                    End If
-                    'WinKeyPressed = False
-                ElseIf hookStruct.vkCode = 40 <> 0 Then
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    Dim processId As UInteger = 0
-                    GetWindowThreadProcessId(hWnd, processId)
-                    Dim process As Process = Process.GetProcessById(CInt(processId))
-                    If Not process.ProcessName = "KrrShell" Then
-
-                        If hWnd <> IntPtr.Zero Then
-                            Dim currentState As String = GetWindowState(hWnd)
-
-                            Select Case currentState
-                                Case "Normal"
-                                    MinimizeWindow(hWnd)
-                                Case "Max"
-                                    RestoreWindow(hWnd)
-                                Case "Min"
-                                    RestoreWindow(hWnd)
-                                Case Else
-
-                            End Select
-                        Else
-
-                        End If
-                        'WinKeyPressed = False
-                    End If
-
-                ElseIf hookStruct.vkCode = 9 <> 0 Then
-                    'WIN + TAB
-
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    Dim processId As UInteger = 0
-                    GetWindowThreadProcessId(hWnd, processId)
-                    Dim process As Process = Process.GetProcessById(CInt(processId))
-                    AltTab.ActiveProcessID = processId
-                    AltTab.Show()
-                    AltTab.Select()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 65 <> 0 Then
-                    'WIN + A (TimeDate/Action Center)
-
-                    UsedMultipleKey = True
-                    Dialog3.Show()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 66 <> 0 Then
-                    'WIN + B (Take Focus on Notify Icons)
-
-                    UsedMultipleKey = True
-                    AppBar.ToolStrip1.Focus()
-                    AppBar.ToolStrip1.Select()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 67 <> 0 OrElse hookStruct.vkCode = 86 <> 0 Then
-                    'WIN + C (Copilot, but here Clipboard Viewer)
-                    'MsgBox("Sorry but Microsoft Copilot isn't here!") 'Little Easter egg!
-
-                    UsedMultipleKey = True
-                    ClipboardViewer.Show()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 68 <> 0 Then
-                    'WIN + D (Show Desktop)
-
-                    UsedMultipleKey = True
-                    Desktop.BringToFront()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 69 <> 0 Then
-                    'WIN + E (Launch File Explorer)
-
-                    UsedMultipleKey = True
-                    Process.Start("C:\Windows\explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 73 <> 0 Then
-                    'WIN + I (Launch Settings, but because I hate it, Control Panel will be!)
-
-                    UsedMultipleKey = True
-                    Process.Start("C:\Windows\System32\control.exe")
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 76 <> 0 Then
-                    'WIN + L (Lock Work Station)
-
-                    UsedMultipleKey = True
-                    Process.Start("RunDll32.exe", "user32.dll,LockWorkStation")
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 77 <> 0 Then
-                    'WIN + M (Minimize all Windows)
-
-                    UsedMultipleKey = True
-                    For Each i As ToolStripButton In AppBar.ProcessStrip.Items
-                        If Not i.Tag Is Nothing AndAlso TypeOf i.Tag Is IntPtr Then
-                            Dim windowHandle As IntPtr = CType(i.Tag, IntPtr)
-                            MinimizeWindow(windowHandle)
-                        End If
-                    Next
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 82 <> 0 Then
-                    'WIN + R (Run Dialog)
-
-                    UsedMultipleKey = True
-                    RunDialog.Show()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 83 <> 0 Then
-                    'WIN + S (Windows Search (in progress...))
-
-                    UsedMultipleKey = True
-                    InputBox("(PROTOTYPE) Type something here to search!", "Search...")
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 84 <> 0 Then
-                    'WIN + T (Focuses the Taskbar)
-
-                    UsedMultipleKey = True
-                    AppBar.ProcessStrip.Focus()
-                    AppBar.ProcessStrip.Select()
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 88 <> 0 Then
-                    'WIN + X (Shows WIN + X menu)
-
-                    UsedMultipleKey = True
-                    AppBar.ActionCM.Show(AppBar, AppBar.Location)
-                    WinKeyPressed = False
-
-                ElseIf hookStruct.vkCode = 89 <> 0 Then
-                    'WIN + Y (Set focused Window on Top or disables TopMost) 'Not in Windows!
-
-                    UsedMultipleKey = True
-                    Dim hWnd As IntPtr = GetForegroundWindow()
-
-                    If hWnd <> IntPtr.Zero Then
-                        ToggleAlwaysOnTop(hWnd)
-                    Else
-                        MessageBox.Show("No active window has been found.", "Info")
-                    End If
-                    WinKeyPressed = False
-
-                End If
-            End If
-
-            If ShiftKeyPressed = True Then
-                If hookStruct.vkCode = 121 <> 0 Then
-                    UsedMultipleKey = True
-                    Process.Start("C:\Windows\System32\cmd.exe")
-                    WinKeyPressed = False
-                End If
-            End If
-
-            'Failed Alt+Tab key, because it is a system keybind and cannot be turned off...
-
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\AltTab", "Enabled", "0") = 1 Then
-                If AltKeyPressed = True Then
-                    If hookStruct.vkCode = 9 <> 0 Then
-                        UsedMultipleKey = True
-                        AltTab.Show()
-                        WinKeyPressed = False
-                    End If
-                End If
-            End If
+    Private Function GetWindowPosition(ByVal hWnd As IntPtr) As Rectangle
+        Dim r As New RECT
+        If GetWindowRect(hWnd, r) Then
+            Return New Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top)
         End If
+        Return Rectangle.Empty
+    End Function
+
+    Private Function GetWindowTitle(ByVal hWnd As IntPtr) As String
+        Dim length As Integer = GetWindowTextLength(hWnd)
+        If length = 0 Then Return String.Empty
+
+        Dim sb As New StringBuilder(length + 1)
+        GetWindowText(hWnd, sb, sb.Capacity)
+        Return sb.ToString()
+    End Function
+
+    Public Sub SmartSnap(ByVal hWnd As IntPtr, ByVal mode As SnapMode)
+        If Not CanSnapWindow(hWnd) Then Exit Sub
+
+        Dim screenArea As Rectangle = Screen.FromHandle(hWnd).WorkingArea
+        Dim halfWidth As Integer = screenArea.Width \ 2
+        Dim halfHeight As Integer = screenArea.Height \ 2
+
+        If Not windowRestoreBounds.ContainsKey(hWnd) AndAlso GetWindowState(hWnd, True) = 1 Then
+            windowRestoreBounds(hWnd) = GetWindowPosition(hWnd)
+        End If
+
+        Dim targetRect As Rectangle
+
+        Select Case mode
+            Case SnapMode.LeftHalf
+                targetRect = New Rectangle(screenArea.X, screenArea.Y, halfWidth, screenArea.Height)
+            Case SnapMode.RightHalf
+                targetRect = New Rectangle(screenArea.X + halfWidth, screenArea.Y, halfWidth, screenArea.Height)
+
+            Case SnapMode.TopLeftQuarter
+                targetRect = New Rectangle(screenArea.X, screenArea.Y, halfWidth, halfHeight)
+            Case SnapMode.TopRightQuarter
+                targetRect = New Rectangle(screenArea.X + halfWidth, screenArea.Y, halfWidth, halfHeight)
+            Case SnapMode.BottomLeftQuarter
+                targetRect = New Rectangle(screenArea.X, screenArea.Y + halfHeight, halfWidth, halfHeight)
+            Case SnapMode.BottomRightQuarter
+                targetRect = New Rectangle(screenArea.X + halfWidth, screenArea.Y + halfHeight, halfWidth, halfHeight)
+
+            Case SnapMode.Restore
+                If windowRestoreBounds.ContainsKey(hWnd) Then
+                    Dim r = windowRestoreBounds(hWnd)
+                    ShowWindow(hWnd, 9) ' SW_RESTORE
+                    SetWindowPos(hWnd, IntPtr.Zero, r.X, r.Y, r.Width, r.Height, &H40)
+                    windowRestoreBounds.Remove(hWnd)
+                    Exit Sub
+                End If
+        End Select
+
+        If Not targetRect.IsEmpty Then
+            ShowWindow(hWnd, 9)
+            SetWindowPos(hWnd, IntPtr.Zero, targetRect.X, targetRect.Y, targetRect.Width, targetRect.Height, &H40)
+        End If
+    End Sub
+
+    Public Enum SnapMode
+        LeftHalf
+        RightHalf
+        TopLeftQuarter
+        TopRightQuarter
+        BottomLeftQuarter
+        BottomRightQuarter
+        Restore
+        Minimize
+    End Enum
+
+    Public Sub SnapWindow(ByVal hWnd As IntPtr, ByVal mode As SnapMode)
+
+        Dim screenArea As Rectangle = Screen.FromHandle(hWnd).WorkingArea
+        Dim newPos As New Rectangle
+
+        Select Case mode
+            Case SnapMode.LeftHalf
+                newPos = New Rectangle(screenArea.X, screenArea.Y, screenArea.Width \ 2, screenArea.Height)
+
+            Case SnapMode.RightHalf
+                newPos = New Rectangle(screenArea.X + (screenArea.Width \ 2), screenArea.Y, screenArea.Width \ 2, screenArea.Height)
+
+            Case SnapMode.TopLeftQuarter
+                newPos = New Rectangle(screenArea.X, screenArea.Y, screenArea.Width \ 2, screenArea.Height \ 2)
+
+            Case SnapMode.TopRightQuarter
+                newPos = New Rectangle(screenArea.X + (screenArea.Width \ 2), screenArea.Y, screenArea.Width \ 2, screenArea.Height \ 2)
+
+        End Select
+
+        ShowWindow(hWnd, 9) ' SW_RESTORE
+
+        SetWindowPos(hWnd, IntPtr.Zero, newPos.X, newPos.Y, newPos.Width, newPos.Height, &H40)
+    End Sub
+
+    Private Function KeyboardHookProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+        If nCode < 0 Then Return CallNextHookEx(hookHandle, nCode, wParam, lParam)
+
+        Dim hookStruct As KBDLLHOOKSTRUCT = Marshal.PtrToStructure(lParam, GetType(KBDLLHOOKSTRUCT))
+        Dim msg As Integer = wParam.ToInt32()
+        Dim vkCode As Integer = hookStruct.vkCode
+
+        Select Case msg
+            Case WM_KEYDOWN, WM_SYSKEYDOWN
+                ' Update modifier states
+                Select Case vkCode
+                    Case VK_WIN_LEFT, VK_WIN_RIGHT : WinKeyPressed = True
+                    Case VK_CTRL_LEFT, VK_CTRL_RIGHT : CtrlKeyPressed = True
+                    Case VK_SHIFT_LEFT, VK_SHIFT_RIGHT : ShiftKeyPressed = True
+                    Case VK_ALT_LEFT, VK_ALT_RIGHT : AltKeyPressed = True
+                End Select
+
+                ' Logic for Combinations
+                If WinKeyPressed Then
+                    If vkCode <> VK_WIN_LEFT AndAlso vkCode <> VK_WIN_RIGHT Then
+                        If HandleWindowsShortcuts(vkCode) Then
+                            Return New IntPtr(1)
+                        End If
+                    End If
+                ElseIf AltKeyPressed AndAlso vkCode = 9 Then ' Alt + Tab
+                    If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\AltTab", "Enabled", "0") = 1 Then
+                        AltTab.Show()
+                        Return New IntPtr(1)
+                    End If
+                End If
+
+            Case WM_KEYUP, WM_SYSKEYUP
+                Select Case vkCode
+                    Case VK_WIN_LEFT, VK_WIN_RIGHT
+                        If Not UsedMultipleKey Then
+                            RaiseEvent HotkeyPressed(Nothing, EventArgs.Empty)
+                        End If
+                        WinKeyPressed = False
+                        UsedMultipleKey = False
+                    Case VK_CTRL_LEFT, VK_CTRL_RIGHT : CtrlKeyPressed = False
+                    Case VK_SHIFT_LEFT, VK_SHIFT_RIGHT : ShiftKeyPressed = False
+                    Case VK_ALT_LEFT, VK_ALT_RIGHT
+                        AltKeyPressed = False
+                        AltTab.Close()
+                End Select
+        End Select
 
         Return CallNextHookEx(hookHandle, nCode, wParam, lParam)
     End Function
@@ -4400,6 +4443,198 @@ Module GlobalKeyboardHook
         Return (hookHandle <> IntPtr.Zero)
     End Function
 
+    Private Function HandleWindowsShortcuts(ByVal vkCode As Integer) As Boolean
+        Dim hWnd As IntPtr = GetForegroundWindow()
+        Dim handled As Boolean = True
+        UsedMultipleKey = True
+
+        Dim state As Integer = GetWindowState(hWnd, True)
+
+        Select Case vkCode
+            Case 9 ' TAB
+                If AltKeyPressed OrElse WinKeyPressed Then
+                    UsedMultipleKey = True
+
+                    If Not AltTab.Visible Then
+                        Dim hWndALTTAB As IntPtr = GetForegroundWindow()
+                        Dim processId As UInteger = 0
+                        GetWindowThreadProcessId(hWndALTTAB, processId)
+
+                        AltTab.ActiveProcessID = processId
+                        AltTab.Show()
+                        AltTab.Focus()
+
+                        AltTab.MenuStrip1.Focus()
+                    End If
+
+                    If AltTab.MenuStrip1.Items.Count <> 0 Then
+
+                        Dim currentSelItem As Integer = 0
+
+                        For i As Integer = 0 To AltTab.MenuStrip1.Items.Count - 1
+                            If AltTab.MenuStrip1.Items.Item(i).Selected Then
+                                currentSelItem = i
+                            End If
+                        Next
+
+                        If currentSelItem + 1 > AltTab.MenuStrip1.Items.Count - 1 Then
+                            AltTab.MenuStrip1.Items.Item(0).Select()
+                        Else
+                            AltTab.MenuStrip1.Items.Item(currentSelItem + 1).Select()
+                        End If
+                    End If
+
+                    Return True
+                End If
+
+            Case 37 ' LEFT
+                If CanSnapWindow(hWnd) = True Then
+                    If CtrlKeyPressed AndAlso WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.BottomLeftQuarter)
+                    ElseIf WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.LeftHalf)
+                    End If
+                End If
+
+            Case 39 ' RIGHT
+                If CanSnapWindow(hWnd) = True Then
+                    If CtrlKeyPressed AndAlso WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.TopRightQuarter)
+                    ElseIf WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.RightHalf)
+                    End If
+                End If
+
+            Case 38 ' UP
+                If CanSnapWindow(hWnd) = True Then
+                    If CtrlKeyPressed AndAlso WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.TopLeftQuarter)
+                    ElseIf WinKeyPressed Then
+                        If state = 2 Then
+                            ShowWindow(hWnd, 9)
+                        ElseIf state = 1 Then
+                            ShowWindow(hWnd, 3)
+                        End If
+                    End If
+                End If
+
+            Case 40 ' DOWN
+                If CanSnapWindow(hWnd) = True Then
+                    If CtrlKeyPressed AndAlso WinKeyPressed Then
+                        SmartSnap(hWnd, SnapMode.BottomRightQuarter)
+                    ElseIf WinKeyPressed Then
+                        If state = 3 Then
+                            ShowWindow(hWnd, 9)
+                        Else
+                            ShowWindow(hWnd, 6)
+                        End If
+                    End If
+                End If
+
+            Case 65 ' A
+                If Not TimeDate.Visible Then
+                    TimeDate.Show()
+                    TimeDate.BringToFront()
+                    TimeDate.Focus()
+                Else
+                    TimeDate.BringToFront()
+                    TimeDate.Focus()
+                End If
+
+            Case 66 ' B
+                AppBar.ToolStrip1.Focus()
+                AppBar.ToolStrip1.Select()
+
+            Case 67 ' C
+                MsgBox("Nonono Copilot not here xd, but if you want to add something here, let me know.")
+
+            Case 68 ' D
+                Desktop.BringToFront()
+
+            Case 69 ' E
+                Process.Start("explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+
+            Case 73 ' I
+                If Not AppbarProperties.Visible Then
+                    AppbarProperties.Show(AppBar)
+                    AppbarProperties.BringToFront()
+                    AppbarProperties.Focus()
+                Else
+                    AppbarProperties.BringToFront()
+                    AppbarProperties.Focus()
+                End If
+
+            Case 76 ' L
+                Process.Start("RunDll32.exe", "user32.dll,LockWorkStation")
+
+            Case 77 ' M
+                If CtrlKeyPressed AndAlso WinKeyPressed Then
+                    For Each i As ToolStripButton In AppBar.ProcessStrip.Items
+                        If Not i.Tag Is Nothing AndAlso TypeOf i.Tag Is IntPtr Then
+                            Dim windowHandle As IntPtr = CType(i.Tag, IntPtr)
+                            RestoreWindow(windowHandle)
+                        End If
+                    Next
+                ElseIf WinKeyPressed Then
+                    For Each i As ToolStripButton In AppBar.ProcessStrip.Items
+                        If Not i.Tag Is Nothing AndAlso TypeOf i.Tag Is IntPtr Then
+                            Dim windowHandle As IntPtr = CType(i.Tag, IntPtr)
+                            MinimizeWindow(windowHandle)
+                        End If
+                    Next
+                End If
+
+            Case 82 ' R
+                If Not RunDialog.Visible Then
+                    RunDialog.Show()
+                    RunDialog.BringToFront()
+                    RunDialog.Focus()
+                Else
+                    RunDialog.BringToFront()
+                    RunDialog.Focus()
+                End If
+
+            Case 83 ' S
+                InputBox("(PROTOTYPE) Type something here to search!", "Search...")
+
+            Case 84 ' T
+                AppBar.ProcessStrip.Focus()
+                AppBar.ProcessStrip.Select()
+
+            Case 86 ' V
+                If Not ClipboardViewer.Visible Then
+                    ClipboardViewer.Show()
+                    ClipboardViewer.BringToFront()
+                    ClipboardViewer.Focus()
+                Else
+                    ClipboardViewer.BringToFront()
+                    ClipboardViewer.Focus()
+                End If
+
+            Case 88 ' X
+                If Not AppBar.ActionCM.Visible Then
+                    AppBar.ActionCM.Show(AppBar, AppBar.Location)
+                    AppBar.ActionCM.BringToFront()
+                    AppBar.ActionCM.Focus()
+                Else
+                    AppBar.ActionCM.BringToFront()
+                    AppBar.ActionCM.Focus()
+                End If
+
+            Case 89 ' Y
+                If hWnd <> IntPtr.Zero Then
+                    ToggleAlwaysOnTop(hWnd)
+                Else
+                    MessageBox.Show("No active window has been found.", "Info")
+                End If
+
+            Case Else
+                handled = False
+        End Select
+
+        Return handled
+    End Function
+
     Public Function Unhook() As Boolean
         Dim result As Boolean = UnhookWindowsHookEx(hookHandle)
         hookHandle = IntPtr.Zero
@@ -4412,5 +4647,4 @@ Module GlobalKeyboardHook
     <DllImport("user32.dll", CharSet:=CharSet.Auto, CallingConvention:=CallingConvention.StdCall)>
     Public Function GetKeyState(ByVal nVirtKey As Integer) As Short
     End Function
-
 End Module

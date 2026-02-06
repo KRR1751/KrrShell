@@ -60,7 +60,7 @@ Partial Class ClipboardViewer
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(7, 2, 0, 2)
-        Me.MenuStrip1.Size = New System.Drawing.Size(685, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(524, 24)
         Me.MenuStrip1.TabIndex = 0
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -118,7 +118,7 @@ Partial Class ClipboardViewer
         '
         Me.HideToolStripMenuItem.Name = "HideToolStripMenuItem"
         Me.HideToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.F4), System.Windows.Forms.Keys)
-        Me.HideToolStripMenuItem.Size = New System.Drawing.Size(141, 22)
+        Me.HideToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.HideToolStripMenuItem.Text = "Hide"
         '
         'OnTopToolStripMenuItem
@@ -127,7 +127,7 @@ Partial Class ClipboardViewer
         Me.OnTopToolStripMenuItem.CheckOnClick = True
         Me.OnTopToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.OnTopToolStripMenuItem.Name = "OnTopToolStripMenuItem"
-        Me.OnTopToolStripMenuItem.Size = New System.Drawing.Size(141, 22)
+        Me.OnTopToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.OnTopToolStripMenuItem.Text = "On Top?"
         '
         'RichTextBox1
@@ -137,7 +137,7 @@ Partial Class ClipboardViewer
         Me.RichTextBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.RichTextBox1.Name = "RichTextBox1"
         Me.RichTextBox1.ReadOnly = True
-        Me.RichTextBox1.Size = New System.Drawing.Size(685, 372)
+        Me.RichTextBox1.Size = New System.Drawing.Size(524, 280)
         Me.RichTextBox1.TabIndex = 1
         Me.RichTextBox1.Text = ""
         Me.RichTextBox1.Visible = False
@@ -145,10 +145,10 @@ Partial Class ClipboardViewer
         'StatusStrip1
         '
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSSL1, Me.TSSL2})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 396)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 304)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Padding = New System.Windows.Forms.Padding(1, 0, 16, 0)
-        Me.StatusStrip1.Size = New System.Drawing.Size(685, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(524, 22)
         Me.StatusStrip1.TabIndex = 2
         Me.StatusStrip1.Text = "StatusStrip1"
         '
@@ -172,7 +172,7 @@ Partial Class ClipboardViewer
         Me.PictureBox1.Location = New System.Drawing.Point(0, 24)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(685, 372)
+        Me.PictureBox1.Size = New System.Drawing.Size(524, 280)
         Me.PictureBox1.TabIndex = 3
         Me.PictureBox1.TabStop = False
         Me.PictureBox1.Visible = False
@@ -186,7 +186,7 @@ Partial Class ClipboardViewer
         Me.ListBox1.Location = New System.Drawing.Point(0, 24)
         Me.ListBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ListBox1.Name = "ListBox1"
-        Me.ListBox1.Size = New System.Drawing.Size(685, 372)
+        Me.ListBox1.Size = New System.Drawing.Size(524, 280)
         Me.ListBox1.TabIndex = 4
         '
         'Panel1
@@ -197,24 +197,24 @@ Partial Class ClipboardViewer
         Me.Panel1.Location = New System.Drawing.Point(0, 24)
         Me.Panel1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(685, 372)
+        Me.Panel1.Size = New System.Drawing.Size(524, 280)
         Me.Panel1.TabIndex = 5
         Me.Panel1.Visible = False
         '
         'Label1
         '
         Me.Label1.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.Label1.Location = New System.Drawing.Point(0, 332)
+        Me.Label1.Location = New System.Drawing.Point(0, 240)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(685, 40)
+        Me.Label1.Size = New System.Drawing.Size(524, 40)
         Me.Label1.TabIndex = 1
         '
         'Button1
         '
         Me.Button1.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(286, 153)
+        Me.Button1.Location = New System.Drawing.Point(224, 122)
         Me.Button1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(82, 48)
@@ -230,7 +230,7 @@ Partial Class ClipboardViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(685, 418)
+        Me.ClientSize = New System.Drawing.Size(524, 326)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.ListBox1)
         Me.Controls.Add(Me.PictureBox1)

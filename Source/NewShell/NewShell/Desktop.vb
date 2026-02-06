@@ -6,6 +6,7 @@ Imports System.Text
 Imports System.Threading
 Imports System.Windows.Forms
 Imports System.Windows.Forms.Menu
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Button
 Imports Microsoft.Win32
 Imports Shell32
 
@@ -46,15 +47,45 @@ Public Class Desktop
     Private Shared Function CallWindowProc(lpPrevWndFunc As IntPtr, hWnd As IntPtr, Msg As Integer, wParam As IntPtr, lParam As IntPtr) As IntPtr
     End Function
 
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function SetFocus(hWnd As IntPtr) As IntPtr
+    End Function
+
     Private Const WM_MOUSEACTIVATE As Integer = &H21
     Private Const MA_NOACTIVATEANDEAT As Integer = &H4
 
     Protected Overrides Sub WndProc(ByRef m As Message)
         If m.Msg = WM_MOUSEACTIVATE Then
+            'SetFocus(Me.Handle)
             m.Result = CType(MA_NOACTIVATEANDEAT, IntPtr)
             Return
         End If
         MyBase.WndProc(m)
+    End Sub
+
+    Private Const SWP_NOMOVE As Integer = &H2
+    Private Const SWP_NOSIZE As Integer = &H1
+    Private Const SWP_FRAMECHANGED As Integer = &H20
+    Private Const SWP_NOACTIVATE As Integer = &H10
+    Private Const HWND_BOTTOM As Integer = 1
+
+    Private Const GWL_EXSTYLE As Integer = -20
+    Private Const WS_EX_NOACTIVATE As Integer = &H8000000
+
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function SetWindowPos(hWnd As IntPtr, hWndInsertAfter As IntPtr, X As Integer, Y As Integer, cx As Integer, cy As Integer, uFlags As Integer) As Boolean
+    End Function
+
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function GetWindowLong(hWnd As IntPtr, nIndex As Integer) As Integer
+    End Function
+
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function SetWindowLong(hWnd As IntPtr, nIndex As Integer, dwNewLong As Integer) As Integer
+    End Function
+
+    Private Sub SetWindowLayerBottom()
+        SetWindowPos(Me.Handle, New IntPtr(HWND_BOTTOM), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE)
     End Sub
 
     '  Alt+Tab hotkey Disabling/Enabling
@@ -214,6 +245,8 @@ Public Class Desktop
             hHook = IntPtr.Zero
             MessageBox.Show("Failed to implement Custom Alt+Tab hook. So we'll switching it back to Windows' Default.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
+
+        SetWindowLayerBottom()
     End Sub
     Public CanClose As Boolean = False
     Private Sub Desktop_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
@@ -1221,8 +1254,8 @@ Public Class Desktop
         End If
     End Sub
 
-    Private Sub Desktop_GotFocus(sender As Object, e As EventArgs) Handles Me.GotFocus
-        Me.SendToBack()
+    Private Sub Desktop_GotFocus(sender As Object, e As EventArgs) Handles Me.GotFocus, Me.Activated
+        SetWindowLayerBottom()
     End Sub
 
     Private Sub WallpaperRefleshToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RefreshToolStripMenuItem.Click

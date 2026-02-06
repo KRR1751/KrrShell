@@ -30,7 +30,7 @@
     <ProductName>KrrShell</ProductName>
     <PublisherName>KRR1751</PublisherName>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>0.0.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -184,10 +184,10 @@
     <Compile Include="DesktopProperties.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialog3.Designer.vb">
-      <DependentUpon>Dialog3.vb</DependentUpon>
+    <Compile Include="TimeDate.Designer.vb">
+      <DependentUpon>TimeDate.vb</DependentUpon>
     </Compile>
-    <Compile Include="Dialog3.vb">
+    <Compile Include="TimeDate.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FolderCreator.designer.vb">
@@ -316,8 +316,8 @@
     <EmbeddedResource Include="DesktopProperties.resx">
       <DependentUpon>DesktopProperties.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialog3.resx">
-      <DependentUpon>Dialog3.vb</DependentUpon>
+    <EmbeddedResource Include="TimeDate.resx">
+      <DependentUpon>TimeDate.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FolderCreator.resx">
       <DependentUpon>FolderCreator.vb</DependentUpon>
@@ -470,6 +470,18 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="RunDialogIcon.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

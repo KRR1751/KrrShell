@@ -37,11 +37,6 @@ KrrShell
   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
-<member name="P:NewShell.My.Resources.Resources.AppBarMainTransparent1">
-<summary>
-  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
-</summary>
-</member>
 <member name="P:NewShell.My.Resources.Resources.Clock">
 <summary>
   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.

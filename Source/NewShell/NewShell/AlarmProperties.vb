@@ -115,9 +115,9 @@ Public Class APD
                 remNUP221 = NumericUpDown5.Value
             End If
         End If
-        If Dialog3.CheckBox25.Checked = True Then
+        If TimeDate.CheckBox25.Checked = True Then
             If SaveBTN.Checked = True Then
-                If Dialog3.ComboBox5.SelectedIndex = 0 Then
+                If TimeDate.ComboBox5.SelectedIndex = 0 Then
                     If remCB1 = 9 Then
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\1\", "X", remNUPX, Microsoft.Win32.RegistryValueKind.String)
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\1\", "Y", remNUPY, Microsoft.Win32.RegistryValueKind.String)
@@ -176,7 +176,7 @@ Public Class APD
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\1\", "EnableCustomB1", "1", Microsoft.Win32.RegistryValueKind.DWord)
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\1\", "CustomB1", remTXT3, Microsoft.Win32.RegistryValueKind.String)
                     End If
-                ElseIf Dialog3.ComboBox5.SelectedIndex = 1 Then
+                ElseIf TimeDate.ComboBox5.SelectedIndex = 1 Then
                     My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\2\", "RingMode", remDUD11, Microsoft.Win32.RegistryValueKind.DWord)
                     If remDUD11 = 0 Then
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\2\", "RingSYS", remCB11, Microsoft.Win32.RegistryValueKind.DWord)
@@ -192,7 +192,7 @@ Public Class APD
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\2\", "RingRepeat", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\2\", "RingVol", remNUP11, Microsoft.Win32.RegistryValueKind.DWord)
-                ElseIf Dialog3.ComboBox5.SelectedIndex = 2 Then
+                ElseIf TimeDate.ComboBox5.SelectedIndex = 2 Then
                     My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\3\", "Path", remCB21, Microsoft.Win32.RegistryValueKind.String)
                     If remRB21 = True Then
                         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\NW\Alarm\3\", "Mode", "1", Microsoft.Win32.RegistryValueKind.DWord)
@@ -271,157 +271,157 @@ Public Class APD
                 End If
             End If
         Else
-            If Dialog3.ComboBox5.SelectedIndex = 0 Then
+            If TimeDate.ComboBox5.SelectedIndex = 0 Then
                 If remCB1 = 9 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "X", remNUPX, Microsoft.Win32.RegistryValueKind.String)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "Y", remNUPY, Microsoft.Win32.RegistryValueKind.String)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "Position", remCB1, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "X", remNUPX, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "Y", remNUPY, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "Position", remCB1, Microsoft.Win32.RegistryValueKind.DWord)
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "Position", remCB1, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "Position", remCB1, Microsoft.Win32.RegistryValueKind.DWord)
                 End If
                 If remCHB1 = True Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingMode", remDUD1, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingMode", remDUD1, Microsoft.Win32.RegistryValueKind.DWord)
                     If remDUD1 = 0 Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingSYS", remCB2, Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingSYS", remCB2, Microsoft.Win32.RegistryValueKind.DWord)
                     ElseIf remDUD1 = 1 Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingALIST", remCB3, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingALIST", remCB3, Microsoft.Win32.RegistryValueKind.String)
                     ElseIf remDUD1 = 2 Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingPath", remCB4, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingPath", remCB4, Microsoft.Win32.RegistryValueKind.String)
                     End If
                     If remCHB2 = False Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", "0", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingTimesRepeat", remNUP2, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingTimesRepeat", remNUP2, Microsoft.Win32.RegistryValueKind.String)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingVol", remNUP1, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingVol", remNUP1, Microsoft.Win32.RegistryValueKind.DWord)
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", "0", Microsoft.Win32.RegistryValueKind.DWord)
                 End If
                 If remCHB3 = True Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableB2", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableB2", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     If remDUD5 = 0 Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB2", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB2", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB2", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "CustomB2", remTXT4, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB2", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "CustomB2", remTXT4, Microsoft.Win32.RegistryValueKind.String)
                     End If
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableB2", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableB2", "0", Microsoft.Win32.RegistryValueKind.DWord)
                 End If
                 If remDUD2 = 0 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomTitle", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomTitle", "0", Microsoft.Win32.RegistryValueKind.DWord)
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomTitle", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "CustomTitle", remTXT1, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomTitle", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "CustomTitle", remTXT1, Microsoft.Win32.RegistryValueKind.String)
                 End If
                 If remDUD3 = 0 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "0", Microsoft.Win32.RegistryValueKind.DWord)
                 ElseIf remDUD3 = 1 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "1", Microsoft.Win32.RegistryValueKind.DWord)
                 ElseIf remDUD3 = 2 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "2", Microsoft.Win32.RegistryValueKind.DWord)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "CustomPicturePath", remTXT2, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomPicture", "2", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "CustomPicturePath", remTXT2, Microsoft.Win32.RegistryValueKind.String)
                 End If
                 If remDUD4 = 0 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB1", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB1", "0", Microsoft.Win32.RegistryValueKind.DWord)
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB1", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "CustomB1", remTXT3, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableCustomB1", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "CustomB1", remTXT3, Microsoft.Win32.RegistryValueKind.String)
                 End If
-            ElseIf Dialog3.ComboBox5.SelectedIndex = 1 Then
-                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingMode", remDUD11, Microsoft.Win32.RegistryValueKind.DWord)
+            ElseIf TimeDate.ComboBox5.SelectedIndex = 1 Then
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingMode", remDUD11, Microsoft.Win32.RegistryValueKind.DWord)
 
                 If remDUD11 = 0 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingSYS", remCB11, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingSYS", remCB11, Microsoft.Win32.RegistryValueKind.DWord)
                 ElseIf remDUD11 = 1 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingALIST", remCB12, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingALIST", remCB12, Microsoft.Win32.RegistryValueKind.String)
                 ElseIf remDUD11 = 2 Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingPath", remCB13, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingPath", remCB13, Microsoft.Win32.RegistryValueKind.String)
                 End If
                 If remCHB11 = False Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingRepeat", "0", Microsoft.Win32.RegistryValueKind.DWord)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingTimesRepeat", remNUP12, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingRepeat", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingTimesRepeat", remNUP12, Microsoft.Win32.RegistryValueKind.String)
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingRepeat", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingRepeat", "1", Microsoft.Win32.RegistryValueKind.DWord)
                 End If
-                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingVol", remNUP11, Microsoft.Win32.RegistryValueKind.DWord)
-            ElseIf Dialog3.ComboBox5.SelectedIndex = 2 Then
-                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\", "Path", remCB21, Microsoft.Win32.RegistryValueKind.String)
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingVol", remNUP11, Microsoft.Win32.RegistryValueKind.DWord)
+            ElseIf TimeDate.ComboBox5.SelectedIndex = 2 Then
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\", "Path", remCB21, Microsoft.Win32.RegistryValueKind.String)
                 If remRB21 = True Then
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\", "Mode", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\", "Mode", "1", Microsoft.Win32.RegistryValueKind.DWord)
 
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "Arguments", remTXT211, Microsoft.Win32.RegistryValueKind.String)
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "AppWinStyle", remCB211, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "Arguments", remTXT211, Microsoft.Win32.RegistryValueKind.String)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "AppWinStyle", remCB211, Microsoft.Win32.RegistryValueKind.DWord)
                     If remCHB211 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "CreateNoWindow", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "CreateNoWindow", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "CreateNoWindow", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "CreateNoWindow", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB212 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "UseShellExecute", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "UseShellExecute", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "UseShellExecute", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "UseShellExecute", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB213 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RunAs", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "Username", remTXT212, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RunAs", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "Username", remTXT212, Microsoft.Win32.RegistryValueKind.String)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RunAs", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RunAs", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB214 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "LoadUserProfile", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "LoadUserProfile", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "LoadUserProfile", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "LoadUserProfile", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB215 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "EnableCustomWorkingDir", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "CustomWorkDir", remTXT212, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "EnableCustomWorkingDir", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "CustomWorkDir", remTXT212, Microsoft.Win32.RegistryValueKind.String)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "EnableCustomWorkingDir", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "EnableCustomWorkingDir", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB216 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "EnableDomain", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "Domain", remTXT215, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "EnableDomain", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "Domain", remTXT215, Microsoft.Win32.RegistryValueKind.String)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "EnableDomain", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "EnableDomain", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB217 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialog", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialog", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialog", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialog", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB218 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialogParentHandle", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialogParentHandle", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialogParentHandle", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "ErrorDialogParentHandle", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB219 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSError", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSError", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSError", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSError", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB21a = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSInput", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSInput", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSInput", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSInput", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                     If remCHB21b = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSOutput", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSOutput", "1", Microsoft.Win32.RegistryValueKind.DWord)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\1\", "RSOutput", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\1\", "RSOutput", "0", Microsoft.Win32.RegistryValueKind.DWord)
                     End If
                 Else
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\", "Mode", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\", "Mode", "0", Microsoft.Win32.RegistryValueKind.DWord)
 
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\2\", "AppWinStyle", remCB221, Microsoft.Win32.RegistryValueKind.DWord)
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\2\", "AppWinStyle", remCB221, Microsoft.Win32.RegistryValueKind.DWord)
                     If remCHB221 = True Then
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\2\", "Wait", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\2\", "Timeout", remNUP221, Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\2\", "Wait", "1", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\2\", "Timeout", remNUP221, Microsoft.Win32.RegistryValueKind.String)
                     Else
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\2\", "Wait", "0", Microsoft.Win32.RegistryValueKind.DWord)
-                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\2\", "Timeout", "-1", Microsoft.Win32.RegistryValueKind.String)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\2\", "Wait", "0", Microsoft.Win32.RegistryValueKind.DWord)
+                        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\2\", "Timeout", "-1", Microsoft.Win32.RegistryValueKind.String)
                     End If
                 End If
             End If
@@ -471,12 +471,12 @@ Public Class APD
     Private Sub APD_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         On Error Resume Next
         Controller.Enabled = True
-        If Dialog3.CheckBox25.Checked = True Then
+        If TimeDate.CheckBox25.Checked = True Then
             RV17 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\NW\Alarm\1\", "RingMode", Nothing)
             RV19 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\NW\Alarm\3\", "Mode", Nothing)
         Else
-            RV17 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingMode", Nothing)
-            RV19 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\3\", "Mode", Nothing)
+            RV17 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingMode", Nothing)
+            RV19 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\3\", "Mode", Nothing)
         End If
         If RV17 = "0" Then
             remDUD1 = 0
@@ -488,10 +488,10 @@ Public Class APD
             remDUD1 = 2
             DomainUpDown1.SelectedIndex = 2
         End If
-        If Dialog3.CheckBox25.Checked = True Then
+        If TimeDate.CheckBox25.Checked = True Then
             RV18 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\NW\Alarm\2\", "RingMode", Nothing)
         Else
-            RV18 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingMode", Nothing)
+            RV18 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingMode", Nothing)
         End If
         If RV18 = "0" Then
             remDUD11 = 0
@@ -564,7 +564,7 @@ Public Class APD
             ComboBox3.Visible = False
             Button16.Visible = True
             ComboBox4.Visible = True
-            ComboBox4.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingPath", Nothing)
+            ComboBox4.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingPath", Nothing)
         End If
     End Sub
 
@@ -714,7 +714,7 @@ Public Class APD
             ComboBox6.Visible = False
             Button3.Visible = True
             ComboBox7.Visible = False
-            ComboBox5.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\2\", "RingPath", Nothing)
+            ComboBox5.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\2\", "RingPath", Nothing)
         End If
     End Sub
 

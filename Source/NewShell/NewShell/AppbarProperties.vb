@@ -70,6 +70,37 @@ Public Class AppbarProperties
         AppBar.LoadApps()
         ClockTray.SyncAppearance()
 
+        If RadioButton6.Checked = True Then
+            Try
+                Dim side As AppBar.side = side
+                side.Left = -1
+                side.Right = -1
+                side.Top = -1
+                side.Bottom = -1
+                Dim result As Integer = AppBar.DwmExtendFrameIntoClientArea(AppBar.Handle, side)
+            Catch ex As Exception
+                Dim side As AppBar.side = side
+                side.Left = 0
+                side.Right = 0
+                side.Top = 0
+                side.Bottom = 0
+                Dim result As Integer = AppBar.DwmExtendFrameIntoClientArea(AppBar.Handle, side)
+            End Try
+
+            Button16.Enabled = True
+            Label12.Enabled = True
+
+            AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
+            AppBar.TransparencyKey = Nothing
+
+            AppBar.Opacity = 1
+
+        ElseIf RadioButton1.Checked = True Then
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 1, Microsoft.Win32.RegistryValueKind.DWord)
+        ElseIf RadioButton7.Checked = True Then
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 2, Microsoft.Win32.RegistryValueKind.DWord)
+        End If
+
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
@@ -111,30 +142,43 @@ Public Class AppbarProperties
             NumericUpDown3.Value = 90
         End Try
 
+        ComboBox1.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomORB", "")
+
+        ComboBox2.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackImage", "")
+
         Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 2)
             Case 0
+                RadioButton6.Checked = True
+
+
                 Button16.Enabled = True
                 Label12.Enabled = True
 
-                AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
-                AppBar.TransparencyKey = Nothing
+                'AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
+                'AppBar.TransparencyKey = Nothing
 
-                AppBar.Opacity = 1
+                'AppBar.Opacity = 1
 
             Case 1
+                RadioButton1.Checked = True
+
+
                 Button16.Enabled = True
                 Label12.Enabled = True
 
-                AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
-                AppBar.TransparencyKey = Nothing
+                'AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
+                'AppBar.TransparencyKey = Nothing
 
                 Label6.Enabled = True
                 TrackBar1.Enabled = True
                 NumericUpDown3.Enabled = True
 
-                AppBar.Opacity = TrackBar1.Value / 100
+                'AppBar.Opacity = TrackBar1.Value / 100
 
             Case 2
+                RadioButton7.Checked = True
+
+
                 Button16.Enabled = True
                 Label12.Enabled = True
 
@@ -192,13 +236,23 @@ Public Class AppbarProperties
         End If
 
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 0 Then
-            RadioButton8.Checked = True
             RadioButton9.Checked = False
+            RadioButton10.Checked = False
+            RadioButton8.Checked = True
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             RadioButton8.Checked = False
+            RadioButton10.Checked = False
             RadioButton9.Checked = True
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-            'RadioButton10.Checked = True
+            RadioButton8.Checked = False
+            RadioButton9.Checked = False
+            RadioButton10.Checked = True
+            If ComboBox1.Text IsNot Nothing AndAlso File.Exists(ComboBox1.Text) Then
+                PictureBox7.Image = Image.FromFile(ComboBox1.Text)
+
+                'AppBar.LoadAndSplitOrb(ComboBox1.Text)
+
+            End If
         End If
 
         Try
@@ -221,21 +275,85 @@ Public Class AppbarProperties
         Catch ex As Exception
 
         End Try
+
+        Panel1.Enabled = CheckBox9.Checked
+
+        ' WorkingArea Page
+
+        nudTop.Maximum = SystemInformation.PrimaryMonitorSize.Height
+        nudBottom.Maximum = SystemInformation.PrimaryMonitorSize.Height
+        nudLeft.Maximum = SystemInformation.PrimaryMonitorSize.Width
+        nudRight.Maximum = SystemInformation.PrimaryMonitorSize.Width
+
+        Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Type", 0)
+
+            Case 0 ' Explorer
+                RadioButton2.Checked = True
+
+            Case 1 ' User32.dll
+                RadioButton3.Checked = True
+
+        End Select
+
+        If My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\Appbar\WorkingArea\Presets") IsNot Nothing Then
+
+            ComboBox6.Items.Clear()
+
+            ' Gets the list of presets into the Combobox.
+            For Each i As String In My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\Appbar\WorkingArea\Presets").GetValueNames
+                ComboBox6.Items.Add(i)
+            Next
+        End If
+
+        Dim targetPreset As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "CurrentPreset", "Default")
+        If targetPreset IsNot Nothing Then
+
+            Dim realPreset As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets", targetPreset, "Default")
+            If realPreset IsNot Nothing Then
+
+                Dim parts As String() = realPreset.Split(" "c)
+
+                If parts.Length >= 4 Then
+                    nudTop.Value = parts(0)
+                    nudBottom.Value = parts(1)
+                    nudLeft.Value = parts(2)
+                    nudRight.Value = parts(3)
+                End If
+
+                ' Selects an selected preset in Combobox.
+                If ComboBox6.Items.Count > 0 Then
+                    Try
+                        ComboBox6.SelectedIndex = ComboBox6.FindStringExact(targetPreset)
+                    Catch ex As Exception
+                        ComboBox6.SelectedIndex = 0
+                    End Try
+                End If
+            Else ' Load defaults if no presets will be found.
+                nudTop.Value = defWorkTop
+                nudBottom.Value = defWorkBottom
+                nudLeft.Value = defWorkLeft
+                nudRight.Value = defWorkRight
+            End If
+        End If
+
+        CheckBox14.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "AutoUpdate", False)
+
+        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Enabled", False) = 1 Then
+            CheckBox13.Checked = True
+        End If
     End Sub
 
+    Public defWorkTop As Integer = 0
+    Public defWorkBottom As Integer = AppBar.Height
+    Public defWorkLeft As Integer = 0
+    Public defWorkRight As Integer = 0
+
     Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
-        ' Disallowing this because of not knowing anything xdd
 
         AppBar.AutoHideToolStripMenuItem.Checked = CheckBox1.Checked
-        AppBar.fBarRegistered = AppBar.AutoHideToolStripMenuItem.Checked
-        AppBar.RegisterBar()
-        If AppBar.AutoHideToolStripMenuItem.Checked = True Then
-            AppBar.Hidden = True
-            Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - 2)
-        Else
-            AppBar.Hidden = False
-            Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
-        End If
+
+        AppBar.AutoHideOnOff()
+
     End Sub
 
     Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
@@ -386,7 +504,8 @@ Public Class AppbarProperties
     End Sub
 
     Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
-        AboutDialog.ShowDialog(Me)
+        On Error Resume Next
+        AboutDialog.Show(Me)
     End Sub
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
@@ -433,32 +552,10 @@ Public Class AppbarProperties
         AppBar.TopMost = CheckBox8.Checked
     End Sub
 
-    Private Sub RadioButton6_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton6.CheckedChanged
-        Try
-            Dim side As AppBar.side = side
-            side.Left = -1
-            side.Right = -1
-            side.Top = -1
-            side.Bottom = -1
-            Dim result As Integer = AppBar.DwmExtendFrameIntoClientArea(AppBar.Handle, side)
-        Catch ex As Exception
-            Dim side As AppBar.side = side
-            side.Left = 0
-            side.Right = 0
-            side.Top = 0
-            side.Bottom = 0
-            Dim result As Integer = AppBar.DwmExtendFrameIntoClientArea(AppBar.Handle, side)
-        End Try
-
-        Button16.Enabled = True
-        Label12.Enabled = True
-
-        AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
-        AppBar.TransparencyKey = Nothing
-
-        AppBar.Opacity = 1
-
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", "0", Microsoft.Win32.RegistryValueKind.DWord)
+    Private Sub RadioButton6_Click(sender As Object, e As EventArgs) Handles RadioButton6.Click
+        If RadioButton6.Checked = True Then
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 0, Microsoft.Win32.RegistryValueKind.DWord)
+        End If
     End Sub
 
     Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) ' Old
@@ -480,10 +577,10 @@ Public Class AppbarProperties
 
         AppBar.Opacity = 1
 
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", "1", Microsoft.Win32.RegistryValueKind.DWord)
+        'My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 1, Microsoft.Win32.RegistryValueKind.DWord)
     End Sub
 
-    Private Sub RadioButton7_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton7.CheckedChanged, RadioButton1.CheckedChanged
+    Private Sub RadioButton7_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton7.Click, RadioButton1.Click
         Dim side As AppBar.side = side
         side.Left = 0
         side.Right = 0
@@ -504,7 +601,7 @@ Public Class AppbarProperties
 
             AppBar.Opacity = TrackBar1.Value
 
-            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", "1", Microsoft.Win32.RegistryValueKind.DWord)
+            'My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 1, Microsoft.Win32.RegistryValueKind.DWord)
         Else
             Label6.Enabled = False
             TrackBar1.Enabled = False
@@ -512,7 +609,7 @@ Public Class AppbarProperties
 
             AppBar.Opacity = 1
 
-            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", "2", Microsoft.Win32.RegistryValueKind.DWord)
+            'My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 2, Microsoft.Win32.RegistryValueKind.DWord)
         End If
     End Sub
 
@@ -541,7 +638,7 @@ Public Class AppbarProperties
             If ComboBox2.Text IsNot Nothing AndAlso File.Exists(ComboBox2.Text) Then
                 AppBar.BackgroundImage = Image.FromFile(ComboBox2.Text)
             Else
-                AppBar.BackgroundImage = My.Resources.AppBarMainTransparent1
+                AppBar.BackgroundImage = My.Resources.AppBarMainTransparent
             End If
 
         Else
@@ -700,6 +797,13 @@ Public Class AppbarProperties
         ElseIf RadioButton10.Checked = True Then
             SB2.Enabled = False
             SB3.Enabled = True
+            If ComboBox1.Text IsNot Nothing AndAlso File.Exists(ComboBox1.Text) Then
+                PictureBox7.Image = Image.FromFile(ComboBox1.Text)
+
+                AppBar.LoadAndSplitOrb(ComboBox1.Text)
+
+            End If
+            AppBar.Button1.BackgroundImage = AppBar.OrbNormal
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "2", Microsoft.Win32.RegistryValueKind.DWord)
         End If
     End Sub
@@ -764,10 +868,14 @@ Public Class AppbarProperties
 
     Private Sub Button9_Click_1(sender As Object, e As EventArgs) Handles Button9.Click
         AppBar.SizeLocked = False
+
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", NumericUpDown2.Value, Microsoft.Win32.RegistryValueKind.DWord)
+
         AppBar.Width = NumericUpDown2.Value
+
         Try
             Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
+
             If hWnd <> IntPtr.Zero Then
                 Dim newX As Integer = AppBar.Width
                 Dim newY As Integer = AppBar.Location.Y
@@ -775,10 +883,11 @@ Public Class AppbarProperties
                 Dim newHeight As Integer = AppBar.Height
 
                 MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-            Else
             End If
+
         Catch ex As Exception
         End Try
+
         AppBar.SizeLocked = True
     End Sub
 
@@ -814,4 +923,168 @@ Public Class AppbarProperties
     Private Sub CheckBox12_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox12.CheckedChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\ShutdownDialog", "Style", CheckBox12.Checked, Microsoft.Win32.RegistryValueKind.DWord)
     End Sub
+
+    Private Sub Button15_Click(sender As Object, e As EventArgs) Handles Button15.Click
+        On Error Resume Next
+        Dim OFD As New OpenFileDialog
+        OFD.Title = "Select a Custom ORB for your Start Menu"
+        OFD.CheckFileExists = True
+        OFD.FileName = ""
+        OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
+        If OFD.ShowDialog = DialogResult.OK Then
+            PictureBox7.Image = Image.FromFile(OFD.FileName)
+            ComboBox1.Text = OFD.FileName
+
+            AppBar.LoadAndSplitOrb(OFD.FileName)
+            AppBar.Button1.BackgroundImage = AppBar.OrbNormal
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomORB", OFD.FileName)
+
+        End If
+    End Sub
+
+    Private Sub Button17_Click(sender As Object, e As EventArgs) Handles Button17.Click
+        TriggerWorkingArea()
+    End Sub
+
+    Private Sub CheckBox13_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox13.CheckedChanged
+        Panel3.Enabled = CheckBox13.Checked
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Enabled", CheckBox13.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub RadioButton2_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton2.CheckedChanged, RadioButton3.CheckedChanged
+        If RadioButton2.Checked = True Then
+            Panel2.Enabled = False
+
+            Button10.Enabled = True
+            Button13.Enabled = True
+
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Type", 0, Microsoft.Win32.RegistryValueKind.DWord)
+            TriggerWorkingArea()
+
+        ElseIf RadioButton3.Checked = True Then
+            Button10.Enabled = False
+            Button13.Enabled = False
+
+            Panel2.Enabled = True
+
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Type", 1, Microsoft.Win32.RegistryValueKind.DWord)
+            TriggerWorkingArea()
+
+        End If
+    End Sub
+
+    ' Working Area Updates
+    Public Sub TriggerWorkingArea()
+        If RadioButton2.Checked = True Then ' On Explorer
+
+            AppBar.fBarRegistered = False
+            AppBar.RegisterBar()
+
+        ElseIf RadioButton3.Checked = True Then ' On User32.dll
+
+            Dim workspace As New WorkspaceManager()
+
+            Try
+                Dim workTop As String = nudTop.Value
+                Dim workBottom As String = nudBottom.Value
+                Dim workLeft As String = nudLeft.Value
+                Dim workRight As String = nudRight.Value
+
+                workspace.UpdateWorkingArea(workTop, workBottom, workLeft, workRight)
+
+            Catch ex As Exception
+                MsgBox("Failed to apply Working Area from User32.dll. " & ex.Message)
+                'workspace.UpdateWorkingArea(defWorkTop, defWorkBottom, defWorkLeft, defWorkRight)
+            End Try
+        End If
+    End Sub
+
+    Private Sub ComboBox6_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox6.SelectedIndexChanged
+        Dim selectedPreset As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets", ComboBox6.SelectedItem, "Default")
+        If selectedPreset IsNot Nothing Then
+
+            If ComboBox6.SelectedItem = "Default" Then Button20.Enabled = False Else Button20.Enabled = True
+
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "CurrentPreset", ComboBox6.SelectedItem)
+
+            Try
+                Dim parts As String() = selectedPreset.Split(" "c)
+
+                If parts.Length >= 4 Then
+                    nudTop.Value = parts(0)
+                    nudBottom.Value = parts(1)
+                    nudLeft.Value = parts(2)
+                    nudRight.Value = parts(3)
+                End If
+
+            Catch ex As Exception
+                nudTop.Value = defWorkTop
+                nudBottom.Value = defWorkBottom
+                nudLeft.Value = defWorkLeft
+                nudRight.Value = defWorkRight
+            End Try
+        End If
+
+        If CheckBox14.Checked = True Then TriggerWorkingArea()
+    End Sub
+
+    Private Sub CheckBox14_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox14.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "AutoUpdate", CheckBox14.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub Button20_Click(sender As Object, e As EventArgs) Handles Button20.Click
+
+        Dim selectedPreset As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets", ComboBox6.SelectedItem, "Default")
+        If selectedPreset IsNot Nothing AndAlso ComboBox6.SelectedItem <> "Default" Then
+
+            If MessageBox.Show($"Do you really want to remove this preset? [{ComboBox6.SelectedItem}]", "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+                Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\Appbar\WorkingArea\Presets", True)
+
+                If myKey IsNot Nothing Then
+                    Try
+                        myKey.DeleteValue(ComboBox6.SelectedItem)
+                    Finally
+                        myKey.Close()
+                    End Try
+                End If
+
+                ComboBox6.Items.RemoveAt(ComboBox6.FindStringExact(ComboBox6.SelectedItem))
+                ComboBox6.SelectedIndex = 0
+            End If
+        End If
+    End Sub
+
+    Private Sub Button19_Click(sender As Object, e As EventArgs) Handles Button19.Click
+        Dim selectedPreset As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets", ComboBox6.SelectedItem, "Default")
+        If selectedPreset IsNot Nothing Then
+
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets\", ComboBox6.SelectedItem,
+                                          $"{nudTop.Value} {nudBottom.Value} {nudLeft.Value} {nudRight.Value}")
+
+        End If
+    End Sub
+
+    Private Sub Button18_Click(sender As Object, e As EventArgs) Handles Button18.Click
+        Dim createdPreset As String = InputBox("Type a name for your made preset how it will be called.", "Saving a new Preset...", "MyCustom")
+        If createdPreset IsNot Nothing Then
+
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea\Presets\", createdPreset,
+                                          $"{nudTop.Value} {nudBottom.Value} {nudLeft.Value} {nudRight.Value}")
+
+            ComboBox6.Items.Add(createdPreset)
+            ComboBox6.SelectedIndex = ComboBox6.FindStringExact(createdPreset)
+
+        End If
+    End Sub
+
+    Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
+        AppBar.fBarRegistered = False
+        AppBar.RegisterBar()
+    End Sub
+
+    Private Sub Button13_Click(sender As Object, e As EventArgs) Handles Button13.Click
+        AppBar.fBarRegistered = True
+        AppBar.RegisterBar()
+    End Sub
 End Class
+

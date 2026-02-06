@@ -12,21 +12,21 @@ Public Class MLf
 
     Private Sub MLf_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles Me.KeyPress
         If e.KeyChar = "c"c Then
-            Dialog3.MouseLocker.Enabled = False
-            Dialog3.TPauseB.Enabled = False
-            Dialog3.TPauseB.Text = "Pause"
-            Dialog3.TsT.Enabled = False
-            Dialog3.Td = 0
-            Dialog3.Th = 0
-            Dialog3.Tm = 0
-            Dialog3.Ts = 0
-            Dialog3.GroupBox4.Enabled = True
-            If Dialog3.CheckBox15.Checked = True Then
-                Dialog3.GroupBox7.Enabled = True
+            TimeDate.MouseLocker.Enabled = False
+            TimeDate.TPauseB.Enabled = False
+            TimeDate.TPauseB.Text = "Pause"
+            TimeDate.TsT.Enabled = False
+            TimeDate.Td = 0
+            TimeDate.Th = 0
+            TimeDate.Tm = 0
+            TimeDate.Ts = 0
+            TimeDate.GroupBox4.Enabled = True
+            If TimeDate.CheckBox15.Checked = True Then
+                TimeDate.GroupBox7.Enabled = True
             End If
-            Dialog3.CheckBox15.Enabled = True
-            Dialog3.alarm.Stop()
-            Dialog3.TStartB.Text = "Start"
+            TimeDate.CheckBox15.Enabled = True
+            TimeDate.alarm.Stop()
+            TimeDate.TStartB.Text = "Start"
             c = True
             Me.Close()
         End If
@@ -45,21 +45,21 @@ Public Class MLf
     Private Sub MouseLocker_MouseClick(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseClick
         If e.Button = Windows.Forms.MouseButtons.Right Then
             If clc = 3 Then
-                Dialog3.MouseLocker.Enabled = False
-                Dialog3.TPauseB.Enabled = False
-                Dialog3.TPauseB.Text = "Pause"
-                Dialog3.TsT.Enabled = False
-                Dialog3.Td = 0
-                Dialog3.Th = 0
-                Dialog3.Tm = 0
-                Dialog3.Ts = 0
-                Dialog3.GroupBox4.Enabled = True
-                If Dialog3.CheckBox15.Checked = True Then
-                    Dialog3.GroupBox7.Enabled = True
+                TimeDate.MouseLocker.Enabled = False
+                TimeDate.TPauseB.Enabled = False
+                TimeDate.TPauseB.Text = "Pause"
+                TimeDate.TsT.Enabled = False
+                TimeDate.Td = 0
+                TimeDate.Th = 0
+                TimeDate.Tm = 0
+                TimeDate.Ts = 0
+                TimeDate.GroupBox4.Enabled = True
+                If TimeDate.CheckBox15.Checked = True Then
+                    TimeDate.GroupBox7.Enabled = True
                 End If
-                Dialog3.CheckBox15.Enabled = True
-                Dialog3.alarm.Stop()
-                Dialog3.TStartB.Text = "Start"
+                TimeDate.CheckBox15.Enabled = True
+                TimeDate.alarm.Stop()
+                TimeDate.TStartB.Text = "Start"
                 Me.Close()
             Else
                 Reseter.Enabled = True

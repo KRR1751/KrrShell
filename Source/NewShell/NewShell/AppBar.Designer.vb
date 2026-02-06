@@ -80,12 +80,11 @@ Partial Class AppBar
         Me.MenuBarToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ShowDesktopToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.RunDialogToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TaskManagerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.AutoHideToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ReloadAppsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ReloadAppsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.LockAppbarToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PropertiesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Splitter2 = New System.Windows.Forms.Splitter()
@@ -148,7 +147,7 @@ Partial Class AppBar
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripButton3 = New System.Windows.Forms.ToolStripButton()
-        Me.TimeDate = New System.Windows.Forms.Panel()
+        Me.TimeDatePanel = New System.Windows.Forms.Panel()
         Me.DayLabel = New System.Windows.Forms.Label()
         Me.DateLabel = New System.Windows.Forms.Label()
         Me.TimeLabel = New System.Windows.Forms.Label()
@@ -212,7 +211,7 @@ Partial Class AppBar
         Me.TPCM.SuspendLayout()
         Me.Panel4.SuspendLayout()
         Me.ToolStrip1.SuspendLayout()
-        Me.TimeDate.SuspendLayout()
+        Me.TimeDatePanel.SuspendLayout()
         Me.TaDCM.SuspendLayout()
         Me.VCM.SuspendLayout()
         Me.MCM.SuspendLayout()
@@ -223,28 +222,28 @@ Partial Class AppBar
         '
         Me.ActionCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripSeparator4, Me.ToolStripSeparator5, Me.ToolStripSeparator14, Me.ClipboardToolStripMenuItem, Me.FunStuffToolStripMenuItem, Me.PerformanceToolStripMenuItem, Me.HTTSM, Me.ToolStripSeparator16, Me.LTIMain, Me.ToolStripSeparator25, Me.EnableExplorerToolStripMenuItem, Me.ToolStripSeparator15, Me.ActionCenterToolStripMenuItem})
         Me.ActionCM.Name = "ActionCM"
-        Me.ActionCM.Size = New System.Drawing.Size(155, 194)
+        Me.ActionCM.Size = New System.Drawing.Size(156, 194)
         '
         'ToolStripSeparator4
         '
         Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
-        Me.ToolStripSeparator4.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator4.Size = New System.Drawing.Size(152, 6)
         '
         'ToolStripSeparator5
         '
         Me.ToolStripSeparator5.Name = "ToolStripSeparator5"
-        Me.ToolStripSeparator5.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator5.Size = New System.Drawing.Size(152, 6)
         '
         'ToolStripSeparator14
         '
         Me.ToolStripSeparator14.Name = "ToolStripSeparator14"
-        Me.ToolStripSeparator14.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator14.Size = New System.Drawing.Size(152, 6)
         '
         'ClipboardToolStripMenuItem
         '
         Me.ClipboardToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ClearToolStripMenuItem, Me.DaToolStripMenuItem, Me.MultiCopyToolStripMenuItem})
         Me.ClipboardToolStripMenuItem.Name = "ClipboardToolStripMenuItem"
-        Me.ClipboardToolStripMenuItem.Size = New System.Drawing.Size(154, 22)
+        Me.ClipboardToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
         Me.ClipboardToolStripMenuItem.Text = "Clipboard"
         '
         'ClearToolStripMenuItem
@@ -270,7 +269,7 @@ Partial Class AppBar
         '
         Me.FunStuffToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RaInBoWMoDeToolStripMenuItem})
         Me.FunStuffToolStripMenuItem.Name = "FunStuffToolStripMenuItem"
-        Me.FunStuffToolStripMenuItem.Size = New System.Drawing.Size(154, 22)
+        Me.FunStuffToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
         Me.FunStuffToolStripMenuItem.Text = "Fun Stuff"
         Me.FunStuffToolStripMenuItem.Visible = False
         '
@@ -286,7 +285,7 @@ Partial Class AppBar
         '
         Me.PerformanceToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DisableAlarmOption, Me.DisableMPTBOption, Me.SaferModToolStripMenuItem1})
         Me.PerformanceToolStripMenuItem.Name = "PerformanceToolStripMenuItem"
-        Me.PerformanceToolStripMenuItem.Size = New System.Drawing.Size(154, 22)
+        Me.PerformanceToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
         Me.PerformanceToolStripMenuItem.Text = "Performance"
         '
         'DisableAlarmOption
@@ -316,7 +315,7 @@ Partial Class AppBar
         '
         Me.HTTSM.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ScreenColorPickerToolStripMenuItem, Me.ScreenPainterToolStripMenuItem, Me.WinSpyToolStripMenuItem})
         Me.HTTSM.Name = "HTTSM"
-        Me.HTTSM.Size = New System.Drawing.Size(154, 22)
+        Me.HTTSM.Size = New System.Drawing.Size(155, 22)
         Me.HTTSM.Text = "Helpfull Tools"
         Me.HTTSM.Visible = False
         '
@@ -342,7 +341,7 @@ Partial Class AppBar
         'ToolStripSeparator16
         '
         Me.ToolStripSeparator16.Name = "ToolStripSeparator16"
-        Me.ToolStripSeparator16.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator16.Size = New System.Drawing.Size(152, 6)
         Me.ToolStripSeparator16.Visible = False
         '
         'LTIMain
@@ -350,7 +349,7 @@ Partial Class AppBar
         Me.LTIMain.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LTI1, Me.LTI2, Me.ToolStripSeparator17, Me.LTI3, Me.LTI4, Me.LTI5, Me.LTI6, Me.LTI7, Me.ToolStripSeparator18, Me.LTI8, Me.LTI9, Me.LTI10, Me.LTI11, Me.AddThemeToolStripMenuItem, Me.ToolStripSeparator19, Me.lo1, Me.lo2, Me.lo3})
         Me.LTIMain.Enabled = False
         Me.LTIMain.Name = "LTIMain"
-        Me.LTIMain.Size = New System.Drawing.Size(154, 22)
+        Me.LTIMain.Size = New System.Drawing.Size(155, 22)
         Me.LTIMain.Text = "Look"
         Me.LTIMain.Visible = False
         '
@@ -529,7 +528,7 @@ Partial Class AppBar
         'ToolStripSeparator25
         '
         Me.ToolStripSeparator25.Name = "ToolStripSeparator25"
-        Me.ToolStripSeparator25.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator25.Size = New System.Drawing.Size(152, 6)
         Me.ToolStripSeparator25.Visible = False
         '
         'EnableExplorerToolStripMenuItem
@@ -538,21 +537,21 @@ Partial Class AppBar
         Me.EnableExplorerToolStripMenuItem.CheckOnClick = True
         Me.EnableExplorerToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.EnableExplorerToolStripMenuItem.Name = "EnableExplorerToolStripMenuItem"
-        Me.EnableExplorerToolStripMenuItem.Size = New System.Drawing.Size(154, 22)
+        Me.EnableExplorerToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
         Me.EnableExplorerToolStripMenuItem.Text = "Enable Explorer"
         Me.EnableExplorerToolStripMenuItem.Visible = False
         '
         'ToolStripSeparator15
         '
         Me.ToolStripSeparator15.Name = "ToolStripSeparator15"
-        Me.ToolStripSeparator15.Size = New System.Drawing.Size(151, 6)
+        Me.ToolStripSeparator15.Size = New System.Drawing.Size(152, 6)
         Me.ToolStripSeparator15.Visible = False
         '
         'ActionCenterToolStripMenuItem
         '
         Me.ActionCenterToolStripMenuItem.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.ActionCenterToolStripMenuItem.Name = "ActionCenterToolStripMenuItem"
-        Me.ActionCenterToolStripMenuItem.Size = New System.Drawing.Size(154, 22)
+        Me.ActionCenterToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
         Me.ActionCenterToolStripMenuItem.Text = "Action Center"
         Me.ActionCenterToolStripMenuItem.Visible = False
         '
@@ -568,15 +567,15 @@ Partial Class AppBar
         '
         'CMMAIN
         '
-        Me.CMMAIN.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolbarsToolStripMenuItem, Me.ShowDesktopToolStripMenuItem, Me.ToolStripSeparator3, Me.RunDialogToolStripMenuItem, Me.TaskManagerToolStripMenuItem, Me.ToolStripSeparator1, Me.AutoHideToolStripMenuItem, Me.ReloadAppsToolStripMenuItem, Me.ToolStripSeparator2, Me.LockAppbarToolStripMenuItem, Me.PropertiesToolStripMenuItem})
+        Me.CMMAIN.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolbarsToolStripMenuItem, Me.ShowDesktopToolStripMenuItem, Me.ToolStripSeparator3, Me.TaskManagerToolStripMenuItem, Me.ToolStripSeparator1, Me.AutoHideToolStripMenuItem, Me.ReloadAppsToolStripMenuItem, Me.ToolStripSeparator2, Me.LockAppbarToolStripMenuItem, Me.PropertiesToolStripMenuItem})
         Me.CMMAIN.Name = "CMMAIN"
-        Me.CMMAIN.Size = New System.Drawing.Size(150, 198)
+        Me.CMMAIN.Size = New System.Drawing.Size(150, 176)
         '
         'ToolbarsToolStripMenuItem
         '
         Me.ToolbarsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StartButtonToolStripMenuItem, Me.PinnedBarToolStripMenuItem, Me.MenuBarToolStripMenuItem})
         Me.ToolbarsToolStripMenuItem.Name = "ToolbarsToolStripMenuItem"
-        Me.ToolbarsToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.ToolbarsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ToolbarsToolStripMenuItem.Text = "Toolbars"
         '
         'StartButtonToolStripMenuItem
@@ -585,7 +584,7 @@ Partial Class AppBar
         Me.StartButtonToolStripMenuItem.CheckOnClick = True
         Me.StartButtonToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.StartButtonToolStripMenuItem.Name = "StartButtonToolStripMenuItem"
-        Me.StartButtonToolStripMenuItem.Size = New System.Drawing.Size(137, 22)
+        Me.StartButtonToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.StartButtonToolStripMenuItem.Text = "Start Button"
         '
         'PinnedBarToolStripMenuItem
@@ -594,7 +593,7 @@ Partial Class AppBar
         Me.PinnedBarToolStripMenuItem.CheckOnClick = True
         Me.PinnedBarToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.PinnedBarToolStripMenuItem.Name = "PinnedBarToolStripMenuItem"
-        Me.PinnedBarToolStripMenuItem.Size = New System.Drawing.Size(137, 22)
+        Me.PinnedBarToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.PinnedBarToolStripMenuItem.Text = "Pinned Bar"
         '
         'MenuBarToolStripMenuItem
@@ -603,54 +602,48 @@ Partial Class AppBar
         Me.MenuBarToolStripMenuItem.CheckOnClick = True
         Me.MenuBarToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.MenuBarToolStripMenuItem.Name = "MenuBarToolStripMenuItem"
-        Me.MenuBarToolStripMenuItem.Size = New System.Drawing.Size(137, 22)
+        Me.MenuBarToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.MenuBarToolStripMenuItem.Text = "Menu Bar"
         '
         'ShowDesktopToolStripMenuItem
         '
         Me.ShowDesktopToolStripMenuItem.Name = "ShowDesktopToolStripMenuItem"
-        Me.ShowDesktopToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.ShowDesktopToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ShowDesktopToolStripMenuItem.Text = "Show Desktop"
         '
         'ToolStripSeparator3
         '
         Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
-        Me.ToolStripSeparator3.Size = New System.Drawing.Size(146, 6)
-        '
-        'RunDialogToolStripMenuItem
-        '
-        Me.RunDialogToolStripMenuItem.Name = "RunDialogToolStripMenuItem"
-        Me.RunDialogToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
-        Me.RunDialogToolStripMenuItem.Text = "Run Dialog"
+        Me.ToolStripSeparator3.Size = New System.Drawing.Size(177, 6)
         '
         'TaskManagerToolStripMenuItem
         '
         Me.TaskManagerToolStripMenuItem.Name = "TaskManagerToolStripMenuItem"
-        Me.TaskManagerToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.TaskManagerToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.TaskManagerToolStripMenuItem.Text = "Task manager"
         '
         'ToolStripSeparator1
         '
         Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(146, 6)
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(177, 6)
         '
         'AutoHideToolStripMenuItem
         '
         Me.AutoHideToolStripMenuItem.CheckOnClick = True
         Me.AutoHideToolStripMenuItem.Name = "AutoHideToolStripMenuItem"
-        Me.AutoHideToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.AutoHideToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.AutoHideToolStripMenuItem.Text = "Auto Hide"
-        '
-        'ReloadAppsToolStripMenuItem
-        '
-        Me.ReloadAppsToolStripMenuItem.Name = "ReloadAppsToolStripMenuItem"
-        Me.ReloadAppsToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
-        Me.ReloadAppsToolStripMenuItem.Text = "Reload Apps"
         '
         'ToolStripSeparator2
         '
         Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
-        Me.ToolStripSeparator2.Size = New System.Drawing.Size(146, 6)
+        Me.ToolStripSeparator2.Size = New System.Drawing.Size(177, 6)
+        '
+        'ReloadAppsToolStripMenuItem
+        '
+        Me.ReloadAppsToolStripMenuItem.Name = "ReloadAppsToolStripMenuItem"
+        Me.ReloadAppsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ReloadAppsToolStripMenuItem.Text = "Refresh Apps"
         '
         'LockAppbarToolStripMenuItem
         '
@@ -658,13 +651,14 @@ Partial Class AppBar
         Me.LockAppbarToolStripMenuItem.CheckOnClick = True
         Me.LockAppbarToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
         Me.LockAppbarToolStripMenuItem.Name = "LockAppbarToolStripMenuItem"
-        Me.LockAppbarToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.LockAppbarToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.LockAppbarToolStripMenuItem.Text = "Lock Appbar"
         '
         'PropertiesToolStripMenuItem
         '
+        Me.PropertiesToolStripMenuItem.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PropertiesToolStripMenuItem.Name = "PropertiesToolStripMenuItem"
-        Me.PropertiesToolStripMenuItem.Size = New System.Drawing.Size(149, 22)
+        Me.PropertiesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.PropertiesToolStripMenuItem.Text = "Properties"
         '
         'Splitter2
@@ -825,10 +819,11 @@ Partial Class AppBar
         'TPCM
         '
         Me.TPCM.BackColor = System.Drawing.SystemColors.Control
+        Me.TPCM.ImageScalingSize = New System.Drawing.Size(24, 24)
         Me.TPCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MoreOptionsToolStripMenuItem, Me.ToolStripSeparator21, Me.SetPriorityLevelToolStripMenuItem, Me.WindowStateToolStripMenuItem, Me.ToolStripSeparator6, Me.SwitchButNotActiveToolStripMenuItem, Me.SwitchToToolStripMenuItem, Me.ToolStripSeparator7, Me.StartSameProcessToolStripMenuItem, Me.PinToolStripMenuItem, Me.CloseToolStripMenuItem})
         Me.TPCM.Name = "TPCM"
         Me.TPCM.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
-        Me.TPCM.Size = New System.Drawing.Size(235, 326)
+        Me.TPCM.Size = New System.Drawing.Size(235, 348)
         '
         'MoreOptionsToolStripMenuItem
         '
@@ -1027,7 +1022,6 @@ Partial Class AppBar
         Me.SwitchButNotActiveToolStripMenuItem.Name = "SwitchButNotActiveToolStripMenuItem"
         Me.SwitchButNotActiveToolStripMenuItem.Size = New System.Drawing.Size(234, 38)
         Me.SwitchButNotActiveToolStripMenuItem.Text = "Switch (No Active)"
-        Me.SwitchButNotActiveToolStripMenuItem.Visible = False
         '
         'SwitchToToolStripMenuItem
         '
@@ -1035,13 +1029,11 @@ Partial Class AppBar
         Me.SwitchToToolStripMenuItem.Name = "SwitchToToolStripMenuItem"
         Me.SwitchToToolStripMenuItem.Size = New System.Drawing.Size(234, 38)
         Me.SwitchToToolStripMenuItem.Text = "Switch To"
-        Me.SwitchToToolStripMenuItem.Visible = False
         '
         'ToolStripSeparator7
         '
         Me.ToolStripSeparator7.Name = "ToolStripSeparator7"
         Me.ToolStripSeparator7.Size = New System.Drawing.Size(231, 6)
-        Me.ToolStripSeparator7.Visible = False
         '
         'StartSameProcessToolStripMenuItem
         '
@@ -1072,7 +1064,7 @@ Partial Class AppBar
         '
         Me.Panel4.BackColor = System.Drawing.Color.Transparent
         Me.Panel4.Controls.Add(Me.ToolStrip1)
-        Me.Panel4.Controls.Add(Me.TimeDate)
+        Me.Panel4.Controls.Add(Me.TimeDatePanel)
         Me.Panel4.Controls.Add(Me.Button2)
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Right
         Me.Panel4.Location = New System.Drawing.Point(995, 0)
@@ -1126,16 +1118,16 @@ Partial Class AppBar
         Me.ToolStripButton3.Size = New System.Drawing.Size(24, 39)
         Me.ToolStripButton3.Text = "Network"
         '
-        'TimeDate
+        'TimeDatePanel
         '
-        Me.TimeDate.Controls.Add(Me.DayLabel)
-        Me.TimeDate.Controls.Add(Me.DateLabel)
-        Me.TimeDate.Controls.Add(Me.TimeLabel)
-        Me.TimeDate.Dock = System.Windows.Forms.DockStyle.Right
-        Me.TimeDate.Location = New System.Drawing.Point(78, 0)
-        Me.TimeDate.Name = "TimeDate"
-        Me.TimeDate.Size = New System.Drawing.Size(74, 37)
-        Me.TimeDate.TabIndex = 2
+        Me.TimeDatePanel.Controls.Add(Me.DayLabel)
+        Me.TimeDatePanel.Controls.Add(Me.DateLabel)
+        Me.TimeDatePanel.Controls.Add(Me.TimeLabel)
+        Me.TimeDatePanel.Dock = System.Windows.Forms.DockStyle.Right
+        Me.TimeDatePanel.Location = New System.Drawing.Point(78, 0)
+        Me.TimeDatePanel.Name = "TimeDatePanel"
+        Me.TimeDatePanel.Size = New System.Drawing.Size(74, 37)
+        Me.TimeDatePanel.TabIndex = 2
         '
         'DayLabel
         '
@@ -1210,13 +1202,13 @@ Partial Class AppBar
         '
         Me.TaDCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.CopyPartToolStripMenuItem, Me.CopyTimeToolStripMenuItem, Me.CopyDateToolStripMenuItem, Me.CopyCurrentDayToolStripMenuItem, Me.CopyEVERYTHINGToolStripMenuItem, Me.ToolStripSeparator10, Me.TimeAndDateSettingsToolStripMenuItem, Me.ShowTimeAndDateToolStripMenuItem, Me.ToolStripSeparator20, Me.ALARMSTOPToolStripMenuItem})
         Me.TaDCM.Name = "TaDCM"
-        Me.TaDCM.Size = New System.Drawing.Size(197, 192)
+        Me.TaDCM.Size = New System.Drawing.Size(196, 192)
         '
         'CopyPartToolStripMenuItem
         '
         Me.CopyPartToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.HoursToolStripMenuItem, Me.MinutesToolStripMenuItem, Me.SecondsToolStripMenuItem, Me.MilisecondsToolStripMenuItem, Me.ToolStripSeparator12, Me.DayToolStripMenuItem, Me.MonthToolStripMenuItem, Me.YearToolStripMenuItem})
         Me.CopyPartToolStripMenuItem.Name = "CopyPartToolStripMenuItem"
-        Me.CopyPartToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CopyPartToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.CopyPartToolStripMenuItem.Text = "Copy.."
         '
         'HoursToolStripMenuItem
@@ -1270,7 +1262,7 @@ Partial Class AppBar
         '
         Me.CopyTimeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WithSecondsToolStripMenuItem, Me.WithMilisecondsToolStripMenuItem, Me.ToolStripSeparator13, Me.ToolStripMenuItem2})
         Me.CopyTimeToolStripMenuItem.Name = "CopyTimeToolStripMenuItem"
-        Me.CopyTimeToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CopyTimeToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.CopyTimeToolStripMenuItem.Text = "Copy Time"
         '
         'WithSecondsToolStripMenuItem
@@ -1301,7 +1293,7 @@ Partial Class AppBar
         '
         Me.CopyDateToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DDMMYYYYToolStripMenuItem, Me.DDMMYYYYToolStripMenuItem1, Me.DDMMYYYYToolStripMenuItem2, Me.ToolStripSeparator11, Me.YYYYMMDDToolStripMenuItem, Me.YYYYMMDDToolStripMenuItem1, Me.YYYYMMDDToolStripMenuItem2})
         Me.CopyDateToolStripMenuItem.Name = "CopyDateToolStripMenuItem"
-        Me.CopyDateToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CopyDateToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.CopyDateToolStripMenuItem.Text = "Copy Date"
         '
         'DDMMYYYYToolStripMenuItem
@@ -1348,45 +1340,45 @@ Partial Class AppBar
         'CopyCurrentDayToolStripMenuItem
         '
         Me.CopyCurrentDayToolStripMenuItem.Name = "CopyCurrentDayToolStripMenuItem"
-        Me.CopyCurrentDayToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CopyCurrentDayToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.CopyCurrentDayToolStripMenuItem.Text = "Copy Current Day"
         '
         'CopyEVERYTHINGToolStripMenuItem
         '
         Me.CopyEVERYTHINGToolStripMenuItem.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.CopyEVERYTHINGToolStripMenuItem.Name = "CopyEVERYTHINGToolStripMenuItem"
-        Me.CopyEVERYTHINGToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CopyEVERYTHINGToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.CopyEVERYTHINGToolStripMenuItem.Text = "Copy EVERYTHING"
         '
         'ToolStripSeparator10
         '
         Me.ToolStripSeparator10.Name = "ToolStripSeparator10"
-        Me.ToolStripSeparator10.Size = New System.Drawing.Size(193, 6)
+        Me.ToolStripSeparator10.Size = New System.Drawing.Size(192, 6)
         '
         'TimeAndDateSettingsToolStripMenuItem
         '
         Me.TimeAndDateSettingsToolStripMenuItem.Name = "TimeAndDateSettingsToolStripMenuItem"
-        Me.TimeAndDateSettingsToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.TimeAndDateSettingsToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.TimeAndDateSettingsToolStripMenuItem.Text = "Time and Date Settings"
         '
         'ShowTimeAndDateToolStripMenuItem
         '
         Me.ShowTimeAndDateToolStripMenuItem.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ShowTimeAndDateToolStripMenuItem.Name = "ShowTimeAndDateToolStripMenuItem"
-        Me.ShowTimeAndDateToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.ShowTimeAndDateToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.ShowTimeAndDateToolStripMenuItem.Text = "Show Time and Date"
         '
         'ToolStripSeparator20
         '
         Me.ToolStripSeparator20.Name = "ToolStripSeparator20"
-        Me.ToolStripSeparator20.Size = New System.Drawing.Size(193, 6)
+        Me.ToolStripSeparator20.Size = New System.Drawing.Size(192, 6)
         Me.ToolStripSeparator20.Visible = False
         '
         'ALARMSTOPToolStripMenuItem
         '
         Me.ALARMSTOPToolStripMenuItem.Font = New System.Drawing.Font("Segoe UI Black", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.ALARMSTOPToolStripMenuItem.Name = "ALARMSTOPToolStripMenuItem"
-        Me.ALARMSTOPToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.ALARMSTOPToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.ALARMSTOPToolStripMenuItem.Text = "ALARM STOP"
         Me.ALARMSTOPToolStripMenuItem.Visible = False
         '
@@ -1428,13 +1420,13 @@ Partial Class AppBar
         '
         Me.MCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolsToolStripMenuItem, Me.ToolStripSeparator27, Me.AboutShellToolStripMenuItem})
         Me.MCM.Name = "MCM"
-        Me.MCM.Size = New System.Drawing.Size(137, 54)
+        Me.MCM.Size = New System.Drawing.Size(136, 54)
         '
         'ToolsToolStripMenuItem
         '
         Me.ToolsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ClipboardViewerToolStripMenuItem})
         Me.ToolsToolStripMenuItem.Name = "ToolsToolStripMenuItem"
-        Me.ToolsToolStripMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.ToolsToolStripMenuItem.Size = New System.Drawing.Size(135, 22)
         Me.ToolsToolStripMenuItem.Text = "Quick Tools"
         '
         'ClipboardViewerToolStripMenuItem
@@ -1446,12 +1438,12 @@ Partial Class AppBar
         'ToolStripSeparator27
         '
         Me.ToolStripSeparator27.Name = "ToolStripSeparator27"
-        Me.ToolStripSeparator27.Size = New System.Drawing.Size(133, 6)
+        Me.ToolStripSeparator27.Size = New System.Drawing.Size(132, 6)
         '
         'AboutShellToolStripMenuItem
         '
         Me.AboutShellToolStripMenuItem.Name = "AboutShellToolStripMenuItem"
-        Me.AboutShellToolStripMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.AboutShellToolStripMenuItem.Size = New System.Drawing.Size(135, 22)
         Me.AboutShellToolStripMenuItem.Text = "About Shell"
         '
         'PIcm
@@ -1541,7 +1533,7 @@ Partial Class AppBar
         Me.Panel4.ResumeLayout(False)
         Me.ToolStrip1.ResumeLayout(False)
         Me.ToolStrip1.PerformLayout()
-        Me.TimeDate.ResumeLayout(False)
+        Me.TimeDatePanel.ResumeLayout(False)
         Me.TaDCM.ResumeLayout(False)
         Me.VCM.ResumeLayout(False)
         Me.MCM.ResumeLayout(False)
@@ -1591,7 +1583,6 @@ Partial Class AppBar
     Friend WithEvents MenuBarToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ShowDesktopToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripSeparator3 As System.Windows.Forms.ToolStripSeparator
-    Friend WithEvents RunDialogToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents TaskManagerToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents AutoHideToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
@@ -1601,7 +1592,7 @@ Partial Class AppBar
     Friend WithEvents Panel4 As System.Windows.Forms.Panel
     Friend WithEvents ToolStrip1 As System.Windows.Forms.ToolStrip
     Friend WithEvents ToolStripButton1 As System.Windows.Forms.ToolStripButton
-    Friend WithEvents TimeDate As System.Windows.Forms.Panel
+    Friend WithEvents TimeDatePanel As System.Windows.Forms.Panel
     Friend WithEvents DayLabel As System.Windows.Forms.Label
     Friend WithEvents DateLabel As System.Windows.Forms.Label
     Friend WithEvents TimeLabel As System.Windows.Forms.Label

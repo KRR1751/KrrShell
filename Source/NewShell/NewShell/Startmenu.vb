@@ -164,13 +164,18 @@ Public Class Startmenu
                     AppBar.Button1.BackgroundImage = My.Resources.StartRight
                 End Try
             ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-
+                Try
+                    AppBar.Button1.BackgroundImage = AppBar.OrbNormal
+                Catch ex As Exception
+                    AppBar.Button1.BackgroundImage = My.Resources.StartRight
+                End Try
             End If
         End If
     End Sub
-
+    Dim canClose As Boolean = False
     Private Sub Startmenu_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-        If Not e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown Then
+        If Not e.CloseReason = CloseReason.TaskManagerClosing OrElse e.CloseReason = CloseReason.WindowsShutDown OrElse canClose = True Then
+            canClose = False
             e.Cancel = True
         Else
             e.Cancel = False
@@ -245,15 +250,13 @@ Public Class Startmenu
         Button1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap
         Button26.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap
     End Sub
-
+    Dim PinnedAppsPath As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned"
     Public Sub ReloadTiles()
         ToolStrip1.Items.Clear()
 
-        Dim PinnedAppsPath As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned"
-
         Try
-            If Directory.Exists(Environment.GetFolderPath(PinnedAppsPath)) = True Then
-                Dim DirectoryInformation As New DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned")
+            If Directory.Exists(PinnedAppsPath.Trim) = True Then
+                Dim DirectoryInformation As New DirectoryInfo(PinnedAppsPath)
 
                 For Each i As DirectoryInfo In DirectoryInformation.GetDirectories
                     Dim item As New ToolStripMenuItem(i.Name)
@@ -312,7 +315,7 @@ Public Class Startmenu
             End If
 
         Catch ex As Exception
-
+            MsgBox(ex.Message)
         End Try
     End Sub
 
@@ -402,6 +405,9 @@ Public Class Startmenu
 
     Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
         System.Diagnostics.Process.Start("C:\Windows\explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+
+        canClose = True
+        Me.Close()
     End Sub
 
     Private Sub Startmenu_LocationChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.LocationChanged
@@ -605,6 +611,9 @@ Public Class Startmenu
     Private Sub Button27_Click(sender As Object, e As EventArgs) Handles Button27.Click
         RunDialog.Show(AppBar)
         RunDialog.Activate()
+
+        canClose = True
+        Me.Close()
     End Sub
     Private Sub ts1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ts1.Click
         Select Case ts1.Text
@@ -713,10 +722,13 @@ Public Class Startmenu
 
     Private Sub Button26_Click(sender As Object, e As EventArgs) Handles Button26.Click
         Shell("Control.exe")
+
+        canClose = True
+        Me.Close()
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        SA.ShowDialog(Me)
+        SA.ShowDialog(AppBar)
     End Sub
 
     Private Sub LockScreenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LockScreenToolStripMenuItem.Click
@@ -1021,7 +1033,10 @@ Public Class Startmenu
     End Sub
 
     Private Sub TreeView2_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles TreeView2.NodeMouseClick
-        If e.Button = MouseButtons.Left Then
+        If e.Button = MouseButtons.Right Then
+            TreeView2.SelectedNode = e.Node
+            FCM.Show(MousePosition)
+        Else
             If Directory.Exists(e.Node.Tag) Then
                 If e.Node.Nodes.Count > 0 Then
                     If e.Node.IsExpanded = True Then
@@ -1035,18 +1050,29 @@ Public Class Startmenu
                 SelectControl.Enabled = True
 
                 Try
-                    Process.Start(e.Node.Tag)
+                    Dim pr As New Process()
+
+                    pr.StartInfo.FileName = e.Node.Tag
+
+                    pr.Start()
+
+                    pr.WaitForInputIdle()
+
+                    canClose = True
+                    Me.Visible = False
+                    Me.Close()
                 Catch ex As Exception
 
                 End Try
             End If
-        Else
-            TreeView2.SelectedNode = e.Node
-            FCM.Show(MousePosition)
         End If
     End Sub
 
     Private Sub TreeView2_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles TreeView2.AfterSelect
         If File.Exists(e.Node.Tag) Then SelectControl.Enabled = True
+    End Sub
+
+    Private Sub Startmenu_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
+        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
     End Sub
 End Class

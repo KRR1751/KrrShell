@@ -120,13 +120,24 @@
   <metadata name="Controller.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>124, 17</value>
-  </metadata>
   <data name="Label11.Text" xml:space="preserve">
     <value>Check out here soon what will be here!
 
 In this Tab, you can set up your own Hotkeys to launch your apps by just pressing a Shortcut!
 While it is hard to make, I've put this to the feature list to be it working in the future!</value>
+  </data>
+  <data name="Label17.Text" xml:space="preserve">
+    <value>Working Area is an "area" where a main focused window will be while maximazing. Useful to Appbar from being always hidden by other apps or when you want to have another app "always visible" while other apps cannot maximize, you can set it then as well.</value>
+  </data>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>124, 17</value>
+  </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>124, 17</value>
+  </metadata>
+  <data name="CheckBox14.ToolTip" xml:space="preserve">
+    <value>Everytime you switch between Presets, the Working Area will be set automatically without clicking on the "Set Working Area" manually each time.
+
+By default it is enabled, but for debugging you can let it disabled.</value>
   </data>
 </root>

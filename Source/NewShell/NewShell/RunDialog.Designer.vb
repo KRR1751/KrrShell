@@ -153,7 +153,7 @@ Partial Class RunDialog
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel1.Location = New System.Drawing.Point(0, 287)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(411, 57)
+        Me.Panel1.Size = New System.Drawing.Size(421, 57)
         Me.Panel1.TabIndex = 8
         '
         'CheckBox1
@@ -467,7 +467,6 @@ Partial Class RunDialog
         '
         'RRemover
         '
-        Me.RRemover.Enabled = True
         Me.RRemover.Interval = 1
         '
         'CheckBox6
@@ -510,7 +509,7 @@ Partial Class RunDialog
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.ControlLightLight
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(411, 344)
+        Me.ClientSize = New System.Drawing.Size(421, 344)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.Panel1)

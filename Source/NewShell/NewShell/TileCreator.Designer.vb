@@ -44,7 +44,7 @@ Partial Class TileCreator
         '
         Me.OK_Button.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.OK_Button.Enabled = False
-        Me.OK_Button.Location = New System.Drawing.Point(234, 300)
+        Me.OK_Button.Location = New System.Drawing.Point(234, 267)
         Me.OK_Button.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.OK_Button.Name = "OK_Button"
         Me.OK_Button.Size = New System.Drawing.Size(78, 27)
@@ -55,7 +55,7 @@ Partial Class TileCreator
         '
         Me.Cancel_Button.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Cancel_Button.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.Cancel_Button.Location = New System.Drawing.Point(320, 300)
+        Me.Cancel_Button.Location = New System.Drawing.Point(320, 267)
         Me.Cancel_Button.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Cancel_Button.Name = "Cancel_Button"
         Me.Cancel_Button.Size = New System.Drawing.Size(78, 27)
@@ -67,7 +67,7 @@ Partial Class TileCreator
         Me.ComboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
         Me.ComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(18, 67)
+        Me.ComboBox1.Location = New System.Drawing.Point(19, 55)
         Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(318, 23)
@@ -79,14 +79,14 @@ Partial Class TileCreator
         Me.Label1.Location = New System.Drawing.Point(14, 10)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(331, 15)
+        Me.Label1.Size = New System.Drawing.Size(378, 15)
         Me.Label1.TabIndex = 3
-        Me.Label1.Text = "In this form you create your own Tiles such as in Windows 10!"
+        Me.Label1.Text = "Here you can create your own Tiles to be displayed in your Start Menu."
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(14, 48)
+        Me.Label2.Location = New System.Drawing.Point(15, 36)
         Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(56, 15)
@@ -96,7 +96,7 @@ Partial Class TileCreator
         'CheckBox1
         '
         Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Location = New System.Drawing.Point(18, 98)
+        Me.CheckBox1.Location = New System.Drawing.Point(19, 84)
         Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.CheckBox1.Name = "CheckBox1"
         Me.CheckBox1.Size = New System.Drawing.Size(85, 19)
@@ -108,7 +108,7 @@ Partial Class TileCreator
         '
         Me.ComboBox2.Enabled = False
         Me.ComboBox2.FormattingEnabled = True
-        Me.ComboBox2.Location = New System.Drawing.Point(18, 122)
+        Me.ComboBox2.Location = New System.Drawing.Point(19, 108)
         Me.ComboBox2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ComboBox2.Name = "ComboBox2"
         Me.ComboBox2.Size = New System.Drawing.Size(380, 23)
@@ -118,7 +118,7 @@ Partial Class TileCreator
         '
         Me.RadioButton1.AutoSize = True
         Me.RadioButton1.Checked = True
-        Me.RadioButton1.Location = New System.Drawing.Point(18, 180)
+        Me.RadioButton1.Location = New System.Drawing.Point(18, 152)
         Me.RadioButton1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.RadioButton1.Name = "RadioButton1"
         Me.RadioButton1.Size = New System.Drawing.Size(95, 19)
@@ -130,7 +130,7 @@ Partial Class TileCreator
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(14, 162)
+        Me.Label3.Location = New System.Drawing.Point(14, 134)
         Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(30, 15)
@@ -140,7 +140,7 @@ Partial Class TileCreator
         'RadioButton2
         '
         Me.RadioButton2.AutoSize = True
-        Me.RadioButton2.Location = New System.Drawing.Point(146, 180)
+        Me.RadioButton2.Location = New System.Drawing.Point(146, 152)
         Me.RadioButton2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.RadioButton2.Name = "RadioButton2"
         Me.RadioButton2.Size = New System.Drawing.Size(117, 19)
@@ -152,7 +152,7 @@ Partial Class TileCreator
         'RadioButton3
         '
         Me.RadioButton3.AutoSize = True
-        Me.RadioButton3.Location = New System.Drawing.Point(286, 180)
+        Me.RadioButton3.Location = New System.Drawing.Point(286, 152)
         Me.RadioButton3.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.RadioButton3.Name = "RadioButton3"
         Me.RadioButton3.Size = New System.Drawing.Size(107, 19)
@@ -165,7 +165,7 @@ Partial Class TileCreator
         '
         Me.Label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.Label4.Enabled = False
-        Me.Label4.Location = New System.Drawing.Point(18, 203)
+        Me.Label4.Location = New System.Drawing.Point(36, 173)
         Me.Label4.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(37, 37)
@@ -175,7 +175,7 @@ Partial Class TileCreator
         '
         Me.Label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.Label5.Enabled = False
-        Me.Label5.Location = New System.Drawing.Point(146, 203)
+        Me.Label5.Location = New System.Drawing.Point(165, 173)
         Me.Label5.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(75, 37)
@@ -185,7 +185,7 @@ Partial Class TileCreator
         '
         Me.Label6.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.Label6.Enabled = False
-        Me.Label6.Location = New System.Drawing.Point(286, 203)
+        Me.Label6.Location = New System.Drawing.Point(305, 173)
         Me.Label6.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(75, 74)
@@ -193,7 +193,7 @@ Partial Class TileCreator
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(343, 66)
+        Me.Button1.Location = New System.Drawing.Point(344, 54)
         Me.Button1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(55, 27)
@@ -204,10 +204,10 @@ Partial Class TileCreator
         'Label7
         '
         Me.Label7.AutoEllipsis = True
-        Me.Label7.Location = New System.Drawing.Point(14, 300)
+        Me.Label7.Location = New System.Drawing.Point(16, 220)
         Me.Label7.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(214, 27)
+        Me.Label7.Size = New System.Drawing.Size(281, 27)
         Me.Label7.TabIndex = 15
         Me.Label7.Text = "Location: "
         Me.Label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -218,7 +218,7 @@ Partial Class TileCreator
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(415, 340)
+        Me.ClientSize = New System.Drawing.Size(415, 307)
         Me.Controls.Add(Me.Label7)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.Label6)

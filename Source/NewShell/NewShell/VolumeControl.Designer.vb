@@ -131,7 +131,7 @@ Partial Class VolumeControl
         Me.Panel2.Controls.Add(Me.CheckBox1)
         Me.Panel2.Controls.Add(Me.Button1)
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.Panel2.Location = New System.Drawing.Point(0, 197)
+        Me.Panel2.Location = New System.Drawing.Point(0, 199)
         Me.Panel2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(148, 44)
@@ -142,7 +142,7 @@ Partial Class VolumeControl
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange
-        Me.ClientSize = New System.Drawing.Size(148, 241)
+        Me.ClientSize = New System.Drawing.Size(148, 243)
         Me.ControlBox = False
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.CheckBox2)

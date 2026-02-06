@@ -106,15 +106,15 @@ Public Class NW
             TL.ForeColor = SystemColors.ControlText
             Me.ForeColor = SystemColors.ControlText
         End If
-        If Dialog3.ComboBox5.SelectedIndex = 0 Then
-            Dim RV16 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", Nothing)
-            Dim RV17 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingMode", Nothing)
-            Dim RV18 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingALIST", Nothing)
-            Dim RV19 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingPath", Nothing)
-            Dim RV1a = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingSYS", Nothing)
-            Dim RV1b = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", Nothing)
-            Dim RV1c = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingTimesRepeat", Nothing)
-            Dim RV1d = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & Dialog3.AlarmList.SelectedItem & "\Mode\1\", "RingVol", Nothing)
+        If TimeDate.ComboBox5.SelectedIndex = 0 Then
+            Dim RV16 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "EnableRinging", Nothing)
+            Dim RV17 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingMode", Nothing)
+            Dim RV18 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingALIST", Nothing)
+            Dim RV19 = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingPath", Nothing)
+            Dim RV1a = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingSYS", Nothing)
+            Dim RV1b = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingRepeat", Nothing)
+            Dim RV1c = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingTimesRepeat", Nothing)
+            Dim RV1d = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\ALARMS\" & TimeDate.AlarmList.SelectedItem & "\Mode\1\", "RingVol", Nothing)
             If RV16 = "1" Then
                 If RV17 = "0" Then
                     If RV1a = "0" Then

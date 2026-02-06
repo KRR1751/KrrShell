@@ -51,7 +51,7 @@ Public Class ClockTray
         If AppbarProperties.ComboBox2.Text IsNot Nothing AndAlso IO.File.Exists(AppbarProperties.ComboBox2.Text) Then
             Me.BackgroundImage = Image.FromFile(AppbarProperties.ComboBox2.Text)
         Else
-            Me.BackgroundImage = My.Resources.AppBarMainTransparent1
+            Me.BackgroundImage = My.Resources.AppBarMainTransparent
         End If
 
         Me.BackgroundImageLayout = AppBar.BackgroundImageLayout

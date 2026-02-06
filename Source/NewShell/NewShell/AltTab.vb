@@ -1,8 +1,9 @@
 ﻿Imports NewShell.AppBar
+Imports System.ComponentModel
 Imports System.Runtime.InteropServices
 
 Public Class AltTab
-    Public ActiveProcessID As String = String.Empty
+    Public ActiveProcessID As Integer = 0
     <Runtime.InteropServices.DllImport("dwmapi.dll")> Public Shared Function DwmExtendFrameIntoClientArea(ByVal hWnd As IntPtr, ByRef pMarinset As side) As Integer
     End Function
 
@@ -306,7 +307,74 @@ Public Class AltTab
 #End Region
 
     Private ActiveItem As ToolStripMenuItem = Nothing
+    Private initialMousePos As Point
     Private Sub AltTab_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        MenuStrip1.Items.Clear()
+
+        initialMousePos = Cursor.Position
+
+        Dim currentActive As IntPtr = AppBar.ActiveWindowHandle
+
+        Me.Activate()
+        Me.Focus()
+        Me.KeyPreview = True
+
+        DisposeIconCache()
+
+        Dim applications As List(Of TaskbarWindowInfo) = GetTaskbarApplications()
+
+        Dim sortedApps As New List(Of TaskbarWindowInfo)
+
+        Dim activeWin = applications.FirstOrDefault(Function(w) w.Handle = currentActive)
+
+        If activeWin IsNot Nothing Then
+            sortedApps.Add(activeWin)
+            sortedApps.AddRange(applications.Where(Function(w) w.Handle <> currentActive))
+        Else
+            sortedApps = applications
+        End If
+
+        For Each windowInfo In sortedApps
+            Try
+                Dim p As Process = Process.GetProcessById(windowInfo.PID)
+                Dim item As New ToolStripMenuItem()
+
+                item.Text = windowInfo.Title
+                item.Tag = windowInfo.Handle
+                item.AutoSize = False
+                item.Size = New Size(64, 64)
+                item.DisplayStyle = ToolStripItemDisplayStyle.Image
+                item.ImageScaling = ToolStripItemImageScaling.None
+                item.Image = GetProcessIcon(windowInfo.Handle, Nothing)
+                item.AutoToolTip = True
+                item.ToolTipText = windowInfo.Title
+
+                AddHandler item.MouseEnter, Sub(senderItem As Object, ea As EventArgs)
+                                                Dim currentPos As Point = Cursor.Position
+
+                                                Dim deltaX As Integer = Math.Abs(currentPos.X - initialMousePos.X)
+                                                Dim deltaY As Integer = Math.Abs(currentPos.Y - initialMousePos.Y)
+
+                                                If deltaX > 5 OrElse deltaY > 5 Then
+                                                    DirectCast(senderItem, ToolStripMenuItem).Select()
+                                                    UpdatePreview()
+                                                End If
+                                            End Sub
+
+                If Not p.Responding Then item.BackColor = Color.Red
+
+                MenuStrip1.Items.Add(item)
+            Catch : End Try
+        Next
+
+        If MenuStrip1.Items.Count > 1 Then
+            MenuStrip1.Items(1).Select()
+        ElseIf MenuStrip1.Items.Count > 0 Then
+            MenuStrip1.Items(0).Select()
+        End If
+    End Sub
+
+    Private Sub AltTab_LoadOld(sender As Object, e As EventArgs) 'Handles MyBase.Load
         MenuStrip1.Items.Clear()
         Me.Activate()
         Me.Focus()
@@ -460,72 +528,95 @@ Public Class AltTab
     <DllImport("user32.dll")>
     Private Shared Function IsIconic(hWnd As IntPtr) As Boolean
     End Function
+
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function AttachThreadInput(ByVal idAttach As UInteger, ByVal idAttachTo As UInteger, ByVal fAttach As Boolean) As Boolean
+    End Function
+
+    Private Sub ForceForegroundWindow(ByVal hWnd As IntPtr)
+        Dim foregroundThread As UInteger = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero)
+        Dim targetThread As UInteger = GetWindowThreadProcessId(hWnd, IntPtr.Zero)
+
+        If foregroundThread <> targetThread Then
+            AttachThreadInput(foregroundThread, targetThread, True)
+            SetForegroundWindow(hWnd)
+            AttachThreadInput(foregroundThread, targetThread, False)
+        Else
+            SetForegroundWindow(hWnd)
+        End If
+
+        Dim currentState As String = GetWindowState(hWnd)
+
+        Select Case currentState
+            Case "Normal"
+                'normal
+
+            Case "Maximized"
+                'max
+
+            Case "Minimized"
+                ShowWindow(hWnd, SHOW_WINDOW.SW_RESTORE)
+
+            Case Else
+                ShowWindow(hWnd, SHOW_WINDOW.SW_RESTORE)
+
+        End Select
+
+        AppBar.ActiveWindowHandle = hWnd
+    End Sub
+
     Private Sub AltTab_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyUp, MenuStrip1.KeyUp
         If e.KeyCode = Keys.LWin OrElse e.KeyCode = Keys.RWin Then
 
-            For Each item As ToolStripMenuItem In MenuStrip1.Items
+            Dim selectedItem As ToolStripMenuItem = MenuStrip1.Items.OfType(Of ToolStripMenuItem)().FirstOrDefault(Function(i) i.Selected)
 
-                If item.Selected = True Then
+            If selectedItem IsNot Nothing AndAlso selectedItem.Tag IsNot Nothing AndAlso TypeOf selectedItem.Tag Is IntPtr Then
+                Dim windowHandle As IntPtr = CType(selectedItem.Tag, IntPtr)
 
-                    If Not item.Tag Is Nothing AndAlso TypeOf item.Tag Is IntPtr Then
-                        Dim windowHandle As IntPtr = CType(item.Tag, IntPtr)
-
-                        Try
-                            Dim currentState As String = GetWindowState(windowHandle)
-
-                            Select Case currentState
-                                Case "Normal"
-                                    SetForegroundWindow(windowHandle)
-                                    AppBar.ActiveWindowHandle = windowHandle
-
-                                Case "Maximized"
-                                    SetForegroundWindow(windowHandle)
-                                    AppBar.ActiveWindowHandle = windowHandle
-
-                                Case "Minimized"
-                                    SetForegroundWindow(windowHandle)
-                                    AppBar.ActiveWindowHandle = windowHandle
-                                    ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
-
-                                Case Else
-                                    SetForegroundWindow(windowHandle)
-                                    AppBar.ActiveWindowHandle = windowHandle
-                                    ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
-                            End Select
-                        Catch ex As Exception
-                            MsgBox(ex.Message, MsgBoxStyle.Critical, "Cannot focus a process")
-                        End Try
-                    End If
-                End If
-            Next
+                Try
+                    ForceForegroundWindow(windowHandle)
+                    AppBar.ActiveWindowHandle = windowHandle
+                Catch ex As Exception
+                    Debug.WriteLine("Activation failed: " & ex.Message)
+                End Try
+            End If
 
             Me.Close()
+
         ElseIf e.KeyCode = Keys.Tab Then
+            UpdatePreview()
+        End If
+    End Sub
 
-            For Each item As ToolStripMenuItem In MenuStrip1.Items
+    Private Sub UpdatePreview()
+        Dim selectedItem As ToolStripMenuItem = MenuStrip1.Items.OfType(Of ToolStripMenuItem)().FirstOrDefault(Function(i) i.Selected)
 
-                If item.Selected = True Then
-                    If Not item.Tag Is Nothing AndAlso TypeOf item.Tag Is IntPtr Then
-                        Dim windowHandle As IntPtr = CType(item.Tag, IntPtr)
-                        Try
-                            PictureBox1.Image = RenderWindow(item.Tag, False)
-                            Dim targetHeight As Integer = 165
-                            If Not targetHeight > PictureBox1.Image.Width Then
-                                Dim aspectRatio As Double = CDbl(PictureBox1.Image.Width) / CDbl(PictureBox1.Image.Height)
-                                Dim targetWidth As Integer = CInt(targetHeight * aspectRatio)
-                                PictureBox1.Size = New Size(targetWidth + 10, 165)
-                                PictureBox1.Location = New Point(Panel1.Width / 2 - PictureBox1.Width / 2, 5)
-                            Else
-                                PictureBox1.Size = New Size(178, PictureBox1.Image.Height)
-                            End If
-                        Catch ex As Exception
+        If selectedItem IsNot Nothing AndAlso selectedItem.Tag IsNot Nothing Then
+            Dim windowHandle As IntPtr = CType(selectedItem.Tag, IntPtr)
 
-                        End Try
+            Label1.Text = selectedItem.Text
+
+            Try
+                Dim previewImage As Image = RenderWindow(windowHandle, False)
+
+                If previewImage IsNot Nothing Then
+                    PictureBox1.Image = previewImage
+
+                    Dim targetHeight As Integer = 165
+
+                    If previewImage.Width > targetHeight Then
+                        Dim aspectRatio As Double = CDbl(previewImage.Width) / CDbl(previewImage.Height)
+                        Dim targetWidth As Integer = CInt(targetHeight * aspectRatio)
+
+                        PictureBox1.Size = New Size(targetWidth + 10, targetHeight)
+                        PictureBox1.Location = New Point((Panel1.Width - PictureBox1.Width) \ 2, 5)
+                    Else
+                        PictureBox1.Size = New Size(178, previewImage.Height)
                     End If
-
-                    Label1.Text = item.Text
                 End If
-            Next
+            Catch ex As Exception
+                Debug.WriteLine("Preview render failed: " & ex.Message)
+            End Try
         End If
     End Sub
 
@@ -693,5 +784,10 @@ Public Class AltTab
                 Next
             End Try
         End If
+    End Sub
+
+    Private Sub AltTab_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+        ActiveProcessID = 0
+        MenuStrip1.Items.Clear()
     End Sub
 End Class

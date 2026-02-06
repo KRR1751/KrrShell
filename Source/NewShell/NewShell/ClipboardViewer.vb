@@ -1,185 +1,157 @@
-Public Class ClipboardViewer
+Imports System.Collections.Specialized
+Imports System.IO
 
-    Private Sub ClipboardViewer_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+Public Class ClipboardViewer
+    Private lastText As String = ""
+    Private lastFileCount As Integer = -1
+    Private soundPlayer As New Media.SoundPlayer()
+
+    Private Sub ClipboardViewer_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         Me.Visible = False
         Controller.Enabled = False
     End Sub
 
-    Private Sub ClipboardViewer_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub ClipboardViewer_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Visible = True
         Me.Location = New Point(My.Computer.Screen.WorkingArea.Width - Me.Width, My.Computer.Screen.WorkingArea.Height - Me.Height)
         OnTopToolStripMenuItem.Checked = Me.TopMost
         Controller.Enabled = True
+        UpdateClipboardDisplay()
     End Sub
 
-    Private Sub Controller_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Controller.Tick
-        If Clipboard.ContainsText = True Then
-            If RichTextBox1.Text = Clipboard.GetText Then
-            Else
-                TSSL1.Text = "Clipboard now contains Text:"
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = True
-                RichTextBox1.Text = Clipboard.GetText
+    Private Sub Controller_Tick(sender As Object, e As EventArgs) Handles Controller.Tick
+        UpdateClipboardDisplay()
+    End Sub
+
+    Private Sub UpdateClipboardDisplay()
+        ' 1. PRIORITA: RICH TEXT (Zachovává styly, barvy, fonty)
+        If Clipboard.ContainsData(DataFormats.Rtf) Then
+            Dim currentRtf As String = DirectCast(Clipboard.GetData(DataFormats.Rtf), String)
+            If lastText <> currentRtf Then
+                lastText = currentRtf
+                ShowControl(RichTextBox1)
+                TSSL1.Text = "Clipboard now contains Rich Text (Styled):"
+                RichTextBox1.Rtf = currentRtf
             End If
-        ElseIf Clipboard.ContainsFileDropList = True Then
-            If ListBox1.Items.Count = Clipboard.GetFileDropList.Count Then
-            Else
+
+            ' 2. HTML (Zdrojový kód z webu)
+        ElseIf Clipboard.ContainsData(DataFormats.Html) Then
+            Dim currentHtml As String = DirectCast(Clipboard.GetData(DataFormats.Html), String)
+            If lastText <> currentHtml Then
+                lastText = currentHtml
+                ShowControl(RichTextBox1)
+                TSSL1.Text = "Clipboard now contains HTML Source:"
+                RichTextBox1.Text = currentHtml
+            End If
+
+            ' 3. PROSTÝ TEXT
+        ElseIf Clipboard.ContainsText() Then
+            Dim currentText As String = Clipboard.GetText()
+            If lastText <> currentText Then
+                lastText = currentText
+                ShowControl(RichTextBox1)
+                TSSL1.Text = "Clipboard now contains Plain Text:"
+                RichTextBox1.Text = currentText
+            End If
+
+            ' 4. SOUBORY
+        ElseIf Clipboard.ContainsFileDropList() Then
+            Dim files As StringCollection = Clipboard.GetFileDropList()
+            If lastFileCount <> files.Count Then
+                lastFileCount = files.Count
+                ShowControl(ListBox1)
+                TSSL1.Text = "Clipboard now contains File Drop List (" & files.Count & "):"
                 ListBox1.Items.Clear()
-                TSSL1.Text = "Clipboard now contains File Drop List:"
-                Panel1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = False
-                ListBox1.Visible = True
-                Dim i As Integer
-                For i = 0 To Clipboard.GetFileDropList.Count - 1
-                    ListBox1.Items.Add(Clipboard.GetFileDropList.Item(i))
+                For Each file As String In files
+                    ListBox1.Items.Add(file)
                 Next
             End If
-        ElseIf Clipboard.ContainsImage = True Then
-            If PictureBox1.Image Is Clipboard.GetImage Then
-            Else
-                TSSL1.Text = "Clipboard now contains Image:"
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                RichTextBox1.Visible = False
-                PictureBox1.Visible = True
-                PictureBox1.Image = Clipboard.GetImage
-            End If
-        ElseIf Clipboard.ContainsAudio = True Then
-            A.Stream = Clipboard.GetAudioStream
-            If A.Stream Is Clipboard.GetAudioStream Then
-            Else
-                TSSL1.Text = "Clipboard now contains Audio Stream:"
-                ListBox1.Visible = False
-                RichTextBox1.Visible = False
-                PictureBox1.Visible = False
-                Panel1.Visible = True
-                Label1.Text = "Stream: " & A.Stream.ToString & Environment.NewLine & "Sound Location: " & A.SoundLocation
-            End If
-        ElseIf Clipboard.ContainsData(System.Windows.Forms.DataFormats.Rtf) = True Then
 
-        ElseIf Clipboard.ContainsData(System.Windows.Forms.DataFormats.Html) = True Then
-            If RichTextBox1.Text = Clipboard.GetData(System.Windows.Forms.DataFormats.Html) Then
-            Else
-                TSSL1.Text = "Clipboard now contains HTML:"
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = True
-                RichTextBox1.Text = Clipboard.GetText
+            ' 5. OBRÁZKY
+        ElseIf Clipboard.ContainsImage() Then
+            If TSSL1.Text <> "Clipboard now contains Image:" Then
+                ShowControl(PictureBox1)
+                TSSL1.Text = "Clipboard now contains Image:"
+                PictureBox1.Image = Clipboard.GetImage()
             End If
+
+            ' 6. AUDIO
+        ElseIf Clipboard.ContainsAudio() Then
+            If TSSL1.Text <> "Clipboard now contains Audio Stream:" Then
+                ShowControl(Panel1)
+                TSSL1.Text = "Clipboard now contains Audio Stream:"
+                soundPlayer.Stream = Clipboard.GetAudioStream()
+                Label1.Text = "Stream: Audio Data Presence Detected"
+            End If
+
+            ' 7. PRÁZDNO
         Else
-            If TSSL1.Text = "Clipboard has nothing now to display." Then
-            Else
+            If TSSL1.Text <> "Clipboard has nothing now to display." Then
                 TSSL1.Text = "Clipboard has nothing now to display."
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = False
+                HideAllControls()
             End If
+            ResetTrackers()
         End If
     End Sub
-    Dim A As New Media.SoundPlayer()
-    Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+    Private Sub ShowControl(ByVal visibleControl As Control)
+        HideAllControls()
+        visibleControl.Visible = True
+    End Sub
+
+    Private Sub HideAllControls()
+        Panel1.Visible = False
+        ListBox1.Visible = False
+        PictureBox1.Visible = False
+        RichTextBox1.Visible = False
+    End Sub
+
+    Private Sub ResetTrackers()
+        lastText = ""
+        lastFileCount = -1
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         If Button1.Text = "Play" Then
-            A.PlayLooping()
+            soundPlayer.PlayLooping()
             Button1.Text = "Stop"
         Else
-            A.Stop()
+            soundPlayer.Stop()
             Button1.Text = "Play"
         End If
     End Sub
 
-    Private Sub ClearContentToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ClearContentToolStripMenuItem.Click
-        If MessageBox.Show("Are you sure do you want clear the clipboard data?", "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = Windows.Forms.DialogResult.Yes Then
+    Private Sub ClearContentToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearContentToolStripMenuItem.Click
+        If MessageBox.Show("Are you sure you want to clear the clipboard data?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.Yes Then
             Clipboard.Clear()
+            UpdateClipboardDisplay()
         End If
     End Sub
 
-    Private Sub HideToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles HideToolStripMenuItem.Click
-        Me.Close()
+    Private Sub ReloadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReloadToolStripMenuItem.Click
+        ResetTrackers()
+        TSSL1.Text = "" ' Force refresh
+        UpdateClipboardDisplay()
+        TSSL2.Visible = True
+        ReloadInfo.Enabled = True
     End Sub
 
-    Private Sub OnTopToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OnTopToolStripMenuItem.Click
-        Me.TopMost = OnTopToolStripMenuItem.Checked
-    End Sub
-
-    Private Sub ReloadToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ReloadToolStripMenuItem.Click
-        ReloadToolStripMenuItem.Enabled = False
-        Controller.Enabled = False
-        If Clipboard.ContainsText = True Then
-            If Clipboard.ContainsData(System.Windows.Forms.DataFormats.Rtf) = True Then
-                TSSL1.Text = "Clipboard now contains Rich Text:"
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = True
-                RichTextBox1.Rtf = Clipboard.GetData(System.Windows.Forms.DataFormats.Rtf)
-            Else
-                TSSL1.Text = "Clipboard now contains Text:"
-                Panel1.Visible = False
-                ListBox1.Visible = False
-                PictureBox1.Visible = False
-                RichTextBox1.Visible = True
-                RichTextBox1.Text = Clipboard.GetText
-            End If
-        ElseIf Clipboard.ContainsFileDropList = True Then
-            ListBox1.Items.Clear()
-            TSSL1.Text = "Clipboard now contains File Drop List:"
-            Panel1.Visible = False
-            PictureBox1.Visible = False
-            RichTextBox1.Visible = False
-            ListBox1.Visible = True
-            Dim i As Integer
-            For i = 0 To Clipboard.GetFileDropList.Count - 1
-                ListBox1.Items.Add(Clipboard.GetFileDropList.Item(i))
-            Next
-        ElseIf Clipboard.ContainsImage = True Then
-            TSSL1.Text = "Clipboard now contains Image:"
-            Panel1.Visible = False
-            ListBox1.Visible = False
-            RichTextBox1.Visible = False
-            PictureBox1.Visible = True
-            PictureBox1.Image = Clipboard.GetImage
-        ElseIf Clipboard.ContainsAudio = True Then
-            A.Stream = Clipboard.GetAudioStream
-            TSSL1.Text = "Clipboard now contains Audio Stream:"
-            ListBox1.Visible = False
-            RichTextBox1.Visible = False
-            PictureBox1.Visible = False
-            Panel1.Visible = True
-            Label1.Text = "Stream: " & A.Stream.ToString & Environment.NewLine & "Sound Location: " & A.SoundLocation
-        ElseIf Clipboard.ContainsData(System.Windows.Forms.DataFormats.Html) = True Then
-            TSSL1.Text = "Clipboard now contains HTML:"
-            Panel1.Visible = False
-            ListBox1.Visible = False
-            PictureBox1.Visible = False
-            RichTextBox1.Visible = True
-            RichTextBox1.Text = Clipboard.GetText
-        Else
-            TSSL1.Text = "Clipboard has nothing now to display."
-            Panel1.Visible = False
-            ListBox1.Visible = False
-            PictureBox1.Visible = False
-            RichTextBox1.Visible = False
-        End If
-            Controller.Enabled = True
-            ReloadToolStripMenuItem.Enabled = True
-            TSSL2.Visible = True
-            ReloadInfo.Enabled = True
-    End Sub
-
-    Private Sub ReloadInfo_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ReloadInfo.Tick
+    Private Sub ReloadInfo_Tick(sender As Object, e As EventArgs) Handles ReloadInfo.Tick
         TSSL2.Visible = False
         ReloadInfo.Enabled = False
     End Sub
 
-    Private Sub RichTextBox1_LinkClicked(ByVal sender As Object, ByVal e As System.Windows.Forms.LinkClickedEventArgs) Handles RichTextBox1.LinkClicked
-        On Error Resume Next
-        If MessageBox.Show("Are you sure do you want visit this link?" & Environment.NewLine & Environment.NewLine & e.LinkText, "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = Windows.Forms.DialogResult.Yes Then
-            Process.Start(e.LinkText)
+    Private Sub RichTextBox1_LinkClicked(sender As Object, e As LinkClickedEventArgs) Handles RichTextBox1.LinkClicked
+        If MessageBox.Show("Do you want to visit this link?" & Environment.NewLine & e.LinkText, "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+            Process.Start(New ProcessStartInfo(e.LinkText) With {.UseShellExecute = True})
         End If
+    End Sub
+
+    Private Sub OnTopToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OnTopToolStripMenuItem.CheckedChanged
+        Me.TopMost = OnTopToolStripMenuItem.Checked
+    End Sub
+
+    Private Sub HideToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HideToolStripMenuItem.Click
+        Me.Close()
     End Sub
 End Class
