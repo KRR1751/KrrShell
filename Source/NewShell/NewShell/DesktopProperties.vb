@@ -65,6 +65,8 @@ Public Class DesktopProperties
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         Try
             Dim OFD As New OpenFileDialog
+
+            OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
             OFD.Title = "Select a Background Image to appear on your Desktop!"
             OFD.Filter = "Picture formats (*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif"
             OFD.FileName = ""

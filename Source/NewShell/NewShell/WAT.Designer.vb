@@ -161,7 +161,7 @@ Partial Class WAT
         'Button4
         '
         Me.Button4.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.Button4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
+        Me.Button4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
         Me.Button4.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.Button4.Location = New System.Drawing.Point(6, 28)
@@ -189,7 +189,7 @@ Partial Class WAT
         Me.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(7, 55)
+        Me.MinimumSize = New System.Drawing.Size(7, 30)
         Me.Name = "WAT"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False

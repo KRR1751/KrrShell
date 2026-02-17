@@ -324,6 +324,7 @@ Public Class AppbarProperties
                 If ComboBox6.Items.Count > 0 Then
                     Try
                         ComboBox6.SelectedIndex = ComboBox6.FindStringExact(targetPreset)
+                        TriggerWorkingArea()
                     Catch ex As Exception
                         ComboBox6.SelectedIndex = 0
                     End Try
@@ -333,6 +334,7 @@ Public Class AppbarProperties
                 nudBottom.Value = defWorkBottom
                 nudLeft.Value = defWorkLeft
                 nudRight.Value = defWorkRight
+                TriggerWorkingArea()
             End If
         End If
 
@@ -341,7 +343,59 @@ Public Class AppbarProperties
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\WorkingArea", "Enabled", False) = 1 Then
             CheckBox13.Checked = True
         End If
+
+        ' Advanced
+
+        Dim usecustomfm As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "UseCustomFileManager", 0)
+        Select Case usecustomfm
+            Case 0
+                RadioButton11.Checked = True
+
+            Case 1
+                RadioButton12.Checked = True
+        End Select
+
+        Dim customfm As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "CustomFileManager", String.Empty)
+        If customfm IsNot Nothing AndAlso File.Exists(customfm) Then
+            If New FileInfo(customfm).Extension.ToLower = ".exe" Then
+                ComboBox8.Text = customfm
+            End If
+        End If
+
+        Try
+            CheckBox15.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "AvoidExplorerFileDialog", False)
+        Catch ex As Exception
+            CheckBox15.Checked = False
+        End Try
+
+        Try
+            CheckBox16.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "DisableCLSIDsWarnings", False)
+        Catch ex As Exception
+            CheckBox16.Checked = False
+        End Try
+
+        ' Hotkey (page)
+
+        For i As Integer = 0 To 9
+            AddHandler hotkeyPanel.Controls.Item(i).MouseUp, AddressOf hotkeyBtnRClick
+
+            Dim executePath As String = My.Computer.Registry.GetValue(hotkeyStart, i, "")
+
+            If File.Exists(executePath) Then
+                Try : hotkeyPanel.Controls.Item(i).BackgroundImage = Icon.ExtractAssociatedIcon(executePath).ToBitmap : Catch ex As Exception : hotkeyPanel.Controls.Item(i).BackgroundImage = My.Resources.ProgramSmall : End Try
+                hotkeyPanel.Controls.Item(i).Text = String.Empty
+
+                hotkeyPanel.Controls.Item(i).Tag = executePath
+            Else
+                hotkeyPanel.Controls.Item(i).BackgroundImage = Nothing
+                hotkeyPanel.Controls.Item(i).Text = i
+
+                hotkeyPanel.Controls.Item(i).Tag = String.Empty
+            End If
+        Next
     End Sub
+
+    Dim hotkeyStart As String = "HKEY_CURRENT_USER\Software\Shell\CustomPaths\Hotkeys"
 
     Public defWorkTop As Integer = 0
     Public defWorkBottom As Integer = AppBar.Height
@@ -675,6 +729,8 @@ Public Class AppbarProperties
 
     Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click
         Dim ofd As New OpenFileDialog()
+
+        ofd.AutoUpgradeEnabled = AppBar.UseExplorerFP
         ofd.Title = "Open a ""Appbar"" image for to show in the Appbar"
         ofd.CheckFileExists = True
         ofd.Multiselect = False
@@ -811,6 +867,8 @@ Public Class AppbarProperties
     Private Sub PictureBox4_Click(sender As Object, e As EventArgs) Handles PictureBox4.Click
         On Error Resume Next
         Dim OFD As New OpenFileDialog
+
+        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
         OFD.Title = "Select a Custom Image for ""Default"" button state"
         OFD.CheckFileExists = True
         OFD.FileName = ""
@@ -825,6 +883,8 @@ Public Class AppbarProperties
     Private Sub PictureBox5_Click(sender As Object, e As EventArgs) Handles PictureBox5.Click
         On Error Resume Next
         Dim OFD As New OpenFileDialog
+
+        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
         OFD.Title = "Select a Custom Image for ""Hover"" button state"
         OFD.CheckFileExists = True
         OFD.FileName = ""
@@ -838,6 +898,8 @@ Public Class AppbarProperties
     Private Sub PictureBox6_Click(sender As Object, e As EventArgs) Handles PictureBox6.Click
         On Error Resume Next
         Dim OFD As New OpenFileDialog
+
+        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
         OFD.Title = "Select a Custom Image for ""Pressed"" button state"
         OFD.CheckFileExists = True
         OFD.FileName = ""
@@ -927,6 +989,8 @@ Public Class AppbarProperties
     Private Sub Button15_Click(sender As Object, e As EventArgs) Handles Button15.Click
         On Error Resume Next
         Dim OFD As New OpenFileDialog
+
+        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
         OFD.Title = "Select a Custom ORB for your Start Menu"
         OFD.CheckFileExists = True
         OFD.FileName = ""
@@ -1085,6 +1149,188 @@ Public Class AppbarProperties
     Private Sub Button13_Click(sender As Object, e As EventArgs) Handles Button13.Click
         AppBar.fBarRegistered = True
         AppBar.RegisterBar()
+    End Sub
+
+    Private Sub RadioButton11_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton11.CheckedChanged, RadioButton12.CheckedChanged
+        If RadioButton11.Checked = True Then
+
+            ComboBox8.Enabled = False
+            Button22.Enabled = False
+
+            AppBar.UseExplorerFM = True
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "UseCustomFileManager", False, Microsoft.Win32.RegistryValueKind.DWord)
+
+        ElseIf RadioButton12.Checked = True Then
+
+            ComboBox8.Enabled = True
+            Button22.Enabled = True
+
+            AppBar.UseExplorerFM = False
+            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "UseCustomFileManager", True, Microsoft.Win32.RegistryValueKind.DWord)
+
+            If File.Exists(ComboBox8.Text) Then
+                If New FileInfo(ComboBox8.Text).Extension.ToLower = ".exe" Then
+                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "CustomFileManager", ComboBox8.Text)
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub Button22_Click(sender As Object, e As EventArgs) Handles Button22.Click
+        Dim ofd As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .ShowHelp = True,
+            .CheckFileExists = True,
+            .Title = "Select a custom File Manager for this shell...",
+            .Filter = "Executables (*.exe)|*.exe"
+        }
+
+        If File.Exists(ComboBox8.Text) Then
+            Dim FI As New FileInfo(ComboBox8.Text)
+
+            ofd.InitialDirectory = FI.DirectoryName
+            ofd.FileName = FI.Name
+        ElseIf Directory.Exists(ComboBox8.Text) Then
+            ofd.InitialDirectory = ComboBox8.Text
+        Else
+            ofd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+        End If
+
+        AddHandler ofd.HelpRequest, Sub()
+                                        MessageBox.Show("Select a program (any *.exe) that is a File Manager, can execute command args for exp. ""C:\YourExplorer.exe C:\""" & Environment.NewLine & Environment.NewLine & "NOTE: If a program you pick doesn't support Command Args or a different program that is not a File Manager, errors may occur when something will be selected.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1)
+                                    End Sub
+
+        Select Case ofd.ShowDialog
+            Case DialogResult.OK
+                ComboBox8.Text = ofd.FileName
+        End Select
+    End Sub
+
+    Private Sub CheckBox15_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox15.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "AvoidExplorerFileDialog", CheckBox15.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+
+        If CheckBox15.Checked = True Then AppBar.UseExplorerFP = False Else AppBar.UseExplorerFP = True
+    End Sub
+
+    Private Sub ComboBox8_TextChanged(sender As Object, e As EventArgs) Handles ComboBox8.TextChanged
+        If Not String.IsNullOrWhiteSpace(ComboBox8.Text) AndAlso File.Exists(ComboBox8.Text) Then
+            If New FileInfo(ComboBox8.Text).Extension.ToLower = ".exe" Then
+                AppBar.CustomFMPath = ComboBox8.Text
+
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "CustomFileManager", ComboBox8.Text)
+            End If
+        End If
+    End Sub
+
+    Private Sub CheckBox16_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox16.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "DisableCLSIDsWarnings", CheckBox16.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub hotkeyBtnClick(btn As Button)
+        Dim ofd As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .CheckFileExists = True,
+            .Title = "Pick a program/file you want to execute after hotkey pressed.",
+            .Filter = "Executable (*.exe;*.pif)|*.exe;*.pif|All files (*.*)|*.*",
+            .Multiselect = False,
+            .SupportMultiDottedExtensions = True,
+            .ValidateNames = True}
+
+        If btn.Tag IsNot Nothing Then
+            If File.Exists(btn.Tag.ToString) Then
+                Dim fi As New FileInfo(btn.Tag.ToString)
+                ofd.InitialDirectory = fi.DirectoryName
+                ofd.FileName = fi.Name
+            End If
+        Else
+            ofd.FileName = String.Empty
+        End If
+
+        'Hotkey setup
+        If ofd.ShowDialog(Me) = DialogResult.OK Then
+
+            btn.Tag = ofd.FileName
+
+            Try : btn.BackgroundImage = Icon.ExtractAssociatedIcon(ofd.FileName).ToBitmap : Catch ex As Exception : btn.BackgroundImage = My.Resources.ProgramSmall : End Try
+
+            btn.Text = String.Empty
+        End If
+    End Sub
+
+    Private Sub hotkeyBtnRClick(sender As Object, e As MouseEventArgs)
+        If e.Button = MouseButtons.Right Then
+            If MessageBox.Show("Are you sure do you want remove this program?", "Confirm box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+
+                Dim btn As Control = CType(sender, Control)
+
+                My.Computer.Registry.SetValue(hotkeyStart, hotkeyPanel.Controls.GetChildIndex(btn), "")
+
+                btn.BackgroundImage = Nothing
+                btn.Text = hotkeyPanel.Controls.GetChildIndex(btn)
+                btn.Tag = Nothing
+
+            End If
+        End If
+    End Sub
+
+    Private Sub hotkeyBTN1_Click(sender As Object, e As EventArgs) Handles hotkeyBTN1.Click
+        hotkeyBtnClick(hotkeyBTN1)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "1", hotkeyBTN1.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN2_Click(sender As Object, e As EventArgs) Handles hotkeyBTN2.Click
+        hotkeyBtnClick(hotkeyBTN2)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "2", hotkeyBTN2.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN3_Click(sender As Object, e As EventArgs) Handles hotkeyBTN3.Click
+        hotkeyBtnClick(hotkeyBTN3)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "3", hotkeyBTN3.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN4_Click(sender As Object, e As EventArgs) Handles hotkeyBTN4.Click
+        hotkeyBtnClick(hotkeyBTN4)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "4", hotkeyBTN4.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN5_Click(sender As Object, e As EventArgs) Handles hotkeyBTN5.Click
+        hotkeyBtnClick(hotkeyBTN5)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "5", hotkeyBTN5.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN6_Click(sender As Object, e As EventArgs) Handles hotkeyBTN6.Click
+        hotkeyBtnClick(hotkeyBTN6)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "6", hotkeyBTN6.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN7_Click(sender As Object, e As EventArgs) Handles hotkeyBTN7.Click
+        hotkeyBtnClick(hotkeyBTN7)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "7", hotkeyBTN7.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN8_Click(sender As Object, e As EventArgs) Handles hotkeyBTN8.Click
+        hotkeyBtnClick(hotkeyBTN8)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "8", hotkeyBTN8.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN9_Click(sender As Object, e As EventArgs) Handles hotkeyBTN9.Click
+        hotkeyBtnClick(hotkeyBTN9)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "9", hotkeyBTN9.Tag.ToString)
+    End Sub
+
+    Private Sub hotkeyBTN0_Click(sender As Object, e As EventArgs) Handles hotkeyBTN0.Click
+        hotkeyBtnClick(hotkeyBTN0)
+
+        My.Computer.Registry.SetValue(hotkeyStart, "0", hotkeyBTN0.Tag.ToString)
     End Sub
 End Class
 

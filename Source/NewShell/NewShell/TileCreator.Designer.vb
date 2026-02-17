@@ -29,33 +29,44 @@ Partial Class TileCreator
         Me.Label2 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
-        Me.RadioButton1 = New System.Windows.Forms.RadioButton()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.RadioButton2 = New System.Windows.Forms.RadioButton()
-        Me.RadioButton3 = New System.Windows.Forms.RadioButton()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Button1 = New System.Windows.Forms.Button()
+        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Button3 = New System.Windows.Forms.Button()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.ComboBox4 = New System.Windows.Forms.ComboBox()
+        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
+        Me.Button2 = New System.Windows.Forms.Button()
+        Me.Label4 = New System.Windows.Forms.Label()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.Height_ComboBox = New System.Windows.Forms.ComboBox()
+        Me.Width_ComboBox = New System.Windows.Forms.ComboBox()
+        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.ComboBox3 = New System.Windows.Forms.ComboBox()
+        Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
+        Me.GroupBox1.SuspendLayout()
+        Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
         'OK_Button
         '
         Me.OK_Button.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.OK_Button.Enabled = False
-        Me.OK_Button.Location = New System.Drawing.Point(234, 267)
+        Me.OK_Button.Location = New System.Drawing.Point(163, 445)
         Me.OK_Button.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.OK_Button.Name = "OK_Button"
-        Me.OK_Button.Size = New System.Drawing.Size(78, 27)
+        Me.OK_Button.Size = New System.Drawing.Size(97, 27)
         Me.OK_Button.TabIndex = 0
-        Me.OK_Button.Text = "OK"
+        Me.OK_Button.Text = "Create Tile"
         '
         'Cancel_Button
         '
         Me.Cancel_Button.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Cancel_Button.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.Cancel_Button.Location = New System.Drawing.Point(320, 267)
+        Me.Cancel_Button.Location = New System.Drawing.Point(268, 445)
         Me.Cancel_Button.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Cancel_Button.Name = "Cancel_Button"
         Me.Cancel_Button.Size = New System.Drawing.Size(78, 27)
@@ -64,29 +75,32 @@ Partial Class TileCreator
         '
         'ComboBox1
         '
+        Me.ComboBox1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.ComboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
         Me.ComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(19, 55)
+        Me.ComboBox1.Location = New System.Drawing.Point(10, 34)
         Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(318, 23)
+        Me.ComboBox1.Size = New System.Drawing.Size(250, 23)
         Me.ComboBox1.TabIndex = 2
         '
         'Label1
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(14, 10)
+        Me.Label1.Dock = System.Windows.Forms.DockStyle.Top
+        Me.Label1.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.Location = New System.Drawing.Point(0, 0)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(378, 15)
+        Me.Label1.Size = New System.Drawing.Size(359, 15)
         Me.Label1.TabIndex = 3
         Me.Label1.Text = "Here you can create your own Tiles to be displayed in your Start Menu."
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(15, 36)
+        Me.Label2.Location = New System.Drawing.Point(7, 19)
         Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(56, 15)
@@ -96,104 +110,41 @@ Partial Class TileCreator
         'CheckBox1
         '
         Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Location = New System.Drawing.Point(19, 84)
+        Me.CheckBox1.Location = New System.Drawing.Point(10, 63)
         Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(85, 19)
+        Me.CheckBox1.Size = New System.Drawing.Size(88, 19)
         Me.CheckBox1.TabIndex = 5
-        Me.CheckBox1.Text = "Arguments"
+        Me.CheckBox1.Text = "Arguments:"
         Me.CheckBox1.UseVisualStyleBackColor = True
         '
         'ComboBox2
         '
+        Me.ComboBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.ComboBox2.Enabled = False
         Me.ComboBox2.FormattingEnabled = True
-        Me.ComboBox2.Location = New System.Drawing.Point(19, 108)
+        Me.ComboBox2.Location = New System.Drawing.Point(10, 79)
         Me.ComboBox2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(380, 23)
+        Me.ComboBox2.Size = New System.Drawing.Size(312, 23)
         Me.ComboBox2.TabIndex = 6
-        '
-        'RadioButton1
-        '
-        Me.RadioButton1.AutoSize = True
-        Me.RadioButton1.Checked = True
-        Me.RadioButton1.Location = New System.Drawing.Point(18, 152)
-        Me.RadioButton1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
-        Me.RadioButton1.Name = "RadioButton1"
-        Me.RadioButton1.Size = New System.Drawing.Size(95, 19)
-        Me.RadioButton1.TabIndex = 7
-        Me.RadioButton1.TabStop = True
-        Me.RadioButton1.Text = "Small (96, 96)"
-        Me.RadioButton1.UseVisualStyleBackColor = True
-        '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(14, 134)
-        Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(30, 15)
-        Me.Label3.TabIndex = 8
-        Me.Label3.Text = "Size:"
-        '
-        'RadioButton2
-        '
-        Me.RadioButton2.AutoSize = True
-        Me.RadioButton2.Location = New System.Drawing.Point(146, 152)
-        Me.RadioButton2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
-        Me.RadioButton2.Name = "RadioButton2"
-        Me.RadioButton2.Size = New System.Drawing.Size(117, 19)
-        Me.RadioButton2.TabIndex = 9
-        Me.RadioButton2.TabStop = True
-        Me.RadioButton2.Text = "Medium (192, 96)"
-        Me.RadioButton2.UseVisualStyleBackColor = True
-        '
-        'RadioButton3
-        '
-        Me.RadioButton3.AutoSize = True
-        Me.RadioButton3.Location = New System.Drawing.Point(286, 152)
-        Me.RadioButton3.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
-        Me.RadioButton3.Name = "RadioButton3"
-        Me.RadioButton3.Size = New System.Drawing.Size(107, 19)
-        Me.RadioButton3.TabIndex = 10
-        Me.RadioButton3.TabStop = True
-        Me.RadioButton3.Text = "Large (192, 192)"
-        Me.RadioButton3.UseVisualStyleBackColor = True
-        '
-        'Label4
-        '
-        Me.Label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.Label4.Enabled = False
-        Me.Label4.Location = New System.Drawing.Point(36, 173)
-        Me.Label4.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(37, 37)
-        Me.Label4.TabIndex = 11
-        '
-        'Label5
-        '
-        Me.Label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.Label5.Enabled = False
-        Me.Label5.Location = New System.Drawing.Point(165, 173)
-        Me.Label5.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(75, 37)
-        Me.Label5.TabIndex = 12
         '
         'Label6
         '
+        Me.Label6.BackColor = System.Drawing.Color.Transparent
         Me.Label6.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.Label6.Enabled = False
-        Me.Label6.Location = New System.Drawing.Point(305, 173)
+        Me.Label6.Image = Global.NewShell.My.Resources.Resources.ProgramMedium
+        Me.Label6.Location = New System.Drawing.Point(127, 37)
         Me.Label6.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(75, 74)
+        Me.Label6.Size = New System.Drawing.Size(192, 192)
         Me.Label6.TabIndex = 13
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(344, 54)
+        Me.Button1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button1.Location = New System.Drawing.Point(263, 32)
         Me.Button1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(55, 27)
@@ -201,16 +152,171 @@ Partial Class TileCreator
         Me.Button1.Text = "..."
         Me.Button1.UseVisualStyleBackColor = True
         '
+        'GroupBox1
+        '
+        Me.GroupBox1.Controls.Add(Me.Button3)
+        Me.GroupBox1.Controls.Add(Me.Label7)
+        Me.GroupBox1.Controls.Add(Me.ComboBox4)
+        Me.GroupBox1.Controls.Add(Me.Label6)
+        Me.GroupBox1.Controls.Add(Me.CheckBox2)
+        Me.GroupBox1.Controls.Add(Me.Button2)
+        Me.GroupBox1.Controls.Add(Me.Label4)
+        Me.GroupBox1.Controls.Add(Me.Label3)
+        Me.GroupBox1.Controls.Add(Me.Height_ComboBox)
+        Me.GroupBox1.Controls.Add(Me.Width_ComboBox)
+        Me.GroupBox1.Location = New System.Drawing.Point(12, 198)
+        Me.GroupBox1.Name = "GroupBox1"
+        Me.GroupBox1.Size = New System.Drawing.Size(333, 236)
+        Me.GroupBox1.TabIndex = 16
+        Me.GroupBox1.TabStop = False
+        Me.GroupBox1.Text = "Tile Size and Appearance"
+        '
+        'Button3
+        '
+        Me.Button3.Location = New System.Drawing.Point(5, 156)
+        Me.Button3.Name = "Button3"
+        Me.Button3.Size = New System.Drawing.Size(115, 23)
+        Me.Button3.TabIndex = 22
+        Me.Button3.Text = "Set to Transparent"
+        Me.Button3.UseVisualStyleBackColor = True
+        '
         'Label7
         '
-        Me.Label7.AutoEllipsis = True
-        Me.Label7.Location = New System.Drawing.Point(16, 220)
-        Me.Label7.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Label7.AutoSize = True
+        Me.Label7.Enabled = False
+        Me.Label7.Location = New System.Drawing.Point(7, 182)
         Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(281, 27)
-        Me.Label7.TabIndex = 15
-        Me.Label7.Text = "Location: "
-        Me.Label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.Label7.Size = New System.Drawing.Size(72, 15)
+        Me.Label7.TabIndex = 21
+        Me.Label7.Text = "Icon Layout:"
+        '
+        'ComboBox4
+        '
+        Me.ComboBox4.Enabled = False
+        Me.ComboBox4.FormattingEnabled = True
+        Me.ComboBox4.Location = New System.Drawing.Point(5, 200)
+        Me.ComboBox4.Name = "ComboBox4"
+        Me.ComboBox4.Size = New System.Drawing.Size(115, 23)
+        Me.ComboBox4.TabIndex = 20
+        '
+        'CheckBox2
+        '
+        Me.CheckBox2.AutoSize = True
+        Me.CheckBox2.Location = New System.Drawing.Point(127, 19)
+        Me.CheckBox2.Name = "CheckBox2"
+        Me.CheckBox2.Size = New System.Drawing.Size(181, 19)
+        Me.CheckBox2.TabIndex = 19
+        Me.CheckBox2.Text = "Show real File Icon in Preview"
+        Me.CheckBox2.UseVisualStyleBackColor = True
+        '
+        'Button2
+        '
+        Me.Button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.Button2.Location = New System.Drawing.Point(6, 111)
+        Me.Button2.Name = "Button2"
+        Me.Button2.Size = New System.Drawing.Size(114, 45)
+        Me.Button2.TabIndex = 18
+        Me.Button2.Text = "Background color"
+        Me.Button2.UseVisualStyleBackColor = True
+        '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(6, 64)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(46, 15)
+        Me.Label4.TabIndex = 17
+        Me.Label4.Text = "Height:"
+        '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(6, 19)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(42, 15)
+        Me.Label3.TabIndex = 16
+        Me.Label3.Text = "Width:"
+        '
+        'Height_ComboBox
+        '
+        Me.Height_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.Height_ComboBox.FormattingEnabled = True
+        Me.Height_ComboBox.Items.AddRange(New Object() {"(48) Extra Small", "(96) Small", "(144) Medium", "(192) Large"})
+        Me.Height_ComboBox.Location = New System.Drawing.Point(6, 82)
+        Me.Height_ComboBox.Name = "Height_ComboBox"
+        Me.Height_ComboBox.Size = New System.Drawing.Size(114, 23)
+        Me.Height_ComboBox.TabIndex = 15
+        '
+        'Width_ComboBox
+        '
+        Me.Width_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.Width_ComboBox.FormattingEnabled = True
+        Me.Width_ComboBox.Items.AddRange(New Object() {"(48) Extra Small", "(96) Small", "(144) Medium", "(192) Large"})
+        Me.Width_ComboBox.Location = New System.Drawing.Point(6, 38)
+        Me.Width_ComboBox.Name = "Width_ComboBox"
+        Me.Width_ComboBox.Size = New System.Drawing.Size(114, 23)
+        Me.Width_ComboBox.TabIndex = 14
+        '
+        'GroupBox2
+        '
+        Me.GroupBox2.Controls.Add(Me.ComboBox2)
+        Me.GroupBox2.Controls.Add(Me.Label2)
+        Me.GroupBox2.Controls.Add(Me.ComboBox1)
+        Me.GroupBox2.Controls.Add(Me.CheckBox1)
+        Me.GroupBox2.Controls.Add(Me.Button1)
+        Me.GroupBox2.Location = New System.Drawing.Point(12, 77)
+        Me.GroupBox2.Name = "GroupBox2"
+        Me.GroupBox2.Size = New System.Drawing.Size(333, 115)
+        Me.GroupBox2.TabIndex = 17
+        Me.GroupBox2.TabStop = False
+        Me.GroupBox2.Text = "Action"
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(14, 30)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(107, 15)
+        Me.Label5.TabIndex = 18
+        Me.Label5.Text = "Tile Custom name:"
+        '
+        'TextBox1
+        '
+        Me.TextBox1.Location = New System.Drawing.Point(17, 48)
+        Me.TextBox1.Name = "TextBox1"
+        Me.TextBox1.Size = New System.Drawing.Size(226, 23)
+        Me.TextBox1.TabIndex = 19
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Enabled = False
+        Me.Label8.Location = New System.Drawing.Point(246, 30)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(83, 15)
+        Me.Label8.TabIndex = 20
+        Me.Label8.Text = "Custom order:"
+        '
+        'ComboBox3
+        '
+        Me.ComboBox3.Enabled = False
+        Me.ComboBox3.FormattingEnabled = True
+        Me.ComboBox3.Location = New System.Drawing.Point(249, 48)
+        Me.ComboBox3.Name = "ComboBox3"
+        Me.ComboBox3.Size = New System.Drawing.Size(98, 23)
+        Me.ComboBox3.TabIndex = 21
+        '
+        'LinkLabel1
+        '
+        Me.LinkLabel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.LinkLabel1.AutoSize = True
+        Me.LinkLabel1.Enabled = False
+        Me.LinkLabel1.Location = New System.Drawing.Point(14, 451)
+        Me.LinkLabel1.Name = "LinkLabel1"
+        Me.LinkLabel1.Size = New System.Drawing.Size(125, 15)
+        Me.LinkLabel1.TabIndex = 22
+        Me.LinkLabel1.TabStop = True
+        Me.LinkLabel1.Text = "Convert old Tiles here."
         '
         'TileCreator
         '
@@ -218,21 +324,15 @@ Partial Class TileCreator
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(415, 307)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.Button1)
-        Me.Controls.Add(Me.Label6)
+        Me.ClientSize = New System.Drawing.Size(359, 484)
+        Me.Controls.Add(Me.LinkLabel1)
+        Me.Controls.Add(Me.ComboBox3)
+        Me.Controls.Add(Me.Label8)
+        Me.Controls.Add(Me.TextBox1)
         Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.RadioButton3)
-        Me.Controls.Add(Me.RadioButton2)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.RadioButton1)
-        Me.Controls.Add(Me.ComboBox2)
-        Me.Controls.Add(Me.CheckBox1)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.GroupBox2)
+        Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.ComboBox1)
         Me.Controls.Add(Me.Cancel_Button)
         Me.Controls.Add(Me.OK_Button)
         Me.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -244,6 +344,10 @@ Partial Class TileCreator
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Tile Creator"
+        Me.GroupBox1.ResumeLayout(False)
+        Me.GroupBox1.PerformLayout()
+        Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -255,13 +359,22 @@ Partial Class TileCreator
     Friend WithEvents Label2 As Label
     Friend WithEvents CheckBox1 As CheckBox
     Friend WithEvents ComboBox2 As ComboBox
-    Friend WithEvents RadioButton1 As RadioButton
-    Friend WithEvents Label3 As Label
-    Friend WithEvents RadioButton2 As RadioButton
-    Friend WithEvents RadioButton3 As RadioButton
-    Friend WithEvents Label4 As Label
-    Friend WithEvents Label5 As Label
     Friend WithEvents Label6 As Label
     Friend WithEvents Button1 As Button
+    Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents Width_ComboBox As ComboBox
+    Friend WithEvents Height_ComboBox As ComboBox
+    Friend WithEvents Label4 As Label
+    Friend WithEvents Label3 As Label
+    Friend WithEvents GroupBox2 As GroupBox
+    Friend WithEvents Label5 As Label
+    Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents CheckBox2 As CheckBox
+    Friend WithEvents Button2 As Button
+    Friend WithEvents Label8 As Label
+    Friend WithEvents ComboBox3 As ComboBox
+    Friend WithEvents LinkLabel1 As LinkLabel
     Friend WithEvents Label7 As Label
+    Friend WithEvents ComboBox4 As ComboBox
+    Friend WithEvents Button3 As Button
 End Class

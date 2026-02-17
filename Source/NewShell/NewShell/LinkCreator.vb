@@ -202,7 +202,7 @@ Public Class LinkCreator
     Private Sub DirectoryToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DirectoryToolStripMenuItem.Click
         Dim D As New FolderBrowserDialog()
         D.RootFolder = Environment.SpecialFolder.Desktop
-        D.ShowNewFolderButton = False
+        D.ShowNewFolderButton = True
         D.Description = "Select a Directory do you want to set up for your new Link file:"
         If IO.File.Exists(ComboBox1.Text) = True Then
             Dim FI As New IO.FileInfo(ComboBox1.Text)
@@ -223,6 +223,8 @@ Public Class LinkCreator
 
     Private Sub FileToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FileToolStripMenuItem.Click
         Dim D As New OpenFileDialog()
+
+        D.AutoUpgradeEnabled = AppBar.UseExplorerFP
         D.CheckFileExists = True
         D.DereferenceLinks = True
         D.Filter = "All files (*.*)|*.*"
@@ -273,7 +275,7 @@ Public Class LinkCreator
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         Dim D As New FolderBrowserDialog()
         D.RootFolder = Environment.SpecialFolder.Desktop
-        D.ShowNewFolderButton = False
+        D.ShowNewFolderButton = True
         D.Description = "Select a Directory where the new Link file will be located:"
         If IO.Directory.Exists(ComboBox1.Text) = True Then
             D.SelectedPath = ComboBox1.Text.Trim
@@ -291,6 +293,8 @@ Public Class LinkCreator
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         Dim D As New OpenFileDialog()
+
+        D.AutoUpgradeEnabled = AppBar.UseExplorerFP
         D.CheckFileExists = True
         D.DereferenceLinks = True
         D.Filter = "Icon file (*.ico)|*.ico"

@@ -201,6 +201,7 @@ Partial Class Desktop
         Me.ShowInTaskbar = False
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide
         Me.StartPosition = System.Windows.Forms.FormStartPosition.Manual
+        Me.Text = "Program Manager"
         Me.TopMost = True
         Me.DesktopCM.ResumeLayout(False)
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()

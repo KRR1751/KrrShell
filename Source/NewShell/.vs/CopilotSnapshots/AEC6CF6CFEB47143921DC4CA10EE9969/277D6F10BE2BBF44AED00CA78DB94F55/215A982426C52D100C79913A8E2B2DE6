@@ -1,0 +1,39 @@
+﻿Imports System.IO
+Imports System.Runtime.InteropServices
+Imports System.Drawing
+Imports System.Diagnostics
+
+Public Class Desktop
+
+    ' Replaced Shell32-dependent code with managed fallbacks.
+
+    Public Shared Function GetFileIcon(filePath As String, small As Boolean) As Icon
+        Try
+            If String.IsNullOrEmpty(filePath) Then Return Nothing
+
+            If File.Exists(filePath) Then
+                Try
+                    Return Icon.ExtractAssociatedIcon(filePath)
+                Catch
+                    Return Nothing
+                End Try
+            Else
+                Return Nothing
+            End If
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
+    Public Shared Sub ShowShellContextMenu(filePath As String, screenPoint As Point)
+        ' Avoid Shell32 COM calls; fallback to opening file properties via explorer
+        If File.Exists(filePath) Then
+            Try
+                Process.Start("explorer.exe", "/select," & Chr(34) & filePath & Chr(34))
+            Catch
+                ' best-effort fallback
+            End Try
+        End If
+    End Sub
+
+End Class

@@ -1,13 +1,27 @@
+Imports System.Diagnostics.Eventing.Reader
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports System.Reflection.Emit
 Imports System.Runtime.InteropServices
 Imports System.Security.Cryptography
 Imports System.Security.Policy
+Imports System.Text
 Imports System.Web
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Button
 Imports Microsoft.Win32
 Public Class Startmenu
+
+    Private Const WS_EX_TOOLWINDOW As Integer = &H80
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp As CreateParams = MyBase.CreateParams
+            ' Apply the ToolWindow style before the window is actually created
+            cp.ExStyle = cp.ExStyle Or WS_EX_TOOLWINDOW
+            Return cp
+        End Get
+    End Property
+
     <Runtime.InteropServices.DllImport("dwmapi.dll")> Public Shared Function DwmExtendFrameIntoClientArea(ByVal hWnd As IntPtr, ByRef pMarinset As side) As Integer
     End Function
 
@@ -182,6 +196,30 @@ Public Class Startmenu
         End If
     End Sub
 
+    <DllImport("shell32.dll", EntryPoint:="#262", CharSet:=CharSet.Unicode, SetLastError:=True, CallingConvention:=CallingConvention.StdCall)>
+    Private Shared Function GetUserTilePath(ByVal username As String, ByVal flags As UInteger, ByVal path As StringBuilder, ByVal pathLength As UInteger) As Integer
+    End Function
+
+    Public Shared Function GetCurrentUserImagePath() As String
+        Dim accountPics As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Windows", "AccountPictures")
+        If Directory.Exists(accountPics) Then
+            For Each f In Directory.EnumerateFiles(accountPics)
+                Dim ext = Path.GetExtension(f).ToLowerInvariant()
+                If ext = ".png" Or ext = ".jpg" Or ext = ".jpeg" Or ext = ".bmp" Then
+                    Return f
+                End If
+            Next
+        End If
+
+        Dim programDataPic As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Microsoft", "User Account Pictures", "user.png")
+        If File.Exists(programDataPic) Then Return programDataPic
+
+        Dim tempPic As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "Temp", Environment.UserName & ".bmp")
+        If File.Exists(tempPic) Then Return tempPic
+
+        Return String.Empty
+    End Function
+
     Private Sub Startmenu_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Try
             Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "Mode", "0")
@@ -239,19 +277,150 @@ Public Class Startmenu
         'Account Picture Detection
 
         Try
-            Button2.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
+            Dim imagePath As String = GetCurrentUserImagePath()
+
+            If Not String.IsNullOrEmpty(imagePath) AndAlso File.Exists(imagePath) Then
+                usr_Picture.BackgroundImage = Image.FromFile(imagePath)
+            Else
+                Dim defaultPath As String = "C:\ProgramData\Microsoft\User Account Pictures\user.png"
+                If File.Exists(defaultPath) Then
+                    usr_Picture.BackgroundImage = Image.FromFile(defaultPath)
+                Else
+                    usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
+                End If
+            End If
         Catch ex As Exception
-            Button2.BackgroundImage = My.Resources.DefaultUserPicture
+            MessageBox.Show("Error loading profile image: " & ex.Message)
+            usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
         End Try
 
         ' Buttons
 
-        Button27.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 95, False).ToBitmap
-        Button1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap
-        Button26.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap
+        Try : cmd_btn4.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 95, False).ToBitmap : Catch ex As Exception : cmd_btn4.BackgroundImage = My.Resources.RunDialogIcon : End Try
+        Try : If AppBar.UseExplorerFM = True Then : cmd_btn3.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\explorer.exe", 1, False).ToBitmap : Else : If File.Exists(AppBar.CustomFMPath) Then : cmd_btn3.BackgroundImage = Icon.ExtractAssociatedIcon(AppBar.CustomFMPath).ToBitmap : Else : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End If : End If : Catch ex As Exception : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End Try
+        Try : cmd_btn2.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap : Catch ex As Exception : cmd_btn2.BackgroundImage = My.Resources.Settings : End Try
+        Try : cmd_btn1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap : Catch ex As Exception : cmd_btn1.BackgroundImage = My.Resources.ActionCenter : End Try
+
     End Sub
     Dim PinnedAppsPath As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned"
     Public Sub ReloadTiles()
+        ToolStrip1.Items.Clear()
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles", True)
+
+        If myKey IsNot Nothing Then
+            Try
+                For Each i As String In myKey.GetSubKeyNames
+
+                    ' Registry values
+                    Dim fullPath As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "Program", String.Empty)
+                    Dim args As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "Arguments", String.Empty)
+
+                    Dim order As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "Order", 0)
+
+                    Dim sizeModeW As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "SizeTypeW", 1)
+                    Dim sizeModeH As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "SizeTypeH", 1)
+
+                    'When I'll know how.
+                    'Dim borderType As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "BorderType", 0)
+
+                    Dim backColor As Color = Color.Transparent
+                    Dim imageLayout = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "ImageLayout", 1)
+
+                    Try
+                        backColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & i, "BackColor", Color.Transparent))
+                    Catch ex As Exception
+                        backColor = Color.Transparent
+                    End Try
+
+                    ' Where it is all doing!
+                    If Not String.IsNullOrEmpty(fullPath) OrElse File.Exists(fullPath) Then
+
+                        Dim FI As New FileInfo(fullPath)
+                        Dim PI As New ToolStripButton(i)
+
+                        With PI ' Settings and Tile appearance
+
+                            .ToolTipText = FI.FullName
+                            .Tag = args
+
+                            ' Style
+                            .AutoSize = False
+                            .TextAlign = ContentAlignment.BottomCenter
+                            .TextImageRelation = TextImageRelation.Overlay
+                            .ImageAlign = ContentAlignment.MiddleCenter
+
+                            If Me.BackColor.R >= 150 OrElse Me.BackColor.G >= 130 AndAlso Me.BackColor.B >= 130 Then .ForeColor = Color.Black Else .ForeColor = Color.White
+
+                            .BackColor = backColor
+
+                            ' Image/Icon
+                            Try
+                                Dim bmp As Bitmap = Desktop.GetFileIcon(FI.FullName, True).ToBitmap
+
+                                If bmp IsNot Nothing Then .Image = bmp Else .Image = My.Resources.ProgramMedium
+                            Catch ex As Exception
+                                .Image = My.Resources.ProgramMedium
+                            End Try
+
+                            If TypeOf imageLayout IsNot Integer Then
+                                ' Image Layout....
+                            End If
+
+                            ' Sizing
+                            Dim SMextraSmall As Integer = 48
+                            Dim SMSmall As Integer = 96
+                            Dim SMMedium As Integer = 144
+                            Dim SMLarge As Integer = 192
+
+                            Select Case sizeModeW ' Width
+                                Case 0 ' Extra Small
+                                    .Width = SMextraSmall
+                                    .DisplayStyle = ToolStripItemDisplayStyle.Image
+                                Case 1 ' Small
+                                    .Width = SMSmall
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+                                Case 2 ' Medium
+                                    .Width = SMMedium
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+                                Case 3 ' Large
+                                    .Width = SMLarge
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+
+                            End Select : Select Case sizeModeH ' Height
+
+                                Case 0 ' Extra Small
+                                    .Height = SMextraSmall
+                                    .DisplayStyle = ToolStripItemDisplayStyle.Image
+                                Case 1 ' Small
+                                    .Height = SMSmall
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+                                Case 2 ' Medium
+                                    .Height = SMMedium
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+                                Case 3 ' Large
+                                    .Height = SMLarge
+                                    .DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
+
+                            End Select
+
+                            ' Handlers
+                            AddHandler .MouseUp, AddressOf TileClick
+
+                        End With
+
+                        ' Adding the items
+
+                        ToolStrip1.Items.Add(PI)
+                    End If
+                Next
+            Finally
+                myKey.Close()
+            End Try
+        End If
+    End Sub
+
+    Public Sub ReloadTilesOld()
         ToolStrip1.Items.Clear()
 
         Try
@@ -320,6 +489,37 @@ Public Class Startmenu
     End Sub
 
     Private Sub TileClick(ByVal sender As System.Object, ByVal e As Windows.Forms.MouseEventArgs)
+
+        Dim regName As String = CType(sender, ToolStripButton).Text
+        Dim program As String = CType(sender, ToolStripButton).ToolTipText
+        Dim args As String = CType(sender, ToolStripButton).Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            If e.Button = MouseButtons.Right Then
+
+                TileCM.Tag = regName
+                TileCM.Show(Control.MousePosition)
+
+            ElseIf e.Button = MouseButtons.Left Then
+
+                If File.Exists(program) = True Then
+
+                    Dim SI As New ProcessStartInfo(program) With {
+                        .Arguments = args,
+                        .UseShellExecute = True
+                    }
+
+                    Process.Start(SI)
+                Else
+                    Process.Start(program)
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub TileClickOld(ByVal sender As System.Object, ByVal e As Windows.Forms.MouseEventArgs)
 
         Dim DirectoryInformation As New DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned")
 
@@ -403,8 +603,14 @@ Public Class Startmenu
         PopulateTreeView(rootPath, TreeView2.Nodes)
     End Sub
 
-    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
-        System.Diagnostics.Process.Start("C:\Windows\explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmd_btn3.Click
+        If AppBar.UseExplorerFM = True Then
+            Process.Start("explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+        Else
+            If Not String.IsNullOrWhiteSpace(AppBar.CustomFMPath) AndAlso File.Exists(AppBar.CustomFMPath) Then
+                Process.Start(AppBar.CustomFMPath)
+            End If
+        End If
 
         canClose = True
         Me.Close()
@@ -602,13 +808,13 @@ Public Class Startmenu
         End Select
     End Sub
 
-    Private Sub Button3_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Button3.MouseUp
+    Private Sub Button3_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles cmd_btn3.MouseUp
         If e.Button = Windows.Forms.MouseButtons.Right Then
             ContextMenu1.Show(Me, Control.MousePosition, LeftRightAlignment.Left)
         End If
     End Sub
 
-    Private Sub Button27_Click(sender As Object, e As EventArgs) Handles Button27.Click
+    Private Sub Button27_Click(sender As Object, e As EventArgs) Handles cmd_btn4.Click
         RunDialog.Show(AppBar)
         RunDialog.Activate()
 
@@ -635,7 +841,23 @@ Public Class Startmenu
     End Sub
 
     Private Sub ts3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ts3.Click
-        Process.Start("explorer.exe", "/select," & TreeView2.SelectedNode.Tag)
+
+        Dim destPath As String = TreeView2.SelectedNode.Tag
+
+        If AppBar.UseExplorerFM = True Then
+            Process.Start("explorer.exe", "/select," & destPath)
+        Else
+            If Not String.IsNullOrWhiteSpace(AppBar.CustomFMPath) AndAlso File.Exists(AppBar.CustomFMPath) Then
+
+                If File.Exists(destPath) Then
+                    Dim FI As New FileInfo(destPath)
+                    Process.Start(AppBar.CustomFMPath, FI.DirectoryName)
+
+                ElseIf Directory.Exists(destPath) Then
+                    Process.Start(AppBar.CustomFMPath, """" & destPath & """")
+                End If
+            End If
+        End If
     End Sub
 
     Private Sub ts4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ts4.Click
@@ -643,15 +865,27 @@ Public Class Startmenu
     End Sub
 
     Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
-        Dim DirectoryInformation As New DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned")
 
-        If IO.File.Exists(DirectoryInformation.FullName & "\" & TileCM.Tag & "\Arguments") = True Then
-            Dim SI As New ProcessStartInfo(IO.File.ReadAllText(DirectoryInformation.FullName & "\" & TileCM.Tag & "\Program")) With {
-                    .Arguments = IO.File.ReadAllText(DirectoryInformation.FullName & "\" & TileCM.Tag & "\Arguments")
-                }
-            Process.Start(SI)
-        Else
-            Process.Start(IO.File.ReadAllText(DirectoryInformation.FullName & "\" & TileCM.Tag & "\Program"))
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+
+            Dim program As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & regName, "Program", String.Empty)
+            Dim args As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & regName, "Arguments", String.Empty)
+
+            If File.Exists(program) = True Then
+
+                Dim SI As New ProcessStartInfo(program) With {
+                        .Arguments = args,
+                        .UseShellExecute = True
+                    }
+
+                Process.Start(SI)
+            Else
+                Process.Start(program)
+            End If
         End If
     End Sub
 
@@ -659,37 +893,6 @@ Public Class Startmenu
         If Not Me.Location = New Point(0, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height) Then
             Me.Location = New Point(0, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height)
         End If
-    End Sub
-
-    Private Sub TileSizeToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles TileSizeToolStripMenuItem.DropDownOpening
-        If My.Computer.FileSystem.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType") = 1 Then
-            Small9696ToolStripMenuItem.Checked = True
-            Medium19296ToolStripMenuItem.Checked = False
-            Big192192ToolStripMenuItem.Checked = False
-        ElseIf My.Computer.FileSystem.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType") = 2 Then
-            Small9696ToolStripMenuItem.Checked = False
-            Medium19296ToolStripMenuItem.Checked = True
-            Big192192ToolStripMenuItem.Checked = False
-        ElseIf My.Computer.FileSystem.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType") = 3 Then
-            Small9696ToolStripMenuItem.Checked = False
-            Medium19296ToolStripMenuItem.Checked = False
-            Big192192ToolStripMenuItem.Checked = True
-        End If
-    End Sub
-
-    Private Sub Small9696ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Small9696ToolStripMenuItem.Click
-        IO.File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType", 1)
-        ReloadTiles()
-    End Sub
-
-    Private Sub Medium19296ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Medium19296ToolStripMenuItem.Click
-        IO.File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType", 2)
-        ReloadTiles()
-    End Sub
-
-    Private Sub Big192192ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Big192192ToolStripMenuItem.Click
-        IO.File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\SizeType", 3)
-        ReloadTiles()
     End Sub
 
     Private Sub RefleshToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles RefleshToolStripMenuItem1.Click
@@ -720,14 +923,20 @@ Public Class Startmenu
         End If
     End Sub
 
-    Private Sub Button26_Click(sender As Object, e As EventArgs) Handles Button26.Click
-        Shell("Control.exe")
+    Private Sub Button26_Click(sender As Object, e As EventArgs) Handles cmd_btn2.Click
+        On Error Resume Next
+
+        Dim settingsPath As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Settings", "control.exe")
+
+        If Not String.IsNullOrWhiteSpace(settingsPath) AndAlso File.Exists(settingsPath) Then
+            Process.Start(New ProcessStartInfo(settingsPath) With {.UseShellExecute = True})
+        End If
 
         canClose = True
         Me.Close()
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles cmd_btn1.Click
         SA.ShowDialog(AppBar)
     End Sub
 
@@ -753,13 +962,17 @@ Public Class Startmenu
         Process.Start("control", "/name Microsoft.UserAccounts")
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles usr_Picture.Click
         LoginMenuS.Show(Control.MousePosition)
     End Sub
 
     Private Sub ShutdownActionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShutdownActionsToolStripMenuItem.Click
         On Error Resume Next
-        Shell("start C:\Windows\NewShell\Shortcuts\shutdown.vbs")
+
+        Dim objShell As Object
+        objShell = CreateObject("Shell.Application")
+        objShell.ShutdownWindows()
+        objShell = Nothing
     End Sub
 
     Private Sub ShutdownWithFastBootToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShutdownWithFastBootToolStripMenuItem.Click
@@ -786,26 +999,59 @@ Public Class Startmenu
 
     Private Sub DeleteToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DeleteToolStripMenuItem.Click
         If MessageBox.Show("Are you sure do you want delete this Tile """ & TileCM.Tag & """?", "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
-            On Error Resume Next
-            IO.Directory.Delete(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag, True)
-            ReloadTiles()
+
+            Dim regName As String = TileCM.Tag
+            Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles", True)
+
+            If myKey IsNot Nothing Then
+                myKey.DeleteSubKey(regName)
+
+                ReloadTiles()
+            End If
+
+            'IO.Directory.Delete(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag, True)
         End If
     End Sub
 
     Private Sub RenameToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RenameToolStripMenuItem.Click
         On Error Resume Next
-        Dim s As String = Microsoft.VisualBasic.InputBox("Type a new name for the tile to be renamed.", "Rename Dialog")
-        My.Computer.FileSystem.RenameDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag, s)
+
+        Dim regName As String = TileCM.Tag
+
+        Dim s As String = InputBox("Type a new name for the tile to be renamed.", "Rename Dialog", regName)
+        If String.IsNullOrWhiteSpace(s) Then Exit Sub
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        Dim oldPath As String = "Software\Shell\StartMenu\Tiles\" & regName
+        Dim newPath As String = "Software\Shell\StartMenu\Tiles\" & s
+
+        If myKey IsNot Nothing Then
+
+            Using newKey As RegistryKey = myKey.CreateSubKey(s)
+                CopyKey(Registry.CurrentUser, oldPath, newPath)
+            End Using
+
+            Registry.CurrentUser.DeleteSubKeyTree(oldPath)
+
+            ReloadTiles()
+        End If
+
+        'My.Computer.FileSystem.RenameDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag, s)
     End Sub
 
-    Private Sub DefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DefaultToolStripMenuItem.Click
-        Dim FI As New IO.FileInfo(IO.File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\Program"))
-        Process.Start("explorer.exe", " /select," & FI.FullName)
-    End Sub
+    Private Sub CopyKey(root As RegistryKey, sourcePath As String, destPath As String)
+        Using sourceKey As RegistryKey = root.OpenSubKey(sourcePath)
+            Using destKey As RegistryKey = root.CreateSubKey(destPath)
+                For Each valueName As String In sourceKey.GetValueNames()
+                    destKey.SetValue(valueName, sourceKey.GetValue(valueName), sourceKey.GetValueKind(valueName))
+                Next
 
-    Private Sub InStartmenuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles InStartmenuToolStripMenuItem.Click
-        Dim FI As New IO.FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned\" & TileCM.Tag & "\Program")
-        Process.Start("explorer.exe", "/select," & FI.FullName)
+                For Each subKeyName As String In sourceKey.GetSubKeyNames()
+                    CopyKey(sourceKey, subKeyName, destPath & "\" & subKeyName)
+                Next
+            End Using
+        End Using
     End Sub
 
     Dim lastNodeTag As String = String.Empty
@@ -1009,19 +1255,19 @@ Public Class Startmenu
         Try
             If IO.File.Exists(TreeView2.SelectedNode.Tag) Then
                 Dim ico As Icon = Icon.ExtractAssociatedIcon(TreeView2.SelectedNode.Tag)
-                Button2.BackgroundImage = ico.ToBitmap
+                usr_Picture.BackgroundImage = ico.ToBitmap
             Else
                 Try
-                    Button2.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
+                    usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
                 Catch ex1 As Exception
-                    Button2.BackgroundImage = My.Resources.DefaultUserPicture
+                    usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
                 End Try
             End If
         Catch ex As Exception
             Try
-                Button2.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
+                usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
             Catch ex1 As Exception
-                Button2.BackgroundImage = My.Resources.DefaultUserPicture
+                usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
             End Try
         End Try
 
@@ -1074,5 +1320,190 @@ Public Class Startmenu
 
     Private Sub Startmenu_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
         If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
+    End Sub
+
+    Private Sub OpenFileLocationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenFileLocationToolStripMenuItem.Click
+
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+
+            Dim program As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & regName, "Program", String.Empty)
+
+            If File.Exists(program) = True Then
+                If AppBar.UseExplorerFM = True Then
+                    Process.Start("explorer.exe", " /select," & program)
+                Else
+                    If Not String.IsNullOrWhiteSpace(AppBar.CustomFMPath) AndAlso File.Exists(AppBar.CustomFMPath) Then
+                        Dim FI As New FileInfo(program)
+
+                        Process.Start(AppBar.CustomFMPath, """" & FI.DirectoryName & """")
+                    End If
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub CustomToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CustomToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+
+            Dim backColor As Color = Color.Transparent
+
+            Try
+                backColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu\Tiles\" & regName, "BackColor", Color.Transparent))
+            Catch ex As Exception
+                backColor = Color.Transparent
+            End Try
+
+            Dim CD As New ColorDialog With {
+            .AllowFullOpen = True,
+            .AnyColor = True,
+            .FullOpen = True
+        }
+
+            If Not backColor = Color.Transparent Then
+                CD.Color = backColor
+            End If
+
+            If CD.ShowDialog(Me) = DialogResult.OK Then
+                myKey.SetValue("BackColor", ColorTranslator.ToHtml(CD.Color))
+
+                ReloadTiles()
+            End If
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub SetToTransparentToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SetToTransparentToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.DeleteValue("BackColor")
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub ExtraSmallToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExtraSmallToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeW", 0, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub Small9696ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Small9696ToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeW", 1, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub Medium19296ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Medium19296ToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeW", 2, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub Big192192ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Big192192ToolStripMenuItem.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeW", 3, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem2_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem2.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeH", 0, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem3_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem3.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeH", 1, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem4_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem4.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeH", 2, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem5_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem5.Click
+        Dim regName As String = TileCM.Tag
+
+        Dim myKey As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Shell\StartMenu\Tiles\" & regName, True)
+
+        If myKey IsNot Nothing Then
+            myKey.SetValue("SizeTypeH", 3, RegistryValueKind.DWord)
+
+            ReloadTiles()
+
+            myKey.Close()
+        End If
     End Sub
 End Class

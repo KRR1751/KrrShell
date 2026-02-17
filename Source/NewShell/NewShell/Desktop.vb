@@ -54,6 +54,18 @@ Public Class Desktop
     Private Const WM_MOUSEACTIVATE As Integer = &H21
     Private Const MA_NOACTIVATEANDEAT As Integer = &H4
 
+    Private Const WS_EX_TOOLWINDOW As Integer = &H80
+    Private Const WS_EX_APPWINDOW As Integer = &H40000
+
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp As CreateParams = MyBase.CreateParams
+            ' Apply the ToolWindow style before the window is actually created
+            cp.ExStyle = cp.ExStyle Or WS_EX_TOOLWINDOW
+            Return cp
+        End Get
+    End Property
+
     Protected Overrides Sub WndProc(ByRef m As Message)
         If m.Msg = WM_MOUSEACTIVATE Then
             'SetFocus(Me.Handle)
@@ -448,22 +460,22 @@ Public Class Desktop
             currentDraggedButton.Capture = True
 
             If currentDraggedButton IsNot Nothing Then
-                Dim screenPosition As Point = Cursor.Position
-                Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
+    Dim screenPosition As Point = Cursor.Position
+    Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
 
                 currentDraggedButton.Location = New Point(parentLocation.X - mouseOffset.X, parentLocation.Y - mouseOffset.Y)
                 wasDragged = True
             End If
-        ElseIf e.Button = MouseButtons.Left Then
-            If currentDraggedButton IsNot Nothing Then
-                Dim screenPosition As Point = Cursor.Position
-                Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
+    ElseIf e.Button = MouseButtons.Left Then
+    If currentDraggedButton IsNot Nothing Then
+    Dim screenPosition As Point = Cursor.Position
+    Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
 
-                If e.Button = MouseButtons.Left AndAlso (Math.Abs(e.X) > 5 OrElse Math.Abs(e.Y) > 5) Then
+    If e.Button = MouseButtons.Left AndAlso (Math.Abs(e.X) > 5 OrElse Math.Abs(e.Y) > 5) Then
 
-                    Dim filePath As String = CStr(currentDraggedButton.Tag)
+    Dim filePath As String = CStr(currentDraggedButton.Tag)
 
-                    If String.IsNullOrEmpty(filePath) OrElse filePath.StartsWith("::{") Then
+    If String.IsNullOrEmpty(filePath) OrElse filePath.StartsWith("::{") Then
                         isDraggingOut = False
                     Else
                         ' Drag and Drop is for me an Advanced code, even with Gemini.
@@ -486,11 +498,11 @@ Public Class Desktop
 
                         Dim dropResult As DragDropEffects = currentDraggedButton.DoDragDrop(data, DragDropEffects.Move)
 
-                        If dropResult = DragDropEffects.Move Then
-                            If MovedIconPositions.ContainsKey(filePath) Then
+    If dropResult = DragDropEffects.Move Then
+    If MovedIconPositions.ContainsKey(filePath) Then
                                 MovedIconPositions.Remove(filePath)
                             End If
-                        End If
+    End If
 
                         currentDraggedButton.Capture = False
                         currentDraggedButton = Nothing
@@ -498,16 +510,16 @@ Public Class Desktop
 
                         LoadDesktopIcons()
                         Return
-                    End If
-                End If
+    End If
+    End If
 
-                If Not isDraggingOut Then
+    If Not isDraggingOut Then
                     currentDraggedButton.Capture = True
                     currentDraggedButton.Location = New Point(parentLocation.X - mouseOffset.X, parentLocation.Y - mouseOffset.Y)
                     wasDragged = True
                 End If
-            End If
-        End If
+    End If
+    End If
     End Sub
     Dim selectedPaths As New List(Of String)
     Private Sub Button_MouseUp(sender As Object, e As MouseEventArgs)
@@ -530,12 +542,28 @@ Public Class Desktop
         Else
             If e.Button = MouseButtons.Left Then
                 If CType(sender, Button).Tag.StartsWith("::{") Then
-                    Process.Start("explorer.exe", CType(sender, Button).Tag)
+                    If AppBar.UseExplorerFM = True Then
+                        If File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\explorer.exe") Then
+                            Process.Start("explorer.exe", CType(sender, Button).Tag)
+                        Else
+                            MsgBox("Default file explorer wasn't been found.")
+                        End If
+                    Else
+                        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "DisableCLSIDsWarnings", False) = False Then
+                            Select Case MessageBox.Show($"This item you want to open is a CLSID (with: ""{CType(sender, Button).Tag}"") It may happen your custom File Manager does not support CLSIDs. Do you still want to run this?", "CLSID detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
+                                Case DialogResult.Yes
+                                    AppBar.OpenDestination(CType(sender, Button).Tag)
+                            End Select
+                        Else
+                            AppBar.OpenDestination(CType(sender, Button).Tag)
+                        End If
+                    End If
+
                 Else
                     If File.Exists(CType(sender, Button).Tag) Then
                         Process.Start(CType(sender, Button).Tag)
                     ElseIf Directory.Exists(CType(sender, Button).Tag) Then
-                        Process.Start("explorer.exe", CType(sender, Button).Tag)
+                        AppBar.OpenDestination("""" & CType(sender, Button).Tag & """")
                     End If
                 End If
             ElseIf e.Button = MouseButtons.Right Then
@@ -864,6 +892,8 @@ Public Class Desktop
             MessageBox.Show("Path is invalid or doesn't exist: " & targetPath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End If
+
+        ' UNDER DESTRUCTION!!!
 
         Dim shell As Shell32.Shell = Nothing
         Dim folder As Shell32.Folder = Nothing
@@ -1452,6 +1482,10 @@ Public Class Desktop
     Private Sub DesktopCM_GotFocus(sender As Object, e As EventArgs) Handles DesktopCM.GotFocus
         DesktopCM.BringToFront()
     End Sub
+
+    Private Sub Desktop_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
+        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
+    End Sub
 End Class
 
 Public Class ShellHelpers
@@ -1497,7 +1531,6 @@ Public Class ShellHelpers
     <DllImport("user32.dll", SetLastError:=True)>
     Private Shared Function DestroyIcon(ByVal hIcon As IntPtr) As Boolean
     End Function
-
 
     Public Structure ShellItemInfo
         Public Icon As Bitmap
@@ -1577,6 +1610,7 @@ Public Class ShellHelpers
                 End If
             End Using
         Catch
+            ' best-effort fallback
         End Try
 
         If String.IsNullOrEmpty(currentInfo.DisplayName) Then

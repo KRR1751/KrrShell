@@ -36,11 +36,12 @@ Public Class WAT
     Public MouseAway As Boolean = False
 
 #Region " do NOT Activate the Window please. "
+    Public Const WS_EX_TOOLWINDOW As Long = &H80L
     Protected Overrides ReadOnly Property CreateParams() As CreateParams
         Get
             Dim value As CreateParams = MyBase.CreateParams
             'Don't allow the window to be activated.
-            value.ExStyle = value.ExStyle Or NativeConstants.WS_EX_NOACTIVATE
+            value.ExStyle = value.ExStyle Or NativeConstants.WS_EX_NOACTIVATE Or WS_EX_TOOLWINDOW
             Return value
         End Get
     End Property
@@ -55,7 +56,6 @@ Public Class WAT
     End Sub
 
     Protected Overrides Sub WndProc(ByRef m As System.Windows.Forms.Message)
-        'If CheckBox1.Checked = True Then
         If m.Msg = NativeConstants.WM_MOUSEACTIVATE Then
             'Tell Windows not to activate the window on a mouse click.
             m.Result = CType(NativeConstants.MA_NOACTIVATE, IntPtr)
@@ -261,7 +261,7 @@ Public Class WAT
             If Button4.BackgroundImage.Height > targetHeight Then
                 Dim aspectRatio As Double = CDbl(Button4.BackgroundImage.Width) / CDbl(Button4.BackgroundImage.Height)
                 Dim targetWidth As Integer = CInt(targetHeight * aspectRatio)
-                Me.Size = New Size(targetWidth - 10, 140)
+                Me.Size = New Size(targetWidth - 32, 140)
             Else
                 Me.Size = New Size(178, Button4.BackgroundImage.Height)
             End If

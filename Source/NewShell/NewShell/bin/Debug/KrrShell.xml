@@ -8,183 +8,148 @@ KrrShell
 <members>
 <member name="T:NewShell.My.Resources.Resources">
 <summary>
-  A strongly-typed resource class, for looking up localized strings, etc.
+  Třída prostředků se silnými typy pro vyhledávání lokalizovaných řetězců atp.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.ResourceManager">
 <summary>
-  Returns the cached ResourceManager instance used by this class.
+  Vrací instanci ResourceManager uloženou v mezipaměti použitou touto třídou.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Culture">
 <summary>
-  Overrides the current thread's CurrentUICulture property for all
-  resource lookups using this strongly typed resource class.
+  Potlačí vlastnost CurrentUICulture aktuálního vlákna pro všechna
+  vyhledání prostředků pomocí třídy prostředků se silnými typy.
 </summary>
 </member>
-<member name="P:NewShell.My.Resources.Resources._026">
+<member name="P:NewShell.My.Resources.Resources.ActionCenter">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
-<member name="P:NewShell.My.Resources.Resources._1">
+<member name="P:NewShell.My.Resources.Resources.AppBarMain">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
-<member name="P:NewShell.My.Resources.Resources._120">
+<member name="P:NewShell.My.Resources.Resources.AppBarMainTransparent">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._121">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._122">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._123">
-<summary>
-  Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._124">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._146">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._3048">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources._Nothing">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Clock">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Close">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
-<member name="P:NewShell.My.Resources.Resources.EmptyWin7Dog">
+<member name="P:NewShell.My.Resources.Resources.DefaultUserPicture">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.FileExplorer">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.FileExplorerSmall">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.fixed1">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.Gradient_Wallpaper_3008832671">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Information">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.left">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.main">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.main1">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.mainTransparent">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.mainTransparent1">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Maximize">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Minimize">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.Network">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Normalize">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Pin">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Program">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.ProgramMedium">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.ProgramSmall">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
-</summary>
-</member>
-<member name="P:NewShell.My.Resources.Resources.right">
-<summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.RunDialogIcon">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 <member name="P:NewShell.My.Resources.Resources.Settings">
 <summary>
-  Looks up a localized resource of type System.Drawing.Bitmap.
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.StartLeft">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.StartRight">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.VolumeAbove50">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Icon podobný (Ikona).
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.VolumeBelow50">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.VolumeFull">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.VolumeMute">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:NewShell.My.Resources.Resources.VolumeZero">
+<summary>
+  Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
 </summary>
 </member>
 </members>

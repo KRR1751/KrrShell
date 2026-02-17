@@ -80,6 +80,8 @@ Public Class RunDialog
         Me.Location = New Point(0, SystemInformation.WorkingArea.Height - Me.MinimumSize.Height)
         Me.Activate()
 
+        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
+
         ComboBox3.SelectedIndex = 0
 
         If IsProgramRunningAsAdmin() = True Then
