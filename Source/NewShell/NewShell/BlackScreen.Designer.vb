@@ -22,7 +22,13 @@ Partial Class BlackScreen
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Me.FadeTimer = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
+        '
+        'FadeTimer
+        '
+        Me.FadeTimer.Interval = 5
         '
         'BlackScreen
         '
@@ -42,4 +48,6 @@ Partial Class BlackScreen
         Me.ResumeLayout(False)
 
     End Sub
+
+    Friend WithEvents FadeTimer As Timer
 End Class

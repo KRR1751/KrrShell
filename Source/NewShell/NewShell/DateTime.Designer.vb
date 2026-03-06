@@ -35,6 +35,36 @@ Partial Class DateAndTime
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage4 = New System.Windows.Forms.TabPage()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.GroupBox10 = New System.Windows.Forms.GroupBox()
+        Me.Button20 = New System.Windows.Forms.Button()
+        Me.Button18 = New System.Windows.Forms.Button()
+        Me.GroupBox8 = New System.Windows.Forms.GroupBox()
+        Me.Button19 = New System.Windows.Forms.Button()
+        Me.Label40 = New System.Windows.Forms.Label()
+        Me.DateTimePicker1 = New System.Windows.Forms.DateTimePicker()
+        Me.ComboBox5 = New System.Windows.Forms.ComboBox()
+        Me.CheckBox17 = New System.Windows.Forms.CheckBox()
+        Me.GroupBox9 = New System.Windows.Forms.GroupBox()
+        Me.SU_CHB = New System.Windows.Forms.CheckBox()
+        Me.SA_CHB = New System.Windows.Forms.CheckBox()
+        Me.F_CHB = New System.Windows.Forms.CheckBox()
+        Me.Th_CHB = New System.Windows.Forms.CheckBox()
+        Me.W_CHB = New System.Windows.Forms.CheckBox()
+        Me.T_CHB = New System.Windows.Forms.CheckBox()
+        Me.M_CHB = New System.Windows.Forms.CheckBox()
+        Me.Label33 = New System.Windows.Forms.Label()
+        Me.TextBox2 = New System.Windows.Forms.TextBox()
+        Me.A_S = New System.Windows.Forms.NumericUpDown()
+        Me.Label32 = New System.Windows.Forms.Label()
+        Me.A_M = New System.Windows.Forms.NumericUpDown()
+        Me.A_H = New System.Windows.Forms.NumericUpDown()
+        Me.Label31 = New System.Windows.Forms.Label()
+        Me.Label28 = New System.Windows.Forms.Label()
+        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.Button16 = New System.Windows.Forms.Button()
+        Me.Button17 = New System.Windows.Forms.Button()
+        Me.AlarmList = New System.Windows.Forms.ListBox()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
@@ -102,42 +132,19 @@ Partial Class DateAndTime
         Me.Button1 = New System.Windows.Forms.Button()
         Me.tmrSWUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.tmrTCountdown = New System.Windows.Forms.Timer(Me.components)
-        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
-        Me.Button16 = New System.Windows.Forms.Button()
-        Me.Button17 = New System.Windows.Forms.Button()
-        Me.GroupBox8 = New System.Windows.Forms.GroupBox()
-        Me.GroupBox10 = New System.Windows.Forms.GroupBox()
-        Me.Button20 = New System.Windows.Forms.Button()
-        Me.Button18 = New System.Windows.Forms.Button()
-        Me.Label40 = New System.Windows.Forms.Label()
-        Me.Button19 = New System.Windows.Forms.Button()
-        Me.ComboBox5 = New System.Windows.Forms.ComboBox()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
-        Me.Label33 = New System.Windows.Forms.Label()
-        Me.DateTimePicker1 = New System.Windows.Forms.DateTimePicker()
-        Me.Label32 = New System.Windows.Forms.Label()
-        Me.CheckBox17 = New System.Windows.Forms.CheckBox()
-        Me.GroupBox9 = New System.Windows.Forms.GroupBox()
-        Me.SU_CHB = New System.Windows.Forms.CheckBox()
-        Me.SA_CHB = New System.Windows.Forms.CheckBox()
-        Me.F_CHB = New System.Windows.Forms.CheckBox()
-        Me.Th_CHB = New System.Windows.Forms.CheckBox()
-        Me.W_CHB = New System.Windows.Forms.CheckBox()
-        Me.T_CHB = New System.Windows.Forms.CheckBox()
-        Me.M_CHB = New System.Windows.Forms.CheckBox()
-        Me.A_S = New System.Windows.Forms.NumericUpDown()
-        Me.A_M = New System.Windows.Forms.NumericUpDown()
-        Me.A_H = New System.Windows.Forms.NumericUpDown()
-        Me.Label31 = New System.Windows.Forms.Label()
-        Me.Label28 = New System.Windows.Forms.Label()
-        Me.AlarmList = New System.Windows.Forms.ListBox()
-        Me.Label10 = New System.Windows.Forms.Label()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
         Me.Panel3.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabControl1.SuspendLayout()
         Me.TabPage4.SuspendLayout()
+        Me.GroupBox10.SuspendLayout()
+        Me.GroupBox8.SuspendLayout()
+        Me.GroupBox9.SuspendLayout()
+        CType(Me.A_S, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.A_M, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.A_H, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.GroupBox7.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
@@ -158,13 +165,6 @@ Partial Class DateAndTime
         Me.GroupBox1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.Panel2.SuspendLayout()
-        Me.GroupBox7.SuspendLayout()
-        Me.GroupBox8.SuspendLayout()
-        Me.GroupBox10.SuspendLayout()
-        Me.GroupBox9.SuspendLayout()
-        CType(Me.A_S, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.A_M, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.A_H, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'PictureBox1
@@ -236,7 +236,7 @@ Partial Class DateAndTime
         Me.Label3.AutoSize = True
         Me.Label3.Location = New System.Drawing.Point(3, 6)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(72, 15)
+        Me.Label3.Size = New System.Drawing.Size(71, 15)
         Me.Label3.TabIndex = 7
         Me.Label3.Text = "Time Zones:"
         '
@@ -303,6 +303,318 @@ Partial Class DateAndTime
         Me.TabPage4.Size = New System.Drawing.Size(381, 265)
         Me.TabPage4.TabIndex = 3
         Me.TabPage4.Text = "Alarms"
+        '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(178, 106)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(180, 30)
+        Me.Label10.TabIndex = 77
+        Me.Label10.Text = "Alarms are currently not avalible." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Check out here soon!"
+        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'GroupBox10
+        '
+        Me.GroupBox10.Controls.Add(Me.Button20)
+        Me.GroupBox10.Controls.Add(Me.Button18)
+        Me.GroupBox10.Location = New System.Drawing.Point(146, 216)
+        Me.GroupBox10.Name = "GroupBox10"
+        Me.GroupBox10.Size = New System.Drawing.Size(229, 43)
+        Me.GroupBox10.TabIndex = 76
+        Me.GroupBox10.TabStop = False
+        Me.GroupBox10.Text = "Actions"
+        Me.GroupBox10.Visible = False
+        '
+        'Button20
+        '
+        Me.Button20.Location = New System.Drawing.Point(85, 14)
+        Me.Button20.Name = "Button20"
+        Me.Button20.Size = New System.Drawing.Size(75, 23)
+        Me.Button20.TabIndex = 78
+        Me.Button20.Text = "Edit"
+        Me.Button20.UseVisualStyleBackColor = True
+        '
+        'Button18
+        '
+        Me.Button18.Location = New System.Drawing.Point(6, 14)
+        Me.Button18.Name = "Button18"
+        Me.Button18.Size = New System.Drawing.Size(75, 23)
+        Me.Button18.TabIndex = 0
+        Me.Button18.Text = "Create"
+        Me.Button18.UseVisualStyleBackColor = True
+        '
+        'GroupBox8
+        '
+        Me.GroupBox8.Controls.Add(Me.Button19)
+        Me.GroupBox8.Controls.Add(Me.Label40)
+        Me.GroupBox8.Controls.Add(Me.DateTimePicker1)
+        Me.GroupBox8.Controls.Add(Me.ComboBox5)
+        Me.GroupBox8.Controls.Add(Me.CheckBox17)
+        Me.GroupBox8.Controls.Add(Me.GroupBox9)
+        Me.GroupBox8.Controls.Add(Me.Label33)
+        Me.GroupBox8.Controls.Add(Me.TextBox2)
+        Me.GroupBox8.Controls.Add(Me.A_S)
+        Me.GroupBox8.Controls.Add(Me.Label32)
+        Me.GroupBox8.Controls.Add(Me.A_M)
+        Me.GroupBox8.Controls.Add(Me.A_H)
+        Me.GroupBox8.Controls.Add(Me.Label31)
+        Me.GroupBox8.Controls.Add(Me.Label28)
+        Me.GroupBox8.Location = New System.Drawing.Point(146, 8)
+        Me.GroupBox8.Name = "GroupBox8"
+        Me.GroupBox8.RightToLeft = System.Windows.Forms.RightToLeft.No
+        Me.GroupBox8.Size = New System.Drawing.Size(229, 207)
+        Me.GroupBox8.TabIndex = 25
+        Me.GroupBox8.TabStop = False
+        Me.GroupBox8.Text = "New Alarm"
+        Me.GroupBox8.Visible = False
+        '
+        'Button19
+        '
+        Me.Button19.Location = New System.Drawing.Point(199, 176)
+        Me.Button19.Name = "Button19"
+        Me.Button19.Size = New System.Drawing.Size(24, 23)
+        Me.Button19.TabIndex = 75
+        Me.Button19.Text = "..."
+        Me.Button19.UseVisualStyleBackColor = True
+        '
+        'Label40
+        '
+        Me.Label40.AutoSize = True
+        Me.Label40.Location = New System.Drawing.Point(6, 32)
+        Me.Label40.Name = "Label40"
+        Me.Label40.Size = New System.Drawing.Size(55, 15)
+        Me.Label40.TabIndex = 77
+        Me.Label40.Text = "1. 1. 2024"
+        '
+        'DateTimePicker1
+        '
+        Me.DateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
+        Me.DateTimePicker1.Location = New System.Drawing.Point(6, 29)
+        Me.DateTimePicker1.Name = "DateTimePicker1"
+        Me.DateTimePicker1.Size = New System.Drawing.Size(217, 23)
+        Me.DateTimePicker1.TabIndex = 25
+        '
+        'ComboBox5
+        '
+        Me.ComboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox5.FormattingEnabled = True
+        Me.ComboBox5.Items.AddRange(New Object() {"Play Alarm/MsgBox", "Run a Program"})
+        Me.ComboBox5.Location = New System.Drawing.Point(107, 177)
+        Me.ComboBox5.Name = "ComboBox5"
+        Me.ComboBox5.Size = New System.Drawing.Size(92, 23)
+        Me.ComboBox5.TabIndex = 74
+        '
+        'CheckBox17
+        '
+        Me.CheckBox17.AutoSize = True
+        Me.CheckBox17.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.CheckBox17.Location = New System.Drawing.Point(11, 55)
+        Me.CheckBox17.Name = "CheckBox17"
+        Me.CheckBox17.Size = New System.Drawing.Size(67, 17)
+        Me.CheckBox17.TabIndex = 70
+        Me.CheckBox17.Text = "Repeat"
+        Me.CheckBox17.UseVisualStyleBackColor = True
+        '
+        'GroupBox9
+        '
+        Me.GroupBox9.Controls.Add(Me.SU_CHB)
+        Me.GroupBox9.Controls.Add(Me.SA_CHB)
+        Me.GroupBox9.Controls.Add(Me.F_CHB)
+        Me.GroupBox9.Controls.Add(Me.Th_CHB)
+        Me.GroupBox9.Controls.Add(Me.W_CHB)
+        Me.GroupBox9.Controls.Add(Me.T_CHB)
+        Me.GroupBox9.Controls.Add(Me.M_CHB)
+        Me.GroupBox9.Enabled = False
+        Me.GroupBox9.Location = New System.Drawing.Point(6, 56)
+        Me.GroupBox9.Name = "GroupBox9"
+        Me.GroupBox9.Size = New System.Drawing.Size(93, 146)
+        Me.GroupBox9.TabIndex = 69
+        Me.GroupBox9.TabStop = False
+        '
+        'SU_CHB
+        '
+        Me.SU_CHB.AutoSize = True
+        Me.SU_CHB.Location = New System.Drawing.Point(5, 125)
+        Me.SU_CHB.Name = "SU_CHB"
+        Me.SU_CHB.Size = New System.Drawing.Size(65, 19)
+        Me.SU_CHB.TabIndex = 6
+        Me.SU_CHB.Text = "Sunday"
+        Me.SU_CHB.UseVisualStyleBackColor = True
+        '
+        'SA_CHB
+        '
+        Me.SA_CHB.AutoSize = True
+        Me.SA_CHB.Location = New System.Drawing.Point(5, 107)
+        Me.SA_CHB.Name = "SA_CHB"
+        Me.SA_CHB.Size = New System.Drawing.Size(72, 19)
+        Me.SA_CHB.TabIndex = 5
+        Me.SA_CHB.Text = "Saturday"
+        Me.SA_CHB.UseVisualStyleBackColor = True
+        '
+        'F_CHB
+        '
+        Me.F_CHB.AutoSize = True
+        Me.F_CHB.Location = New System.Drawing.Point(5, 89)
+        Me.F_CHB.Name = "F_CHB"
+        Me.F_CHB.Size = New System.Drawing.Size(58, 19)
+        Me.F_CHB.TabIndex = 4
+        Me.F_CHB.Text = "Friday"
+        Me.F_CHB.UseVisualStyleBackColor = True
+        '
+        'Th_CHB
+        '
+        Me.Th_CHB.AutoSize = True
+        Me.Th_CHB.Location = New System.Drawing.Point(5, 71)
+        Me.Th_CHB.Name = "Th_CHB"
+        Me.Th_CHB.Size = New System.Drawing.Size(74, 19)
+        Me.Th_CHB.TabIndex = 3
+        Me.Th_CHB.Text = "Thursday"
+        Me.Th_CHB.UseVisualStyleBackColor = True
+        '
+        'W_CHB
+        '
+        Me.W_CHB.Location = New System.Drawing.Point(5, 53)
+        Me.W_CHB.Name = "W_CHB"
+        Me.W_CHB.Size = New System.Drawing.Size(87, 17)
+        Me.W_CHB.TabIndex = 2
+        Me.W_CHB.Text = "Wednesday"
+        Me.W_CHB.UseVisualStyleBackColor = True
+        '
+        'T_CHB
+        '
+        Me.T_CHB.AutoSize = True
+        Me.T_CHB.Location = New System.Drawing.Point(5, 35)
+        Me.T_CHB.Name = "T_CHB"
+        Me.T_CHB.Size = New System.Drawing.Size(69, 19)
+        Me.T_CHB.TabIndex = 1
+        Me.T_CHB.Text = "Tuesday"
+        Me.T_CHB.UseVisualStyleBackColor = True
+        '
+        'M_CHB
+        '
+        Me.M_CHB.AutoSize = True
+        Me.M_CHB.Location = New System.Drawing.Point(5, 17)
+        Me.M_CHB.Name = "M_CHB"
+        Me.M_CHB.Size = New System.Drawing.Size(70, 19)
+        Me.M_CHB.TabIndex = 0
+        Me.M_CHB.Text = "Monday"
+        Me.M_CHB.UseVisualStyleBackColor = True
+        '
+        'Label33
+        '
+        Me.Label33.AutoSize = True
+        Me.Label33.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Label33.Location = New System.Drawing.Point(104, 164)
+        Me.Label33.Name = "Label33"
+        Me.Label33.Size = New System.Drawing.Size(78, 15)
+        Me.Label33.TabIndex = 73
+        Me.Label33.Text = "Action to do:"
+        '
+        'TextBox2
+        '
+        Me.TextBox2.Location = New System.Drawing.Point(107, 114)
+        Me.TextBox2.Multiline = True
+        Me.TextBox2.Name = "TextBox2"
+        Me.TextBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.TextBox2.Size = New System.Drawing.Size(116, 47)
+        Me.TextBox2.TabIndex = 72
+        '
+        'A_S
+        '
+        Me.A_S.Location = New System.Drawing.Point(187, 72)
+        Me.A_S.Maximum = New Decimal(New Integer() {59, 0, 0, 0})
+        Me.A_S.Name = "A_S"
+        Me.A_S.Size = New System.Drawing.Size(36, 23)
+        Me.A_S.TabIndex = 65
+        '
+        'Label32
+        '
+        Me.Label32.AutoSize = True
+        Me.Label32.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Label32.Location = New System.Drawing.Point(104, 98)
+        Me.Label32.Name = "Label32"
+        Me.Label32.Size = New System.Drawing.Size(74, 15)
+        Me.Label32.TabIndex = 71
+        Me.Label32.Text = "Description:"
+        '
+        'A_M
+        '
+        Me.A_M.Location = New System.Drawing.Point(147, 72)
+        Me.A_M.Maximum = New Decimal(New Integer() {59, 0, 0, 0})
+        Me.A_M.Name = "A_M"
+        Me.A_M.Size = New System.Drawing.Size(36, 23)
+        Me.A_M.TabIndex = 64
+        '
+        'A_H
+        '
+        Me.A_H.Location = New System.Drawing.Point(107, 72)
+        Me.A_H.Maximum = New Decimal(New Integer() {23, 0, 0, 0})
+        Me.A_H.Name = "A_H"
+        Me.A_H.Size = New System.Drawing.Size(36, 23)
+        Me.A_H.TabIndex = 63
+        '
+        'Label31
+        '
+        Me.Label31.AutoSize = True
+        Me.Label31.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label31.Location = New System.Drawing.Point(104, 56)
+        Me.Label31.Name = "Label31"
+        Me.Label31.Size = New System.Drawing.Size(66, 15)
+        Me.Label31.TabIndex = 66
+        Me.Label31.Text = "HH.mm.ss:"
+        '
+        'Label28
+        '
+        Me.Label28.AutoSize = True
+        Me.Label28.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Label28.Location = New System.Drawing.Point(3, 16)
+        Me.Label28.Name = "Label28"
+        Me.Label28.Size = New System.Drawing.Size(25, 15)
+        Me.Label28.TabIndex = 26
+        Me.Label28.Text = "At?"
+        '
+        'GroupBox7
+        '
+        Me.GroupBox7.Controls.Add(Me.Button16)
+        Me.GroupBox7.Controls.Add(Me.Button17)
+        Me.GroupBox7.Controls.Add(Me.AlarmList)
+        Me.GroupBox7.Enabled = False
+        Me.GroupBox7.Location = New System.Drawing.Point(8, 8)
+        Me.GroupBox7.Name = "GroupBox7"
+        Me.GroupBox7.Size = New System.Drawing.Size(132, 251)
+        Me.GroupBox7.TabIndex = 16
+        Me.GroupBox7.TabStop = False
+        Me.GroupBox7.Text = "Alarm List"
+        '
+        'Button16
+        '
+        Me.Button16.Location = New System.Drawing.Point(6, 22)
+        Me.Button16.Name = "Button16"
+        Me.Button16.Size = New System.Drawing.Size(59, 23)
+        Me.Button16.TabIndex = 5
+        Me.Button16.Text = "New"
+        Me.Button16.UseVisualStyleBackColor = True
+        '
+        'Button17
+        '
+        Me.Button17.Enabled = False
+        Me.Button17.Location = New System.Drawing.Point(66, 22)
+        Me.Button17.Name = "Button17"
+        Me.Button17.Size = New System.Drawing.Size(59, 23)
+        Me.Button17.TabIndex = 6
+        Me.Button17.Text = "Remove"
+        Me.Button17.UseVisualStyleBackColor = True
+        '
+        'AlarmList
+        '
+        Me.AlarmList.FormattingEnabled = True
+        Me.AlarmList.IntegralHeight = False
+        Me.AlarmList.ItemHeight = 15
+        Me.AlarmList.Location = New System.Drawing.Point(5, 49)
+        Me.AlarmList.Name = "AlarmList"
+        Me.AlarmList.Size = New System.Drawing.Size(120, 196)
+        Me.AlarmList.TabIndex = 9
         '
         'TabPage3
         '
@@ -985,318 +1297,6 @@ Partial Class DateAndTime
         '
         Me.tmrTCountdown.Interval = 1000
         '
-        'GroupBox7
-        '
-        Me.GroupBox7.Controls.Add(Me.Button16)
-        Me.GroupBox7.Controls.Add(Me.Button17)
-        Me.GroupBox7.Controls.Add(Me.AlarmList)
-        Me.GroupBox7.Enabled = False
-        Me.GroupBox7.Location = New System.Drawing.Point(8, 8)
-        Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(132, 251)
-        Me.GroupBox7.TabIndex = 16
-        Me.GroupBox7.TabStop = False
-        Me.GroupBox7.Text = "Alarm List"
-        '
-        'Button16
-        '
-        Me.Button16.Location = New System.Drawing.Point(6, 22)
-        Me.Button16.Name = "Button16"
-        Me.Button16.Size = New System.Drawing.Size(59, 23)
-        Me.Button16.TabIndex = 5
-        Me.Button16.Text = "New"
-        Me.Button16.UseVisualStyleBackColor = True
-        '
-        'Button17
-        '
-        Me.Button17.Enabled = False
-        Me.Button17.Location = New System.Drawing.Point(66, 22)
-        Me.Button17.Name = "Button17"
-        Me.Button17.Size = New System.Drawing.Size(59, 23)
-        Me.Button17.TabIndex = 6
-        Me.Button17.Text = "Remove"
-        Me.Button17.UseVisualStyleBackColor = True
-        '
-        'GroupBox8
-        '
-        Me.GroupBox8.Controls.Add(Me.Button19)
-        Me.GroupBox8.Controls.Add(Me.Label40)
-        Me.GroupBox8.Controls.Add(Me.DateTimePicker1)
-        Me.GroupBox8.Controls.Add(Me.ComboBox5)
-        Me.GroupBox8.Controls.Add(Me.CheckBox17)
-        Me.GroupBox8.Controls.Add(Me.GroupBox9)
-        Me.GroupBox8.Controls.Add(Me.Label33)
-        Me.GroupBox8.Controls.Add(Me.TextBox2)
-        Me.GroupBox8.Controls.Add(Me.A_S)
-        Me.GroupBox8.Controls.Add(Me.Label32)
-        Me.GroupBox8.Controls.Add(Me.A_M)
-        Me.GroupBox8.Controls.Add(Me.A_H)
-        Me.GroupBox8.Controls.Add(Me.Label31)
-        Me.GroupBox8.Controls.Add(Me.Label28)
-        Me.GroupBox8.Location = New System.Drawing.Point(146, 8)
-        Me.GroupBox8.Name = "GroupBox8"
-        Me.GroupBox8.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.GroupBox8.Size = New System.Drawing.Size(229, 207)
-        Me.GroupBox8.TabIndex = 25
-        Me.GroupBox8.TabStop = False
-        Me.GroupBox8.Text = "New Alarm"
-        Me.GroupBox8.Visible = False
-        '
-        'GroupBox10
-        '
-        Me.GroupBox10.Controls.Add(Me.Button20)
-        Me.GroupBox10.Controls.Add(Me.Button18)
-        Me.GroupBox10.Location = New System.Drawing.Point(146, 216)
-        Me.GroupBox10.Name = "GroupBox10"
-        Me.GroupBox10.Size = New System.Drawing.Size(229, 43)
-        Me.GroupBox10.TabIndex = 76
-        Me.GroupBox10.TabStop = False
-        Me.GroupBox10.Text = "Actions"
-        Me.GroupBox10.Visible = False
-        '
-        'Button20
-        '
-        Me.Button20.Location = New System.Drawing.Point(85, 14)
-        Me.Button20.Name = "Button20"
-        Me.Button20.Size = New System.Drawing.Size(75, 23)
-        Me.Button20.TabIndex = 78
-        Me.Button20.Text = "Edit"
-        Me.Button20.UseVisualStyleBackColor = True
-        '
-        'Button18
-        '
-        Me.Button18.Location = New System.Drawing.Point(6, 14)
-        Me.Button18.Name = "Button18"
-        Me.Button18.Size = New System.Drawing.Size(75, 23)
-        Me.Button18.TabIndex = 0
-        Me.Button18.Text = "Create"
-        Me.Button18.UseVisualStyleBackColor = True
-        '
-        'Label40
-        '
-        Me.Label40.AutoSize = True
-        Me.Label40.Location = New System.Drawing.Point(6, 32)
-        Me.Label40.Name = "Label40"
-        Me.Label40.Size = New System.Drawing.Size(55, 15)
-        Me.Label40.TabIndex = 77
-        Me.Label40.Text = "1. 1. 2024"
-        '
-        'Button19
-        '
-        Me.Button19.Location = New System.Drawing.Point(199, 176)
-        Me.Button19.Name = "Button19"
-        Me.Button19.Size = New System.Drawing.Size(24, 23)
-        Me.Button19.TabIndex = 75
-        Me.Button19.Text = "..."
-        Me.Button19.UseVisualStyleBackColor = True
-        '
-        'ComboBox5
-        '
-        Me.ComboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox5.FormattingEnabled = True
-        Me.ComboBox5.Items.AddRange(New Object() {"Play Alarm/MsgBox", "Run a Program"})
-        Me.ComboBox5.Location = New System.Drawing.Point(107, 177)
-        Me.ComboBox5.Name = "ComboBox5"
-        Me.ComboBox5.Size = New System.Drawing.Size(92, 23)
-        Me.ComboBox5.TabIndex = 74
-        '
-        'TextBox2
-        '
-        Me.TextBox2.Location = New System.Drawing.Point(107, 114)
-        Me.TextBox2.Multiline = True
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.TextBox2.Size = New System.Drawing.Size(116, 47)
-        Me.TextBox2.TabIndex = 72
-        '
-        'Label33
-        '
-        Me.Label33.AutoSize = True
-        Me.Label33.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label33.Location = New System.Drawing.Point(104, 164)
-        Me.Label33.Name = "Label33"
-        Me.Label33.Size = New System.Drawing.Size(78, 15)
-        Me.Label33.TabIndex = 73
-        Me.Label33.Text = "Action to do:"
-        '
-        'DateTimePicker1
-        '
-        Me.DateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
-        Me.DateTimePicker1.Location = New System.Drawing.Point(6, 29)
-        Me.DateTimePicker1.Name = "DateTimePicker1"
-        Me.DateTimePicker1.Size = New System.Drawing.Size(217, 23)
-        Me.DateTimePicker1.TabIndex = 25
-        '
-        'Label32
-        '
-        Me.Label32.AutoSize = True
-        Me.Label32.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label32.Location = New System.Drawing.Point(104, 98)
-        Me.Label32.Name = "Label32"
-        Me.Label32.Size = New System.Drawing.Size(74, 15)
-        Me.Label32.TabIndex = 71
-        Me.Label32.Text = "Description:"
-        '
-        'CheckBox17
-        '
-        Me.CheckBox17.AutoSize = True
-        Me.CheckBox17.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.CheckBox17.Location = New System.Drawing.Point(11, 55)
-        Me.CheckBox17.Name = "CheckBox17"
-        Me.CheckBox17.Size = New System.Drawing.Size(67, 17)
-        Me.CheckBox17.TabIndex = 70
-        Me.CheckBox17.Text = "Repeat"
-        Me.CheckBox17.UseVisualStyleBackColor = True
-        '
-        'GroupBox9
-        '
-        Me.GroupBox9.Controls.Add(Me.SU_CHB)
-        Me.GroupBox9.Controls.Add(Me.SA_CHB)
-        Me.GroupBox9.Controls.Add(Me.F_CHB)
-        Me.GroupBox9.Controls.Add(Me.Th_CHB)
-        Me.GroupBox9.Controls.Add(Me.W_CHB)
-        Me.GroupBox9.Controls.Add(Me.T_CHB)
-        Me.GroupBox9.Controls.Add(Me.M_CHB)
-        Me.GroupBox9.Enabled = False
-        Me.GroupBox9.Location = New System.Drawing.Point(6, 56)
-        Me.GroupBox9.Name = "GroupBox9"
-        Me.GroupBox9.Size = New System.Drawing.Size(93, 146)
-        Me.GroupBox9.TabIndex = 69
-        Me.GroupBox9.TabStop = False
-        '
-        'SU_CHB
-        '
-        Me.SU_CHB.AutoSize = True
-        Me.SU_CHB.Location = New System.Drawing.Point(5, 125)
-        Me.SU_CHB.Name = "SU_CHB"
-        Me.SU_CHB.Size = New System.Drawing.Size(65, 19)
-        Me.SU_CHB.TabIndex = 6
-        Me.SU_CHB.Text = "Sunday"
-        Me.SU_CHB.UseVisualStyleBackColor = True
-        '
-        'SA_CHB
-        '
-        Me.SA_CHB.AutoSize = True
-        Me.SA_CHB.Location = New System.Drawing.Point(5, 107)
-        Me.SA_CHB.Name = "SA_CHB"
-        Me.SA_CHB.Size = New System.Drawing.Size(72, 19)
-        Me.SA_CHB.TabIndex = 5
-        Me.SA_CHB.Text = "Saturday"
-        Me.SA_CHB.UseVisualStyleBackColor = True
-        '
-        'F_CHB
-        '
-        Me.F_CHB.AutoSize = True
-        Me.F_CHB.Location = New System.Drawing.Point(5, 89)
-        Me.F_CHB.Name = "F_CHB"
-        Me.F_CHB.Size = New System.Drawing.Size(58, 19)
-        Me.F_CHB.TabIndex = 4
-        Me.F_CHB.Text = "Friday"
-        Me.F_CHB.UseVisualStyleBackColor = True
-        '
-        'Th_CHB
-        '
-        Me.Th_CHB.AutoSize = True
-        Me.Th_CHB.Location = New System.Drawing.Point(5, 71)
-        Me.Th_CHB.Name = "Th_CHB"
-        Me.Th_CHB.Size = New System.Drawing.Size(75, 19)
-        Me.Th_CHB.TabIndex = 3
-        Me.Th_CHB.Text = "Thursday"
-        Me.Th_CHB.UseVisualStyleBackColor = True
-        '
-        'W_CHB
-        '
-        Me.W_CHB.Location = New System.Drawing.Point(5, 53)
-        Me.W_CHB.Name = "W_CHB"
-        Me.W_CHB.Size = New System.Drawing.Size(87, 17)
-        Me.W_CHB.TabIndex = 2
-        Me.W_CHB.Text = "Wednesday"
-        Me.W_CHB.UseVisualStyleBackColor = True
-        '
-        'T_CHB
-        '
-        Me.T_CHB.AutoSize = True
-        Me.T_CHB.Location = New System.Drawing.Point(5, 35)
-        Me.T_CHB.Name = "T_CHB"
-        Me.T_CHB.Size = New System.Drawing.Size(70, 19)
-        Me.T_CHB.TabIndex = 1
-        Me.T_CHB.Text = "Tuesday"
-        Me.T_CHB.UseVisualStyleBackColor = True
-        '
-        'M_CHB
-        '
-        Me.M_CHB.AutoSize = True
-        Me.M_CHB.Location = New System.Drawing.Point(5, 17)
-        Me.M_CHB.Name = "M_CHB"
-        Me.M_CHB.Size = New System.Drawing.Size(70, 19)
-        Me.M_CHB.TabIndex = 0
-        Me.M_CHB.Text = "Monday"
-        Me.M_CHB.UseVisualStyleBackColor = True
-        '
-        'A_S
-        '
-        Me.A_S.Location = New System.Drawing.Point(187, 72)
-        Me.A_S.Maximum = New Decimal(New Integer() {59, 0, 0, 0})
-        Me.A_S.Name = "A_S"
-        Me.A_S.Size = New System.Drawing.Size(36, 23)
-        Me.A_S.TabIndex = 65
-        '
-        'A_M
-        '
-        Me.A_M.Location = New System.Drawing.Point(147, 72)
-        Me.A_M.Maximum = New Decimal(New Integer() {59, 0, 0, 0})
-        Me.A_M.Name = "A_M"
-        Me.A_M.Size = New System.Drawing.Size(36, 23)
-        Me.A_M.TabIndex = 64
-        '
-        'A_H
-        '
-        Me.A_H.Location = New System.Drawing.Point(107, 72)
-        Me.A_H.Maximum = New Decimal(New Integer() {23, 0, 0, 0})
-        Me.A_H.Name = "A_H"
-        Me.A_H.Size = New System.Drawing.Size(36, 23)
-        Me.A_H.TabIndex = 63
-        '
-        'Label31
-        '
-        Me.Label31.AutoSize = True
-        Me.Label31.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label31.Location = New System.Drawing.Point(104, 56)
-        Me.Label31.Name = "Label31"
-        Me.Label31.Size = New System.Drawing.Size(66, 15)
-        Me.Label31.TabIndex = 66
-        Me.Label31.Text = "HH.mm.ss:"
-        '
-        'Label28
-        '
-        Me.Label28.AutoSize = True
-        Me.Label28.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label28.Location = New System.Drawing.Point(3, 16)
-        Me.Label28.Name = "Label28"
-        Me.Label28.Size = New System.Drawing.Size(25, 15)
-        Me.Label28.TabIndex = 26
-        Me.Label28.Text = "At?"
-        '
-        'AlarmList
-        '
-        Me.AlarmList.FormattingEnabled = True
-        Me.AlarmList.IntegralHeight = False
-        Me.AlarmList.ItemHeight = 15
-        Me.AlarmList.Location = New System.Drawing.Point(5, 49)
-        Me.AlarmList.Name = "AlarmList"
-        Me.AlarmList.Size = New System.Drawing.Size(120, 196)
-        Me.AlarmList.TabIndex = 9
-        '
-        'Label10
-        '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(178, 106)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(180, 30)
-        Me.Label10.TabIndex = 77
-        Me.Label10.Text = "Alarms are currently not avalible." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Check out here soon!"
-        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
         'DateAndTime
         '
         Me.AcceptButton = Me.btnOK
@@ -1321,6 +1321,15 @@ Partial Class DateAndTime
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage4.ResumeLayout(False)
         Me.TabPage4.PerformLayout()
+        Me.GroupBox10.ResumeLayout(False)
+        Me.GroupBox8.ResumeLayout(False)
+        Me.GroupBox8.PerformLayout()
+        Me.GroupBox9.ResumeLayout(False)
+        Me.GroupBox9.PerformLayout()
+        CType(Me.A_S, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.A_M, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.A_H, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.GroupBox7.ResumeLayout(False)
         Me.TabPage3.ResumeLayout(False)
         Me.GroupBox6.ResumeLayout(False)
         Me.GroupBox6.PerformLayout()
@@ -1348,15 +1357,6 @@ Partial Class DateAndTime
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage1.PerformLayout()
         Me.Panel2.ResumeLayout(False)
-        Me.GroupBox7.ResumeLayout(False)
-        Me.GroupBox8.ResumeLayout(False)
-        Me.GroupBox8.PerformLayout()
-        Me.GroupBox10.ResumeLayout(False)
-        Me.GroupBox9.ResumeLayout(False)
-        Me.GroupBox9.PerformLayout()
-        CType(Me.A_S, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.A_M, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.A_H, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub

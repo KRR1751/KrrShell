@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+Imports System.Media
 Imports System.Reflection.Emit
 Imports System.Runtime.InteropServices
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
@@ -586,7 +587,7 @@ Public Class DateAndTime
     Private TotalSeconds As Integer = 0
     Private IsPaused As Boolean = False
 
-    Private Player As Object = CreateObject("WMPlayer.OCX")
+    Private Player As New SoundPlayer
 
     Public DefAlarmFilePath As String = Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\Media\Alarm01.wav"
     Public DefVolume As Integer = 50
@@ -659,7 +660,7 @@ Public Class DateAndTime
                 End If
             End If
 
-            Player.controls.stop()
+            Player.Stop()
 
             btnTStart.Text = "Start"
             btnTPause.Text = "Pause"
@@ -678,10 +679,10 @@ Public Class DateAndTime
 
     Private Sub PlayAlarm()
         Try
-            Player.URL = DefAlarmFilePath
-            Player.settings.setMode("loop", DefIsLoop)
-            Player.settings.volume = DefVolume
-            Player.controls.play()
+            Player.SoundLocation = DefAlarmFilePath
+            'Player.settings.volume = DefVolume
+            If DefIsLoop = True Then Player.PlayLooping() Else Player.Play()
+
         Catch ex As Exception
             Console.Beep()
         End Try
@@ -718,9 +719,9 @@ Public Class DateAndTime
     End Sub
 
     Public Sub UpdateRegistry()
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\DateTime\Timer", "DefaultSoundFile", DefAlarmFilePath)
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\DateTime\Timer", "DefaultSoundFile", DefAlarmFilePath, Microsoft.Win32.RegistryValueKind.String)
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\DateTime\Timer", "DefaultVolume", DefVolume, Microsoft.Win32.RegistryValueKind.DWord)
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\DateTime\Timer", "DefaultSoundFile", DefIsLoop, Microsoft.Win32.RegistryValueKind.DWord)
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\DateTime\Timer", "DefaultIsLoop", DefIsLoop, Microsoft.Win32.RegistryValueKind.DWord)
     End Sub
 
     Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click

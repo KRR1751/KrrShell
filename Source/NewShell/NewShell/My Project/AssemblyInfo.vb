@@ -13,7 +13,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("This program replaces the Windows' shell functions with this one! Make your own Taskbar, Startmenu and Desktop! Made by one guy called @KRR1751 on YouTube! :)")>
 <Assembly: AssemblyCompany("@Safrely-Production")>
 <Assembly: AssemblyProduct("KrrShell")>
-<Assembly: AssemblyCopyright("Copyright ©15. 2. 2025")>
+<Assembly: AssemblyCopyright("Copyright ©6. 3. 2025")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -32,6 +32,6 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("0.3.1.2")>
-<Assembly: AssemblyFileVersion("0.3.1.2")>
+<Assembly: AssemblyVersion("0.4.0")>
+<Assembly: AssemblyFileVersion("0.4.0")>
 <Assembly: NeutralResourcesLanguage("en-001")>

@@ -41,7 +41,7 @@ Public Class DateAndTimeProperties
             If File.Exists(ComboBox1.Text) Then
                 Dim FI As New FileInfo(ComboBox1.Text)
 
-                If FI.Extension.ToLower = ".wav" OrElse FI.Extension.ToLower = ".mp3" Then
+                If FI.Extension.ToLower = ".wav" Then
                     OK_Button.Enabled = True
                     GroupBox1.Enabled = True
                 Else
@@ -59,7 +59,7 @@ Public Class DateAndTimeProperties
         Dim OFD As New OpenFileDialog With {
         .AutoUpgradeEnabled = AppBar.UseExplorerFP,
         .SupportMultiDottedExtensions = True,
-        .Filter = "Wave Audio (*.wav)|*.wav|MP3 Audio (*.mp3)|*.mp3|All files (*.*)|*.*",
+        .Filter = "Wave Audio (*.wav)|*.wav;*.wave",
         .ValidateNames = True,
         .FileName = "",
         .CheckFileExists = True

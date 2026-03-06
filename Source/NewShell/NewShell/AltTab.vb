@@ -56,35 +56,6 @@ Public Class AltTab
         PW_CLIENTONLY = 1
         PW_RENDERFULLCONTENT = 2
     End Enum
-    Public Shared Function RenderWindow(hWnd As IntPtr, clientAreaOnly As Boolean, Optional tryGetFullContent As Boolean = False) As Bitmap
-        Dim printOption = If(clientAreaOnly, PrintWindowOptions.PW_CLIENTONLY, PrintWindowOptions.PW_DEFAULT)
-        printOption = If(tryGetFullContent, PrintWindowOptions.PW_RENDERFULLCONTENT, printOption)
-
-        Dim dwmRect = New Rectangle()
-        Dim hResult = DwmGetWindowAttribute(hWnd, DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, dwmRect, Marshal.SizeOf(Of Rectangle)())
-        If hResult < 0 Then
-            Marshal.ThrowExceptionForHR(hResult)
-            Return Nothing
-        End If
-
-        Dim bmp = New Bitmap(dwmRect.Width - dwmRect.X, dwmRect.Height - dwmRect.Y)
-        Using g = Graphics.FromImage(bmp)
-            Dim hDC = g.GetHdc()
-
-            Try
-                Dim success = PrintWindow(hWnd, hDC, printOption)
-                ' success result not fully handled here
-                If Not success Then
-                    Dim win32Error = Marshal.GetLastWin32Error()
-                    Return Nothing
-                End If
-                Return bmp
-            Finally
-                g.ReleaseHdc(hDC)
-            End Try
-
-        End Using
-    End Function
 
 #Region " Process System"
 
@@ -597,7 +568,7 @@ Public Class AltTab
             Label1.Text = selectedItem.Text
 
             Try
-                Dim previewImage As Image = RenderWindow(windowHandle, False)
+                Dim previewImage As Image = AppBar.RenderWindow(windowHandle, False)
 
                 If previewImage IsNot Nothing Then
                     PictureBox1.Image = previewImage
@@ -655,135 +626,6 @@ Public Class AltTab
     Private Sub AltTab_Deactivate(sender As Object, e As EventArgs) Handles Me.Deactivate, Me.LostFocus
         Me.Activate()
         MenuStrip1.Select()
-    End Sub
-
-    Public Sub LoadAppsOld()
-        If ActiveProcessID = String.Empty Then
-            For Each pr As Process In Process.GetProcesses
-                If Not pr.MainWindowTitle = "" Then
-                    Try
-                        Dim ico As Icon = Icon.ExtractAssociatedIcon(pr.MainModule.FileName)
-                        Dim item As New ToolStripMenuItem
-                        With item
-                            .AutoSize = False
-                            .DisplayStyle = ToolStripItemDisplayStyle.Image
-                            .Text = pr.MainWindowTitle
-                            .Tag = pr.Id
-                            .Image = ico.ToBitmap
-                            .ImageScaling = ToolStripItemImageScaling.None
-                            .Size = New Size(64, 64)
-                        End With
-                        MenuStrip1.Items.Add(item)
-                    Catch ex As Exception
-                        Dim item As New ToolStripMenuItem
-                        With item
-                            .AutoSize = False
-                            .DisplayStyle = ToolStripItemDisplayStyle.Image
-                            .Text = pr.MainWindowTitle
-                            .Tag = pr.Id
-                            .Image = My.Resources.ProgramMedium
-                            .ImageScaling = ToolStripItemImageScaling.None
-                            .Size = New Size(64, 64)
-                        End With
-                        MenuStrip1.Items.Add(item)
-                    End Try
-                End If
-            Next
-        Else
-            Try
-                Dim ActiveProcess As Process = Process.GetProcessById(ActiveProcessID)
-                Try
-                    Dim ico As Icon = Icon.ExtractAssociatedIcon(ActiveProcess.MainModule.FileName)
-                    Dim item As New ToolStripMenuItem
-                    With item
-                        .AutoSize = False
-                        .DisplayStyle = ToolStripItemDisplayStyle.Image
-                        .Text = ActiveProcess.MainWindowTitle
-                        .Tag = ActiveProcess.Id
-                        .Image = ico.ToBitmap
-                        .ImageScaling = ToolStripItemImageScaling.None
-                        .Size = New Size(64, 64)
-                    End With
-                    MenuStrip1.Items.Add(item)
-                Catch ex As Exception
-                    Dim item As New ToolStripMenuItem
-                    With item
-                        .AutoSize = False
-                        .DisplayStyle = ToolStripItemDisplayStyle.Image
-                        .Text = ActiveProcess.MainWindowTitle
-                        .Tag = ActiveProcess.Id
-                        .Image = My.Resources.ProgramMedium
-                        .ImageScaling = ToolStripItemImageScaling.None
-                        .Size = New Size(64, 64)
-                    End With
-                    MenuStrip1.Items.Add(item)
-                End Try
-                For Each pr As Process In Process.GetProcesses
-                    If Not pr.MainWindowTitle = "" Then
-                        If Not ActiveProcessID = pr.Id Then
-                            Try
-                                Dim ico As Icon = Icon.ExtractAssociatedIcon(pr.MainModule.FileName)
-                                Dim item As New ToolStripMenuItem
-                                With item
-                                    .AutoSize = False
-                                    .DisplayStyle = ToolStripItemDisplayStyle.Image
-                                    .Text = pr.MainWindowTitle
-                                    .Tag = pr.Id
-                                    .Image = ico.ToBitmap
-                                    .ImageScaling = ToolStripItemImageScaling.None
-                                    .Size = New Size(64, 64)
-                                End With
-                                MenuStrip1.Items.Add(item)
-                            Catch ex As Exception
-                                Dim item As New ToolStripMenuItem
-                                With item
-                                    .AutoSize = False
-                                    .DisplayStyle = ToolStripItemDisplayStyle.Image
-                                    .Text = pr.MainWindowTitle
-                                    .Tag = pr.Id
-                                    .Image = My.Resources.ProgramMedium
-                                    .ImageScaling = ToolStripItemImageScaling.None
-                                    .Size = New Size(64, 64)
-                                End With
-                                MenuStrip1.Items.Add(item)
-                            End Try
-                        End If
-                    End If
-                Next
-            Catch ex As Exception
-                For Each pr As Process In Process.GetProcesses
-                    If Not pr.MainWindowTitle = "" Then
-                        Try
-                            Dim ico As Icon = Icon.ExtractAssociatedIcon(pr.MainModule.FileName)
-                            Dim item As New ToolStripMenuItem
-                            With item
-                                .AutoSize = False
-                                .DisplayStyle = ToolStripItemDisplayStyle.Image
-                                .Text = pr.MainWindowTitle
-                                .Tag = pr.Id
-                                .Image = ico.ToBitmap
-                                .ImageScaling = ToolStripItemImageScaling.None
-                                .Size = New Size(64, 64)
-
-                            End With
-                            MenuStrip1.Items.Add(item)
-                        Catch ex2 As Exception
-                            Dim item As New ToolStripMenuItem
-                            With item
-                                .AutoSize = False
-                                .DisplayStyle = ToolStripItemDisplayStyle.Image
-                                .Text = pr.MainWindowTitle
-                                .Tag = pr.Id
-                                .Image = My.Resources.ProgramMedium
-                                .ImageScaling = ToolStripItemImageScaling.None
-                                .Size = New Size(64, 64)
-                            End With
-                            MenuStrip1.Items.Add(item)
-                        End Try
-                    End If
-                Next
-            End Try
-        End If
     End Sub
 
     Private Sub AltTab_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing

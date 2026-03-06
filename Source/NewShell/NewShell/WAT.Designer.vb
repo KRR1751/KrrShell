@@ -32,8 +32,9 @@ Partial Class WAT
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel4 = New System.Windows.Forms.Panel()
-        Me.AwayCheck = New System.Windows.Forms.Timer(Me.components)
         Me.Button4 = New System.Windows.Forms.Button()
+        Me.TimerPeek = New System.Windows.Forms.Timer(Me.components)
+        Me.FadeTimer = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -59,6 +60,7 @@ Partial Class WAT
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label1.AutoEllipsis = True
         Me.Label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.Label1.Location = New System.Drawing.Point(0, 0)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
@@ -153,11 +155,6 @@ Partial Class WAT
         Me.Panel4.Size = New System.Drawing.Size(260, 6)
         Me.Panel4.TabIndex = 4
         '
-        'AwayCheck
-        '
-        Me.AwayCheck.Enabled = True
-        Me.AwayCheck.Interval = 600
-        '
         'Button4
         '
         Me.Button4.BackColor = System.Drawing.SystemColors.ButtonFace
@@ -170,6 +167,14 @@ Partial Class WAT
         Me.Button4.Size = New System.Drawing.Size(260, 167)
         Me.Button4.TabIndex = 5
         Me.Button4.UseVisualStyleBackColor = False
+        '
+        'TimerPeek
+        '
+        Me.TimerPeek.Interval = 250
+        '
+        'FadeTimer
+        '
+        Me.FadeTimer.Interval = 4
         '
         'WAT
         '
@@ -189,7 +194,7 @@ Partial Class WAT
         Me.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(7, 30)
+        Me.MinimumSize = New System.Drawing.Size(168, 62)
         Me.Name = "WAT"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
@@ -211,6 +216,7 @@ Partial Class WAT
     Friend WithEvents Panel2 As Panel
     Friend WithEvents Panel3 As Panel
     Friend WithEvents Panel4 As Panel
-    Friend WithEvents AwayCheck As Timer
     Friend WithEvents Button4 As Button
+    Friend WithEvents TimerPeek As Timer
+    Friend WithEvents FadeTimer As Timer
 End Class

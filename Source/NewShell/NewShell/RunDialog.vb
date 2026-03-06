@@ -78,7 +78,7 @@ Public Class RunDialog
 
     Private Sub RunDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Location = New Point(0, SystemInformation.WorkingArea.Height - Me.MinimumSize.Height)
-        Me.Activate()
+        'Me.Activate()
 
         OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
 
@@ -108,6 +108,9 @@ Public Class RunDialog
         End If
 
         ' To first select the Textbox
+        'Me.Activate()
+        SetForegroundWindow(Me.Handle)
+
         ComboBox1.Focus()
         ComboBox1.Select()
     End Sub

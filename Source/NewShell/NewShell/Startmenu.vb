@@ -95,6 +95,26 @@ Public Class Startmenu
     Private Const GENERIC_FILE_INDEX As Integer = 0
     Private Const GENERIC_FOLDER_INDEX As Integer = 1
 
+    Public Shadows Sub Show()
+        Me.Opacity = 0
+        MyBase.Show()
+        FadeTimer.Start()
+    End Sub
+
+    Public Shadows Sub Hide()
+        FadeTimer.Stop()
+        Me.Opacity = 0
+        MyBase.Hide()
+    End Sub
+
+    Private Sub FadeTimer_Tick(sender As Object, e As EventArgs) Handles FadeTimer.Tick
+        If Me.Opacity < 1.0 Then
+            Me.Opacity += 0.1
+        Else
+            FadeTimer.Stop()
+        End If
+    End Sub
+
     <DllImport("shell32.dll")>
     Private Shared Function SHGetFileInfo(
         ByVal pszPath As String,
@@ -140,12 +160,18 @@ Public Class Startmenu
             flags = flags Or SHGFI_USEFILEATTRIBUTES
         End If
 
-        Dim result As IntPtr = SHGetFileInfo(
+        Dim result As IntPtr
+
+        Try
+            result = SHGetFileInfo(
             filePath,
             fileAttributes,
             shfi,
             CUInt(Marshal.SizeOf(shfi)),
             flags)
+        Catch ex As Exception
+            result = IntPtr.Zero
+        End Try
 
         If result <> IntPtr.Zero Then
             Try
@@ -160,30 +186,42 @@ Public Class Startmenu
             Return If(isDirectory, GENERIC_FOLDER_INDEX, GENERIC_FILE_INDEX)
         End If
     End Function
-
-
-    Private Sub Startmenu_Activated(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Activated
-        Me.Visible = True
-    End Sub
     Public FST As Boolean = False
     Private Sub Startmenu_Deactivate(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Deactivate
         If FST = False Then
-            Me.Visible = False
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 0 Then
-                AppBar.Button1.BackgroundImage = My.Resources.StartRight
-            ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
-                Try
-                    AppBar.Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
-                Catch ex As Exception
-                    AppBar.Button1.BackgroundImage = My.Resources.StartRight
-                End Try
-            ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
-                Try
-                    AppBar.Button1.BackgroundImage = AppBar.OrbNormal
-                Catch ex As Exception
-                    AppBar.Button1.BackgroundImage = My.Resources.StartRight
-                End Try
-            End If
+
+            Dim defValue As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0")
+
+            Dim liveBar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
+
+            If liveBar IsNot Nothing Then
+                liveBar.Invoke(Sub()
+                                   Select Case defValue
+
+                                       Case 1 : Try
+                                               Dim customImage As Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
+                                               If customImage IsNot Nothing Then
+                                                   liveBar.Button1.BackgroundImage = customImage
+                                               Else
+                                                   liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                               End If
+
+                                           Catch ex As Exception
+                                               liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                           End Try
+
+                                       Case 2 : Try
+                                               liveBar.Button1.BackgroundImage = liveBar.OrbNormal
+                                           Catch ex As Exception
+                                               liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                           End Try
+
+                                       Case Else
+                                           liveBar.Button1.BackgroundImage = My.Resources.StartRight
+
+                                   End Select
+                               End Sub) : End If
+            Me.Hide()
         End If
     End Sub
     Dim canClose As Boolean = False
@@ -301,6 +339,9 @@ Public Class Startmenu
         Try : cmd_btn2.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap : Catch ex As Exception : cmd_btn2.BackgroundImage = My.Resources.Settings : End Try
         Try : cmd_btn1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap : Catch ex As Exception : cmd_btn1.BackgroundImage = My.Resources.ActionCenter : End Try
 
+        ' Normal
+
+        SetForegroundWindow(Me.Handle)
     End Sub
     Dim PinnedAppsPath As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned"
     Public Sub ReloadTiles()

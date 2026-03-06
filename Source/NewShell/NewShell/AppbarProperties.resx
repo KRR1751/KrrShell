@@ -120,6 +120,12 @@
   <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>124, 17</value>
   </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>124, 17</value>
+  </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>124, 17</value>
+  </metadata>
   <data name="CheckBox6.ToolTip" xml:space="preserve">
     <value>Monitors processes and when one is detected/matches the BlockList, it will automatically kill or close.
 
@@ -132,6 +138,9 @@ WARNING: DO NOT INCLUDE SYSTEM PROCESSES! OR THIS SHELL CAN CRASH YOUR SYSTEM SI
   <metadata name="Controller.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="RadioButton6.ToolTip" xml:space="preserve">
+    <value>Applies the DWM render to the Taskbar. Don't select when you have Windows 10/11 with Titlebar colors to White or Black. When you use OpenGlass or any other title theme, it will apply here as well. (looks beatiful on Windows 7)</value>
+  </data>
   <data name="CheckBox14.ToolTip" xml:space="preserve">
     <value>Everytime you switch between Presets, the Working Area will be set automatically without clicking on the "Set Working Area" manually each time.
 
@@ -148,4 +157,7 @@ Better for another step to avoiding "explorer.exe" completelly.
 
 NOTE: This option will affect just this shell, not other programs "yet"</value>
   </data>
+  <metadata name="ContextMenuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>222, 17</value>
+  </metadata>
 </root>

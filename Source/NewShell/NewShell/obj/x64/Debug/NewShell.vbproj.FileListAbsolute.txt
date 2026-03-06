@@ -59,7 +59,6 @@ C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.StartmenuProperties.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.TileCreator.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.AltTab.resources
-C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.ClockTray.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Debug\Microsoft.Win32.Registry.dll
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Debug\NAudio.Asio.dll
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Debug\NAudio.Core.dll
@@ -85,3 +84,4 @@ C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.vbproj.Up2Date
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.DateAndTime.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.DateAndTimeProperties.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Debug\NewShell.AeroPeekScreen.resources

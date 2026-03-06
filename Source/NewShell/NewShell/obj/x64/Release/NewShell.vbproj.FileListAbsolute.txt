@@ -60,7 +60,6 @@ C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.TileCreator.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AppBar.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AltTab.resources
-C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.ClockTray.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\Interop.Shell32.dll
 C:\MinedowsOS\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.exe.config
 C:\MinedowsOS\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.exe
@@ -124,3 +123,4 @@ C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin\x64\Release\KrrShell.exe.lastcodeanalysissucceeded
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DateAndTimeProperties.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DateAndTime.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AeroPeekScreen.resources

@@ -120,4 +120,17 @@
   <metadata name="ImageList1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>128, 17</value>
+  </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>128, 17</value>
+  </metadata>
+  <data name="CheckBox1.ToolTip" xml:space="preserve">
+    <value>Such as in the Classic Theme days, as this dialog "simulates" the Win 9x Classic Theme modifier
+which includes the Colors, Metrics and Fonts.
+
+And because changing Metrics with Fonts aren't really consistant and are saved in an undocumented way...
+Each bit by bit, it is not really recommended to enable those yet. But they're working...</value>
+  </data>
 </root>

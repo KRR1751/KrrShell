@@ -117,6 +117,7 @@ Partial Class DateAndTimeProperties
         '
         'numVolume
         '
+        Me.numVolume.Enabled = False
         Me.numVolume.Location = New System.Drawing.Point(264, 18)
         Me.numVolume.Name = "numVolume"
         Me.numVolume.Size = New System.Drawing.Size(42, 23)
@@ -126,6 +127,7 @@ Partial Class DateAndTimeProperties
         'Label26
         '
         Me.Label26.AutoSize = True
+        Me.Label26.Enabled = False
         Me.Label26.Location = New System.Drawing.Point(214, 20)
         Me.Label26.Name = "Label26"
         Me.Label26.Size = New System.Drawing.Size(50, 15)

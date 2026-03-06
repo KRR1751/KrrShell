@@ -1,4 +1,6 @@
-﻿Imports System.IO
+﻿Option Strict Off
+
+Imports System.IO
 Imports System.Linq
 Imports System.Reflection.Emit
 Imports System.Runtime.InteropServices
@@ -283,17 +285,6 @@ Public Class Desktop
         End If
     End Sub
 
-    <StructLayout(LayoutKind.Sequential)>
-    Private Structure SHFILEINFO
-        Public hIcon As IntPtr
-        Public iIcon As Integer
-        Public dwAttributes As UInteger
-        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
-        Public szDisplayName As String
-        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=80)>
-        Public szTypeName As String
-    End Structure
-
     Private Const SHGFI_ICON As UInteger = &H100
     Private Const SHGFI_SMALLICON As UInteger = &H1
     Private Const SHGFI_LARGEICON As UInteger = &H0
@@ -304,13 +295,24 @@ Public Class Desktop
     Private Const FILE_ATTRIBUTE_NORMAL As UInteger = &H80
     Private Const FILE_ATTRIBUTE_DIRECTORY As UInteger = &H10
 
-    <DllImport("shell32.dll")>
+    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Unicode)>
+    Private Structure SHFILEINFO
+        Public hIcon As IntPtr
+        Public iIcon As Integer
+        Public dwAttributes As UInteger
+        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
+        Public szDisplayName As String
+        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=80)>
+        Public szTypeName As String
+    End Structure
+
+    <DllImport("shell32.dll", CharSet:=CharSet.Unicode, SetLastError:=True)>
     Private Shared Function SHGetFileInfo(
-        ByVal pszPath As String,
-        ByVal dwFileAttributes As UInteger,
-        ByRef psfi As SHFILEINFO,
-        ByVal cbFileInfo As UInteger,
-        ByVal uFlags As UInteger) As IntPtr
+    ByVal pszPath As String,
+    ByVal dwFileAttributes As UInteger,
+    ByRef psfi As SHFILEINFO,
+    ByVal cbFileInfo As UInteger,
+    ByVal uFlags As UInteger) As IntPtr
     End Function
 
     <DllImport("shell32.dll", CharSet:=CharSet.Unicode, ExactSpelling:=True, PreserveSig:=False)>
@@ -342,12 +344,18 @@ Public Class Desktop
             End If
         End If
 
-        Dim result As IntPtr = SHGetFileInfo(
+        Dim result As IntPtr
+
+        Try
+            result = SHGetFileInfo(
             filePath,
             attributes,
             shInfo,
             CUInt(Marshal.SizeOf(shInfo)),
             flags)
+        Catch ex As Exception
+            result = IntPtr.Zero
+        End Try
 
         If Not result.Equals(IntPtr.Zero) AndAlso Not shInfo.hIcon.Equals(IntPtr.Zero) Then
             Try
@@ -656,7 +664,16 @@ Public Class Desktop
             If isFile = True Then
                 Dim FI As New FileInfo(Items(i))
 
-                DesktopItem.Image = GetFileIcon(Items(i), True).ToBitmap
+                Try
+                    DesktopItem.Image = GetFileIcon(Items(i), True).ToBitmap
+
+                    If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
+                        DesktopItem.BackgroundImage = DesktopItem.Image
+                        DesktopItem.Image = Nothing
+                    End If
+                Catch ex As Exception
+
+                End Try
 
                 If FI.Extension.ToLower = ".lnk" Then
                     DesktopItem.Text = Path.GetFileNameWithoutExtension(FI.FullName)
@@ -666,21 +683,27 @@ Public Class Desktop
 
                 DesktopItem.Tag = Items(i)
 
-                If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
-                    DesktopItem.BackgroundImage = DesktopItem.Image
-                    DesktopItem.Image = Nothing
-                End If
             ElseIf isDirectory = True Then
                 Dim DI As New DirectoryInfo(Items(i))
 
-                DesktopItem.Image = GetFolderIcon(Items(i), True).ToBitmap
+                Try
+                    Dim bmp As Image = GetFolderIcon(Items(i), True).ToBitmap
+                    If bmp IsNot Nothing Then
+                        DesktopItem.Image = bmp
+
+                        If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
+                            DesktopItem.BackgroundImage = DesktopItem.Image
+                            DesktopItem.Image = Nothing
+                        End If
+                    End If
+                Catch ex As Exception
+
+                End Try
+
                 DesktopItem.Text = DI.Name
                 DesktopItem.Tag = Items(i)
 
-                If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
-                    DesktopItem.BackgroundImage = DesktopItem.Image
-                    DesktopItem.Image = Nothing
-                End If
+
             ElseIf isShellItem Then
                 Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(itemPath)
 

@@ -2,33 +2,33 @@
 <?xml-stylesheet type="text/xsl" href="c:\program files\microsoft visual studio\18\community\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="18.0">
  <Localized>
-  <String Key="Category">Kategorie</String>
-  <String Key="Certainty">Jistota</String>
-  <String Key="CollapseAll">Všechno sbalit</String>
-  <String Key="CheckId">ID kontroly</String>
-  <String Key="Error">Chyba</String>
-  <String Key="Errors">chyby</String>
-  <String Key="ExpandAll">Všechno rozbalit</String>
-  <String Key="Help">Nápověda</String>
-  <String Key="Line">Řádek</String>
-  <String Key="Messages">zprávy</String>
-  <String Key="LocationNotStoredInPdb">[Umístění není uloženo v Pdb]</String>
-  <String Key="Project">Projekt</String>
-  <String Key="Resolution">Rozhodnutí</String>
-  <String Key="Rule">Pravidlo</String>
-  <String Key="RuleFile">Soubor pravidla</String>
-  <String Key="RuleDescription">Popis pravidla</String>
-  <String Key="Source">Zdroj</String>
-  <String Key="Status">Stav</String>
-  <String Key="Target">Cíl</String>
-  <String Key="Warning">Upozornění</String>
-  <String Key="Warnings">upozornění</String>
-  <String Key="ReportTitle">Sestava rozšíření Code Analysis</String>
+  <String Key="Category">Category</String>
+  <String Key="Certainty">Certainty</String>
+  <String Key="CollapseAll">Collapse All</String>
+  <String Key="CheckId">Check Id</String>
+  <String Key="Error">Error</String>
+  <String Key="Errors">error(s)</String>
+  <String Key="ExpandAll">Expand All</String>
+  <String Key="Help">Help</String>
+  <String Key="Line">Line</String>
+  <String Key="Messages">message(s)</String>
+  <String Key="LocationNotStoredInPdb">[Location not stored in Pdb]</String>
+  <String Key="Project">Project</String>
+  <String Key="Resolution">Resolution</String>
+  <String Key="Rule">Rule</String>
+  <String Key="RuleFile">Rule File</String>
+  <String Key="RuleDescription">Rule Description</String>
+  <String Key="Source">Source</String>
+  <String Key="Status">Status</String>
+  <String Key="Target">Target</String>
+  <String Key="Warning">Warning</String>
+  <String Key="Warnings">warning(s)</String>
+  <String Key="ReportTitle">Code Analysis Report</String>
  </Localized>
  <Exceptions>
   <Exception Keyword="CA0064" Kind="Engine" TreatAsWarning="True">
    <Type>Microsoft.FxCop.Sdk.FxCopException</Type>
-   <ExceptionMessage>Nebyla provedena žádná analýza, protože zadanou sadu pravidel nelze načíst nebo neobsahuje žádná spravovaná pravidla Code Analysis.</ExceptionMessage>
+   <ExceptionMessage>No analysis was performed because the specified rule set could not be loaded or did not contain any managed code analysis rules.</ExceptionMessage>
   </Exception>
  </Exceptions>
 </FxCopReport>

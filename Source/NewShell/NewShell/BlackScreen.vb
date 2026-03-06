@@ -40,4 +40,24 @@ Public Class BlackScreen
         Public Const MA_NOACTIVATE As Integer = 3
         Public Const SW_SHOWNOACTIVATE As Integer = 4
     End Class
+
+    Public Shadows Sub Show()
+        Me.Opacity = 0
+        MyBase.Show()
+        FadeTimer.Start()
+    End Sub
+
+    Public Shadows Sub Hide()
+        FadeTimer.Stop()
+        Me.Opacity = 0
+        MyBase.Hide()
+    End Sub
+
+    Private Sub FadeTimer_Tick(sender As Object, e As EventArgs) Handles FadeTimer.Tick
+        If Me.Opacity < 0.65 Then
+            Me.Opacity += 0.05
+        Else
+            FadeTimer.Stop()
+        End If
+    End Sub
 End Class

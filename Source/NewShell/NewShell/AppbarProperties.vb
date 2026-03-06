@@ -67,9 +67,6 @@ Public Class AppbarProperties
     End Function
 
     Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
-        AppBar.LoadApps()
-        ClockTray.SyncAppearance()
-
         If RadioButton6.Checked = True Then
             Try
                 Dim side As AppBar.side = side
@@ -111,6 +108,8 @@ Public Class AppbarProperties
     End Sub
 
     Private Sub AppbarProperties_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.Owner = AppBar
+
         CheckBox1.Checked = AppBar.AutoHideToolStripMenuItem.Checked
         CheckBox2.Checked = AppBar.StartButtonToolStripMenuItem.Checked
         CheckBox3.Checked = AppBar.PinnedBarToolStripMenuItem.Checked
@@ -119,18 +118,11 @@ Public Class AppbarProperties
         CheckBox6.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\BlockedProcesses", "Enabled", "0")
         CheckBox7.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "ShowBackImage", False)
         CheckBox8.Checked = AppBar.TopMost
-        CheckBox9.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", False)
+        CheckBox9.Checked = AppBar.Button3.Visible
 
         CheckBox12.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\ShutdownDialog", "Style", False)
 
         GroupBox3.Enabled = CheckBox6.Checked
-
-        NumericUpDown2.Maximum = SystemInformation.PrimaryMonitorSize.Width
-        Try
-            NumericUpDown2.Value = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", 900)
-        Catch ex As Exception
-            NumericUpDown2.Value = 900
-        End Try
 
         ComboBox5.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\", "CombineMode", "0")
 
@@ -275,8 +267,6 @@ Public Class AppbarProperties
         Catch ex As Exception
 
         End Try
-
-        Panel1.Enabled = CheckBox9.Checked
 
         ' WorkingArea Page
 
@@ -562,21 +552,6 @@ Public Class AppbarProperties
         AboutDialog.Show(Me)
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        If MessageBox.Show("Are you sure do you want end this shell? This means that you will no longer have any Taskbar, Desktop or Startmenu. (To revert it back, please press CTRL+SHIFT+ESC to start a new shell process.)", "Confirm box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
-            AppBar.CanClose = True
-            Desktop.CanClose = True
-            SA.SaveSettings()
-            End
-        End If
-    End Sub
-
-    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
-        AppBar.CanClose = True
-        Desktop.CanClose = True
-        Application.Restart()
-    End Sub
-
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button16.Click
         Dim CD As New ColorDialog
         CD.AllowFullOpen = True
@@ -685,21 +660,16 @@ Public Class AppbarProperties
     Private Sub CheckBox7_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox7.CheckedChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "ShowBackImage", CheckBox7.Checked, Microsoft.Win32.RegistryValueKind.DWord)
         If CheckBox7.Checked = True Then
-            PictureBox1.Enabled = True
-            ComboBox2.Enabled = True
-            Button11.Enabled = True
-            ComboBox3.Enabled = True
+
+            GroupBox18.Enabled = True
+
             If ComboBox2.Text IsNot Nothing AndAlso File.Exists(ComboBox2.Text) Then
                 AppBar.BackgroundImage = Image.FromFile(ComboBox2.Text)
             Else
                 AppBar.BackgroundImage = My.Resources.AppBarMainTransparent
             End If
-
         Else
-            PictureBox1.Enabled = False
-            ComboBox2.Enabled = False
-            Button11.Enabled = False
-            ComboBox3.Enabled = False
+            GroupBox18.Enabled = False
             AppBar.BackgroundImage = Nothing
         End If
     End Sub
@@ -769,66 +739,6 @@ Public Class AppbarProperties
     Private Const HWND_TOPMOST = -1 '-- Bring to top and stay there
     Private Sub MoveAndResizeWindow(ByVal hWnd As IntPtr, ByVal X As Integer, ByVal Y As Integer, ByVal Width As Integer, ByVal Height As Integer)
         SetWindowPos(hWnd, IntPtr.Zero, X, Y, Width, Height, SWP_NOZORDER Or SWP_SHOWWINDOW)
-    End Sub
-    Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
-        If CheckBox9.Checked = True Then
-            Panel1.Enabled = True
-            Dim prFound As Boolean = False
-            For Each pr As Process In Process.GetProcesses
-                If pr.ProcessName = "emergeTray" Then
-                    prFound = True
-                    My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "1", Microsoft.Win32.RegistryValueKind.DWord)
-                    AppBar.Panel4.Visible = False
-                    AppBar.Width = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", SystemInformation.PrimaryMonitorSize.Width / 2 + SystemInformation.PrimaryMonitorSize.Width / 4)
-                    ClockTray.Show()
-                    Try
-                        Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
-                        If hWnd <> IntPtr.Zero Then
-                            Dim newX As Integer = AppBar.Width
-                            Dim newY As Integer = AppBar.Location.Y
-                            Dim newWidth As Integer = SystemInformation.PrimaryMonitorSize.Width - AppBar.Width - ClockTray.Width
-                            Dim newHeight As Integer = AppBar.Height
-
-                            MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-                        Else
-                            MessageBox.Show("Main window for moving cannot be found.", "Info")
-                        End If
-                    Catch ex As Exception
-
-                    End Try
-                End If
-            Next
-            If prFound = False Then
-                MessageBox.Show("KrrShell doesn't find any ""emergeTray"" process running! This only works when that process is running.", "KrrShell Could not find emergeTray", MessageBoxButtons.OK, MessageBoxIcon.Hand)
-                CheckBox9.Checked = False
-            End If
-        Else
-            Panel1.Enabled = False
-            My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0", Microsoft.Win32.RegistryValueKind.DWord)
-            AppBar.Panel4.Visible = True
-            AppBar.Width = SystemInformation.PrimaryMonitorSize.Width
-            ClockTray.Hide()
-            Try
-                Dim hWnd As Long
-                hWnd = FindWindow("EmergeDesktopApplet", vbNullString)
-                Dim wp As WINDOWPLACEMENT
-                wp.Length = Marshal.SizeOf(wp)
-                GetWindowPlacement(FindWindow("EmergeDesktopApplet", ""), wp)
-
-                Dim wp2 As WINDOWPLACEMENT
-                wp2.showCmd = ShowWindowCommands.ShowNoActivate
-                wp2.ptMinPosition = wp.ptMinPosition
-                wp2.ptMaxPosition = New POINTAPI(0, 0)
-                wp2.rcNormalPosition = New RECT(AppBar.Width - AppBar.Panel4.Width, AppBar.Location.Y - 1, AppBar.Width - AppBar.Button2.Width - AppBar.DayLabel.Width - AppBar.ToolStripButton1.Width - AppBar.ToolStripButton3.Width - 3, AppBar.Location.Y + AppBar.Height)
-
-                wp2.flags = wp.flags
-                wp2.Length = Marshal.SizeOf(wp2)
-                SetWindowPlacement(FindWindow("EmergeDesktopApplet", ""), wp2)
-                SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
-            Catch ex As Exception
-
-            End Try
-        End If
     End Sub
 
     Private Sub RadioButton8_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton8.CheckedChanged, RadioButton9.CheckedChanged, RadioButton10.CheckedChanged
@@ -928,33 +838,13 @@ Public Class AppbarProperties
         End If
     End Sub
 
-    Private Sub Button9_Click_1(sender As Object, e As EventArgs) Handles Button9.Click
-        AppBar.SizeLocked = False
-
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomWidth", NumericUpDown2.Value, Microsoft.Win32.RegistryValueKind.DWord)
-
-        AppBar.Width = NumericUpDown2.Value
-
-        Try
-            Dim hWnd As IntPtr = FindWindow("EmergeDesktopApplet", vbNullString)
-
-            If hWnd <> IntPtr.Zero Then
-                Dim newX As Integer = AppBar.Width
-                Dim newY As Integer = AppBar.Location.Y
-                Dim newWidth As Integer = SystemInformation.PrimaryMonitorSize.Width - AppBar.Width - ClockTray.Width
-                Dim newHeight As Integer = AppBar.Height
-
-                MoveAndResizeWindow(hWnd, newX, newY, newWidth, newHeight)
-            End If
-
-        Catch ex As Exception
-        End Try
-
-        AppBar.SizeLocked = True
-    End Sub
-
     Private Sub ComboBox5_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox5.SelectedIndexChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\", "CombineMode", ComboBox5.SelectedIndex, Microsoft.Win32.RegistryValueKind.DWord)
+
+        Dim taskbar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
+        If taskbar IsNot Nothing Then
+            taskbar.LoadApps()
+        End If
     End Sub
 
     Private Sub TrackBar1_Scroll(sender As Object, e As EventArgs) Handles TrackBar1.Scroll
@@ -1331,6 +1221,42 @@ Public Class AppbarProperties
         hotkeyBtnClick(hotkeyBTN0)
 
         My.Computer.Registry.SetValue(hotkeyStart, "0", hotkeyBTN0.Tag.ToString)
+    End Sub
+
+    Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles ContextMenuStrip1.Opening
+        RestartAndRunAsAdministratorToolStripMenuItem.Image = SystemIcons.Shield.ToBitmap
+    End Sub
+
+    Private Sub LinkLabel2_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel2.LinkClicked
+        ContextMenuStrip1.Show(MousePosition)
+    End Sub
+
+    Private Sub EndShellToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EndShellToolStripMenuItem.Click
+        If MessageBox.Show("Are you sure do you want end this shell? This means that you will no longer have any Taskbar, Desktop or Startmenu. (To revert it back, please press CTRL+SHIFT+ESC to start a new shell process.)", "Confirm box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+            AppBar.CanClose = True
+            Desktop.CanClose = True
+            SA.SaveSettings()
+            End
+        End If
+    End Sub
+
+    Private Sub RestartShellToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestartShellToolStripMenuItem.Click
+        AppBar.CanClose = True
+        Desktop.CanClose = True
+        Application.Restart()
+    End Sub
+
+    Private Sub RestartAndRunAsAdministratorToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestartAndRunAsAdministratorToolStripMenuItem.Click
+
+    End Sub
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        StartmenuProperties.Show()
+    End Sub
+
+    Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "LanguageList", CheckBox9.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+        AppBar.Button3.Visible = CheckBox9.Checked
     End Sub
 End Class
 

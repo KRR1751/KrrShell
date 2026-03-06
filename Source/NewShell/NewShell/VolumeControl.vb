@@ -72,27 +72,37 @@ Public Class VolumeControl
         Label2.Text = TrackBar1.Value & "%"
         UpdateIcons()
     End Sub
+    Dim liveBar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
 
     Public Sub UpdateIcons()
-        If Not isSysMuted() Then
+
+        If Not IsSysMuted() Then
 
             Dim curVol As Integer = GetCurrentVolume() * 100
 
-            If curVol = 0 Then
-                AppBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeZero
+            If liveBar IsNot Nothing Then
+                liveBar.Invoke(Sub()
+                                   If curVol = 0 Then
+                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeZero
 
-            ElseIf curVol < 50 AndAlso Not curVol = 0 Then
-                AppBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeBelow50
+                                   ElseIf curVol < 50 AndAlso Not curVol = 0 Then
+                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeBelow50
 
-            ElseIf curVol >= 50 AndAlso Not curVol = 100 Then
-                AppBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeAbove50.ToBitmap
+                                   ElseIf curVol >= 50 AndAlso Not curVol = 100 Then
+                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeAbove50.ToBitmap
 
-            ElseIf curVol = 100 Then
-                AppBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeFull
+                                   ElseIf curVol = 100 Then
+                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeFull
 
+                                   End If
+                               End Sub)
             End If
         Else
-            AppBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeMute
+            If liveBar IsNot Nothing Then
+                liveBar.Invoke(Sub()
+                                   liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeMute
+                               End Sub)
+            End If
         End If
     End Sub
 
@@ -113,8 +123,6 @@ Public Class VolumeControl
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Volume", "LastVol", TrackBar1.Value, Microsoft.Win32.RegistryValueKind.DWord)
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Volume", "IsMuted", CheckBox1.Checked, Microsoft.Win32.RegistryValueKind.DWord)
 
-        AppBar.ToolStripButton1.Checked = False
-
         Me.Close()
     End Sub
 
@@ -123,5 +131,15 @@ Public Class VolumeControl
         IsMuted = CheckBox1.Checked
 
         UpdateIcons()
+    End Sub
+
+    Private Sub VolumeControl_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        If liveBar IsNot Nothing Then
+            Try
+                liveBar.ToolStripButton1.Checked = False
+            Catch ex As Exception
+                AppBar.ToolStripButton1.Checked = False
+            End Try
+        End If
     End Sub
 End Class
