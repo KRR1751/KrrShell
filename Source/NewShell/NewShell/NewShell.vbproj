@@ -218,6 +218,12 @@
     <Compile Include="DateTime.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DateTimeProperties.Designer.vb">
+      <DependentUpon>DateTimeProperties.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DateTimeProperties.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Desktop.Designer.vb">
       <DependentUpon>Desktop.vb</DependentUpon>
     </Compile>
@@ -332,6 +338,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DateTime.resx">
       <DependentUpon>DateTime.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateTimeProperties.resx">
+      <DependentUpon>DateTimeProperties.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Desktop.resx">
       <DependentUpon>Desktop.vb</DependentUpon>

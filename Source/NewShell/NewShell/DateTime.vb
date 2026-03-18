@@ -802,7 +802,6 @@ Public Class DateAndTime
     End Sub
 
     Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
-        On Error Resume Next
-        Process.Start(New ProcessStartInfo(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "TimeDateProperties", Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\timedate.cpl")) With {.UseShellExecute = True})
+        DateTimeProperties.ShowDialog(Me)
     End Sub
 End Class

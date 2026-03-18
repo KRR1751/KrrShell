@@ -1,6 +1,16 @@
 Imports System.Runtime.InteropServices
 
 Public Class SA
+    Public Const WS_EX_TOOLWINDOW As Long = &H80L
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp As CreateParams = MyBase.CreateParams
+            ' Apply the ToolWindow style before the window is actually created
+            cp.ExStyle = cp.ExStyle Or WS_EX_TOOLWINDOW
+            Return cp
+        End Get
+    End Property
+
     <DllImport("shell32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
     Private Shared Function ExtractIconEx(
     ByVal lpszFile As String,
@@ -118,7 +128,7 @@ Public Class SA
 
     Public Sub SaveSettings()
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "AutoHide", AppBar.AutoHideToolStripMenuItem.Checked, Microsoft.Win32.RegistryValueKind.DWord)
-        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer1", AppBar.Button1.Width, Microsoft.Win32.RegistryValueKind.String)
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer1", AppBar.Start.Width, Microsoft.Win32.RegistryValueKind.String)
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer2", AppBar.Panel1.Width, Microsoft.Win32.RegistryValueKind.String)
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer3", AppBar.Panel4.Width, Microsoft.Win32.RegistryValueKind.String)
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", ColorTranslator.ToHtml(AppBar.BackColor), Microsoft.Win32.RegistryValueKind.String)

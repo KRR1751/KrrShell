@@ -1,195 +1,472 @@
-﻿Option Strict Off
-
+﻿Imports System.ComponentModel
 Imports System.IO
-Imports System.Linq
-Imports System.Reflection.Emit
 Imports System.Runtime.InteropServices
 Imports System.Text
-Imports System.Threading
-Imports System.Windows.Forms
-Imports System.Windows.Forms.Menu
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Button
 Imports Microsoft.Win32
-Imports Shell32
+Imports System.Collections.Specialized
+
+<StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto)>
+Public Structure SHFILEINFO
+    Public hIcon As IntPtr
+    Public iIcon As Integer
+    Public dwAttributes As Integer
+    <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
+    Public szDisplayName As String
+    <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=80)>
+    Public szTypeName As String
+End Structure
+
+<ComImport()>
+<Guid("46EB5926-582E-4017-9FDF-E8998DAA0950")>
+<InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
+Interface IImageList
+    Function Add(hbmImage As IntPtr, hbmMask As IntPtr, ByRef pi As Integer) As Integer
+    Function ReplaceIcon(i As Integer, hicon As IntPtr, ByRef pi As Integer) As Integer
+    Function SetOverlayImage(iImage As Integer, iOverlay As Integer) As Integer
+    Function Replace(i As Integer, hbmImage As IntPtr, hbmMask As IntPtr) As Integer
+    Function AddMasked(hbmImage As IntPtr, crMask As Integer, ByRef pi As Integer) As Integer
+    Function Draw(ByRef pimldp As IMAGELISTDRAWPARAMS) As Integer
+    Function Remove(i As Integer) As Integer
+    Function GetIcon(i As Integer, flags As Integer, ByRef picon As IntPtr) As Integer
+End Interface
+
+<StructLayout(LayoutKind.Sequential)>
+Public Structure IMAGELISTDRAWPARAMS
+    Public cbSize As Integer
+    Public himl As IntPtr
+    Public i As Integer
+    Public hdcDst As IntPtr
+    Public x As Integer
+    Public y As Integer
+    Public cx As Integer
+    Public cy As Integer
+    Public xBitmap As Integer
+    Public yBitmap As Integer
+    Public rgbBk As Integer
+    Public rgbFg As Integer
+    Public fStyle As Integer
+    Public dwRop As Integer
+    Public fState As Integer
+    Public Frame As Integer
+    Public crEffect As Integer
+End Structure
 
 Public Class Desktop
     Private Const REG_KEY_PATH As String = "DesktopBackground\Shell"
 
-    <DllImport("shell32.dll", SetLastError:=True)>
-    Private Shared Function SHGetStockIconInfo(
-    siid As SHSTOCKICONID,
-    uFlags As UInteger,
-    ByRef psii As SHSTOCKICONINFO
-) As Integer
+    Private Const SHGFI_ICON As UInteger = &H100
+    Private Const SHGFI_SYSICONINDEX As UInteger = &H4000
+    Private Const SHGFI_LARGEICON As UInteger = &H0
+    Private Const SHGFI_SMALLICON As UInteger = &H1
+
+    <DllImport("shell32.dll", CharSet:=CharSet.Auto)>
+    Public Shared Function SHGetFileInfo(pszPath As String, dwFileAttributes As UInteger, ByRef psfi As SHFILEINFO, cbFileInfo As UInteger, uFlags As UInteger) As IntPtr
     End Function
 
-    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Unicode)>
-    Private Structure SHSTOCKICONINFO
-        Public cbSize As UInteger
-        Public hIcon As IntPtr
-        Public iSysImageIndex As Integer
-        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
-        Public szPath As String
-    End Structure
-
-    Private Enum SHSTOCKICONID As Integer
-        SIID_SHIELD = 77
-        SIID_PROPERTIES = 124
-        SIID_COPY = 236
-        SIID_CUT = 233
-        SIID_PASTE = 237
-        SIID_DELETE = 234
-        SIID_RENAME = 305
-    End Enum
-
-    Private Const SHGSI_ICON As UInteger = &H100
-    Private Const SHGSI_SMALLICON As UInteger = &H1
-
-    <DllImport("user32.dll")>
-    Private Shared Function CallWindowProc(lpPrevWndFunc As IntPtr, hWnd As IntPtr, Msg As Integer, wParam As IntPtr, lParam As IntPtr) As IntPtr
+    <DllImport("shell32.dll", CharSet:=CharSet.Auto)>
+    Shared Function ExtractIconEx(libName As String, iconIndex As Integer, largeIconPtr() As IntPtr, smallIconPtr() As IntPtr, nIcons As Integer) As Integer
     End Function
 
-    <DllImport("user32.dll", SetLastError:=True)>
-    Private Shared Function SetFocus(hWnd As IntPtr) As IntPtr
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
+    Public Shared Function DestroyIcon(hIcon As IntPtr) As Boolean
     End Function
 
-    Private Const WM_MOUSEACTIVATE As Integer = &H21
-    Private Const MA_NOACTIVATEANDEAT As Integer = &H4
+    Private BaseIconSize As Size = SystemInformation.IconSize
+    Private ItemWidth As Integer = SystemInformation.IconSpacingSize.Width
+    Private ItemHeight As Integer = SystemInformation.IconSpacingSize.Height
+    Private ZoomLevel As Double = 1.0
+    Private Icons As New List(Of DesktopIcon)
+    Private SelectionRect As Rectangle = Rectangle.Empty
+    Private IsSelecting As Boolean = False
+    Private IsDragging As Boolean = False
+    Private DragStart As Drawing.Point
+    Private LastMousePos As Drawing.Point
 
-    Private Const WS_EX_TOOLWINDOW As Integer = &H80
-    Private Const WS_EX_APPWINDOW As Integer = &H40000
-
+    Public Const WS_EX_TOOLWINDOW As Long = &H80L
     Protected Overrides ReadOnly Property CreateParams As CreateParams
         Get
             Dim cp As CreateParams = MyBase.CreateParams
-            ' Apply the ToolWindow style before the window is actually created
+            ' Apply the ToolWindow style before the window Is actually created
             cp.ExStyle = cp.ExStyle Or WS_EX_TOOLWINDOW
             Return cp
         End Get
     End Property
 
+    Public Async Function BackUpdate() As Task
+        Try
+            Dim wallpaperPath As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", ""))
+            Dim styleVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", "0"))
+            Dim tileVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", "0"))
+
+            If String.IsNullOrEmpty(wallpaperPath) OrElse Not File.Exists(wallpaperPath) Then Return
+
+            Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
+            Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
+            Dim finalImage As Image = Nothing
+
+            Await Task.Run(Sub()
+                               Try
+                                   Dim bytes As Byte() = File.ReadAllBytes(wallpaperPath)
+                                   Dim ms As New MemoryStream(bytes)
+                                   Dim tempImg As Image = Image.FromStream(ms)
+
+                                   Dim isGif As Boolean = tempImg.RawFormat.Equals(Drawing.Imaging.ImageFormat.Gif)
+
+                                   If isGif Then
+                                       finalImage = tempImg
+                                   Else
+                                       Dim needsResize As Boolean = (tempImg.Width > screenWidth OrElse tempImg.Height > screenHeight) AndAlso
+                                                              (styleVal = "2" OrElse styleVal = "6" OrElse styleVal = "10" OrElse styleVal = "22")
+
+                                       If needsResize Then
+                                           Dim bmp As New Bitmap(screenWidth, screenHeight)
+                                           Using g As Graphics = Graphics.FromImage(bmp)
+                                               g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                                               g.DrawImage(tempImg, 0, 0, screenWidth, screenHeight)
+                                           End Using
+                                           finalImage = bmp
+                                       Else
+                                           finalImage = New Bitmap(tempImg)
+                                       End If
+
+                                       tempImg.Dispose()
+                                       ms.Dispose()
+                                   End If
+                               Catch ex As Exception
+                                   Debug.WriteLine("Hybrid Update Error: " & ex.Message)
+                               End Try
+                           End Sub)
+
+            If finalImage IsNot Nothing Then
+                If PictureBoxWallpaper.Image IsNot Nothing Then
+                    Dim oldImg = PictureBoxWallpaper.Image
+                    PictureBoxWallpaper.Image = Nothing
+                    oldImg.Dispose()
+                End If
+
+                PictureBoxWallpaper.Image = finalImage
+                ApplyWallpaperStyle(styleVal, tileVal)
+                PictureBoxWallpaper.Visible = True
+            End If
+
+        Catch ex As Exception
+            Debug.WriteLine("BackUpdate Main Error: " & ex.Message)
+        End Try
+    End Function
+
+    Private Sub ApplyWallpaperStyle(style As String, tile As String)
+        ' 0 = Center (Tile=0), 2 = Stretch, 6 = Fit (Zoom), 10 = Fill (Center + Zoom), 22 = Span
+
+        Select Case style
+            Case "0"
+                If tile = "1" Then
+                    PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Normal
+                Else
+                    PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.CenterImage
+                End If
+            Case "2"
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.StretchImage
+            Case "6"
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Zoom
+            Case "10", "22" ' Fill
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Zoom
+            Case Else
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Normal
+        End Select
+    End Sub
+
+    Public Function GetFileIcon(path As String) As Image
+        Dim largeIcon(0) As IntPtr
+        ExtractIconEx(path, 0, largeIcon, Nothing, 1)
+        If largeIcon(0) <> IntPtr.Zero Then
+            Return Icon.FromHandle(largeIcon(0)).ToBitmap()
+        End If
+        Return SystemIcons.Application.ToBitmap()
+    End Function
+
+    Private Function GetOptimizedIcon(path As String, targetSize As Integer) As Image
+        If path.ToLower.StartsWith("shell:::") Then
+            Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(path.Replace("shell:::", ""))
+
+            If info.Icon IsNot Nothing Then
+                Return info.Icon
+            Else
+                Return SystemIcons.Application.ToBitmap
+            End If
+        End If
+
+        Dim targetPath As String = path
+
+        ' If fatal on Shortcuts, this will gather the real
+        ' Path of a file/folder instead.
+        If IO.Path.GetExtension(path).ToLower() = ".lnk" Then
+            'Try : targetPath = GetShortcutTarget(path) : Catch : targetPath = path : End Try
+        End If
+
+        If IsValidImage(path) Then
+            Try
+                Using fs As New IO.FileStream(path, IO.FileMode.Open, IO.FileAccess.Read)
+                    Using tempImg = Image.FromStream(fs)
+
+                        Dim thumb As New Bitmap(targetSize, targetSize)
+                        Using g = Graphics.FromImage(thumb)
+                            g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+
+                            Dim ratio = Math.Max(targetSize / tempImg.Width, targetSize / tempImg.Height)
+                            Dim newW = CInt(tempImg.Width * ratio)
+                            Dim newH = CInt(tempImg.Height * ratio)
+                            Dim posX = (targetSize - newW) \ 2
+                            Dim posY = (targetSize - newH) \ 2
+                            g.DrawImage(tempImg, posX, posY, newW, newH)
+                        End Using
+                        Return thumb
+                    End Using
+                End Using
+            Catch
+            End Try
+        End If
+
+        Try
+            Dim shinfo As New SHFILEINFO()
+            SHGetFileInfo(targetPath, 0, shinfo, Marshal.SizeOf(shinfo), SHGFI_SYSICONINDEX)
+
+
+            Dim iconSizeFlag As Integer
+            If targetSize <= 16 Then
+                iconSizeFlag = SHIL_SMALL
+            ElseIf targetSize <= 32 Then
+                iconSizeFlag = SHIL_LARGE
+            ElseIf targetSize <= 48 Then
+                iconSizeFlag = SHIL_EXTRALARGE
+            Else
+                iconSizeFlag = SHIL_JUMBO
+            End If
+
+            Dim iidImageList As New Guid("46EB5926-582E-4017-9FDF-E8998DAA0950")
+            Dim iml As IImageList = Nothing
+            SHGetImageList(iconSizeFlag, iidImageList, iml)
+
+            Dim hIcon As IntPtr = IntPtr.Zero
+            If iml IsNot Nothing Then
+                iml.GetIcon(shinfo.iIcon, 1, hIcon)
+            End If
+
+            If hIcon <> IntPtr.Zero Then
+                Dim bmp As Bitmap = Icon.FromHandle(hIcon).ToBitmap()
+                DestroyIcon(hIcon)
+                Return bmp
+            End If
+        Catch ex As Exception
+            Return Icon.ExtractAssociatedIcon(path).ToBitmap()
+        End Try
+
+        Return Icon.ExtractAssociatedIcon(targetPath).ToBitmap()
+
+    End Function
+
+    Private Shared ReadOnly HWND_BOTTOM As IntPtr = New IntPtr(1)
+    Private Const SWP_NOSIZE As UInt32 = &H1
+    Private Const SWP_NOMOVE As UInt32 = &H2
+    Private Const SWP_NOACTIVATE As UInt32 = &H10
+
+    <DllImport("user32.dll")>
+    Private Shared Function SetWindowPos(hWnd As IntPtr, hWndInsertAfter As IntPtr, X As Integer, Y As Integer, cx As Integer, cy As Integer, uFlags As UInt32) As Boolean
+    End Function
+
+    Private Sub SendToBottom()
+        SetWindowPos(Me.Handle, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE Or SWP_NOACTIVATE)
+    End Sub
+
+    Public IsShowDesktopMode As Boolean = False
+
+    Private Sub FormDesktop_Deactivate(sender As Object, e As EventArgs) Handles Me.Deactivate
+        If IsShowDesktopMode Then
+            IsShowDesktopMode = False
+            Me.TopMost = False
+        Else
+            SendToBottom()
+        End If
+    End Sub
+
+    Public Sub ShowDesktop()
+        IsShowDesktopMode = True
+        Me.WindowState = FormWindowState.Maximized
+        Me.BringToFront()
+        Me.Activate()
+    End Sub
+
+    Private Const WM_WINDOWPOSCHANGING As Integer = &H46
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure WINDOWPOS
+        Public hwnd As IntPtr
+        Public hwndInsertAfter As IntPtr
+        Public x As Integer
+        Public y As Integer
+        Public cx As Integer
+        Public cy As Integer
+        Public flags As Integer
+    End Structure
+
     Protected Overrides Sub WndProc(ByRef m As Message)
-        If m.Msg = WM_MOUSEACTIVATE Then
-            'SetFocus(Me.Handle)
-            m.Result = CType(MA_NOACTIVATEANDEAT, IntPtr)
-            Return
+        If m.Msg = WM_WINDOWPOSCHANGING AndAlso Not IsShowDesktopMode Then
+            Dim wp As WINDOWPOS = CType(Marshal.PtrToStructure(m.LParam, GetType(WINDOWPOS)), WINDOWPOS)
+            wp.hwndInsertAfter = New IntPtr(1)
+            wp.flags = wp.flags Or &H10
+
+            Marshal.StructureToPtr(wp, m.LParam, True)
         End If
         MyBase.WndProc(m)
     End Sub
 
-    Private Const SWP_NOMOVE As Integer = &H2
-    Private Const SWP_NOSIZE As Integer = &H1
-    Private Const SWP_FRAMECHANGED As Integer = &H20
-    Private Const SWP_NOACTIVATE As Integer = &H10
-    Private Const HWND_BOTTOM As Integer = 1
+    Private Sub PictureBoxWallpaper_DoubleClick(sender As Object, e As EventArgs) Handles PictureBoxWallpaper.DoubleClick
 
-    Private Const GWL_EXSTYLE As Integer = -20
-    Private Const WS_EX_NOACTIVATE As Integer = &H8000000
+        Dim mousePos As Drawing.Point = PictureBoxWallpaper.PointToClient(Cursor.Position)
 
-    <DllImport("user32.dll", SetLastError:=True)>
-    Private Shared Function SetWindowPos(hWnd As IntPtr, hWndInsertAfter As IntPtr, X As Integer, Y As Integer, cx As Integer, cy As Integer, uFlags As Integer) As Boolean
-    End Function
+        Dim hitIcon = Icons.FirstOrDefault(Function(i) i.Bounds.Contains(mousePos))
 
-    <DllImport("user32.dll", SetLastError:=True)>
-    Private Shared Function GetWindowLong(hWnd As IntPtr, nIndex As Integer) As Integer
-    End Function
-
-    <DllImport("user32.dll", SetLastError:=True)>
-    Private Shared Function SetWindowLong(hWnd As IntPtr, nIndex As Integer, dwNewLong As Integer) As Integer
-    End Function
-
-    Private Sub SetWindowLayerBottom()
-        SetWindowPos(Me.Handle, New IntPtr(HWND_BOTTOM), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE)
+        If hitIcon IsNot Nothing Then
+            Try
+                Process.Start(New ProcessStartInfo(hitIcon.FilePath) With {.UseShellExecute = True})
+            Catch ex As Exception
+                MessageBox.Show("Failed to open file: " & ex.Message)
+            End Try
+        End If
     End Sub
 
-    '  Alt+Tab hotkey Disabling/Enabling
+    Private WithEvents HScrollIcons As New HScrollBar()
+    Private TotalWidth As Integer = 0
 
-    Private Const WH_KEYBOARD_LL As Integer = 13
-    Private Const WM_KEYDOWN As Integer = &H100
-    Private Const WM_SYSKEYDOWN As Integer = &H104
+    Private Sub InitScrollbar()
+        HScrollIcons.Location = New Point(0, SystemInformation.WorkingArea.Height - HScrollIcons.Height)
+        HScrollIcons.Size = New Size(SystemInformation.WorkingArea.Size.Width, HScrollIcons.Height)
+        HScrollIcons.SmallChange = 20
+        HScrollIcons.LargeChange = 100
+        HScrollIcons.Visible = False
+        Me.Controls.Add(HScrollIcons)
+    End Sub
 
-    Private Declare Function SetWindowsHookEx Lib "user32" Alias "SetWindowsHookExA" (ByVal idHook As Integer, ByVal lpfn As KeyboardHookProc, ByVal hMod As IntPtr, ByVal dwThreadId As Integer) As IntPtr
-    Private Declare Function UnhookWindowsHookEx Lib "user32" (ByVal hHook As IntPtr) As Boolean
-    Private Declare Function CallNextHookEx Lib "user32" (ByVal hHook As IntPtr, ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
-    Private Declare Function GetModuleHandle Lib "kernel32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As IntPtr
-    Private Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Short
+    Private Sub HScrollIcons_Scroll(sender As Object, e As ScrollEventArgs) Handles HScrollIcons.Scroll
+        PictureBoxWallpaper.Invalidate()
+    End Sub
 
-    Private hHook As IntPtr = IntPtr.Zero
-    Private keyboardHookDelegate As KeyboardHookProc
-    Private Delegate Function KeyboardHookProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+    Private Sub PictureBoxWallpaper_MouseDown(sender As Object, e As MouseEventArgs) Handles PictureBoxWallpaper.MouseDown
+        Dim virtualX = e.X + HScrollIcons.Value
+        Dim virtualLocation As New Point(virtualX, e.Y)
 
-    Private Structure KBDLLHOOKSTRUCT
-        Public vkCode As Integer
-        Public scanCode As Integer
-        Public flags As Integer
-        Public time As Integer
-        Public dwExtraInfo As IntPtr
-    End Structure
+        DragStart = virtualLocation
+        LastMousePos = e.Location
 
-    Public Function LowLevelKeyboardProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
-        If nCode >= 0 AndAlso (wParam = WM_KEYDOWN OrElse wParam = WM_SYSKEYDOWN) Then
-            Dim keyboardStruct As KBDLLHOOKSTRUCT = CType(Marshal.PtrToStructure(lParam, GetType(KBDLLHOOKSTRUCT)), KBDLLHOOKSTRUCT)
+        Dim hitIcon As DesktopIcon = Icons.FirstOrDefault(Function(i) i.Bounds.Contains(virtualLocation))
 
-            If keyboardStruct.vkCode = Keys.Tab AndAlso (GetAsyncKeyState(Keys.LMenu) OrElse GetAsyncKeyState(Keys.RMenu)) Then
-                Return New IntPtr(1)
+        If hitIcon IsNot Nothing Then
+            If Not hitIcon.IsSelected Then
+                If (ModifierKeys And Keys.Control) <> Keys.Control Then
+                    Icons.ForEach(Sub(i) i.IsSelected = False)
+                End If
+                hitIcon.IsSelected = True
             End If
+            IsDragging = True
+        Else
+            IsSelecting = True
+
+            ' Start SelectionRect
+            SelectionRect = New Rectangle(virtualLocation.X, virtualLocation.Y, 0, 0)
+            Icons.ForEach(Sub(i) i.IsSelected = False)
         End If
 
-        Return CallNextHookEx(hHook, nCode, wParam, lParam)
-    End Function
+        If IsDragging Or IsSelecting Then
+            PictureBoxWallpaper.Capture = True
+        End If
 
-    <DllImport("shlwapi.dll", CharSet:=CharSet.Unicode)>
-    Private Shared Function SHLoadIndirectString(
-        ByVal pszSource As String,
-        ByVal pszOutBuf As StringBuilder,
-        ByVal cchOutBuf As UInteger,
-        ByVal ppvReserved As IntPtr) As Integer
-    End Function
+        PictureBoxWallpaper.Invalidate()
+    End Sub
 
-    <DllImport("shell32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
-    Private Shared Function ExtractIconEx(
-    ByVal lpszFile As String,
-    ByVal nIconIndex As Integer,
-    ByVal phiconLarge() As IntPtr,
-    ByVal phiconSmall() As IntPtr,
-    ByVal nIcons As UInteger
-) As UInteger
-    End Function
+    Private Sub PictureBoxWallpaper_MouseMove(sender As Object, e As MouseEventArgs) Handles PictureBoxWallpaper.MouseMove
+        Dim redrawNeeded As Boolean = False
 
-    <DllImport("user32.dll", SetLastError:=True)>
-    Private Shared Function DestroyIcon(ByVal hIcon As IntPtr) As Boolean
-    End Function
+        If IsSelecting Then
 
-    Public Shared Function GetIcon(ByVal filePath As String, ByVal iconIndex As Integer, ByVal isSmallIcon As Boolean) As Icon
-        Dim hIconLarge(0) As IntPtr
-        Dim hIconSmall(0) As IntPtr
-        Dim iconToReturn As Icon = Nothing
+            Dim virtualX = e.X + HScrollIcons.Value
+            SelectionRect = New Rectangle(
+    Math.Min(DragStart.X, virtualX),
+    Math.Min(DragStart.Y, e.Y),
+    Math.Abs(DragStart.X - virtualX),
+    Math.Abs(DragStart.Y - e.Y)
+)
+            For Each item In Icons
+                item.IsSelected = SelectionRect.IntersectsWith(item.Bounds)
+            Next
+            redrawNeeded = True
 
-        Try
-            Dim result As UInteger = ExtractIconEx(filePath, iconIndex, hIconLarge, hIconSmall, 1)
-
-            If result > 0 Then
-                Dim hIcon As IntPtr = If(isSmallIcon, hIconSmall(0), hIconLarge(0))
-
-                If hIcon <> IntPtr.Zero Then
-                    iconToReturn = Icon.FromHandle(hIcon).Clone()
-
-                    DestroyIcon(hIcon)
+        ElseIf IsDragging Then
+            If e.Button = MouseButtons.Middle Then
+                If Math.Abs(e.X - DragStart.X) > SystemInformation.DragSize.Width OrElse
+                Math.Abs(e.Y - DragStart.Y) > SystemInformation.DragSize.Height Then
+                    StartExternalDrag()
                 End If
+
+                redrawNeeded = True
+
+            ElseIf e.Button = MouseButtons.Left Then
+                Dim deltaX = e.X - LastMousePos.X
+                Dim deltaY = e.Y - LastMousePos.Y
+
+                Dim maxW = PictureBoxWallpaper.Width + HScrollIcons.Value
+                Dim maxH = PictureBoxWallpaper.Height
+
+                For Each item In Icons.Where(Function(i) i.IsSelected)
+                    Dim newX = item.Bounds.X + deltaX
+                    Dim newY = item.Bounds.Y + deltaY
+
+                    If newX < 0 Then newX = 0
+                    If newX + item.Bounds.Width > maxW Then newX = maxW - item.Bounds.Width
+
+                    If newY < 0 Then newY = 0
+                    If newY + item.Bounds.Height > maxH Then newY = maxH - item.Bounds.Height
+
+                    item.Bounds = New Rectangle(newX, newY, item.Bounds.Width, item.Bounds.Height)
+                Next
+
+                ' EXTERNAL DRAG
+                Dim mousePos As Point = e.Location
+                If Not PictureBoxWallpaper.ClientRectangle.Contains(mousePos) Then
+                    StartExternalDrag()
+                End If
+
+                redrawNeeded = True
             End If
+        Else
 
-        Catch ex As Exception
-            Return Nothing
-        End Try
+            For Each item In Icons
+                Dim wasHovered = item.IsHovered
+                item.IsHovered = item.Bounds.Contains(e.Location)
+                If wasHovered <> item.IsHovered Then redrawNeeded = True
+            Next
+        End If
 
-        Return iconToReturn
-    End Function
+        LastMousePos = e.Location
+        If redrawNeeded Then PictureBoxWallpaper.Invalidate()
+    End Sub
 
-    Private Const CLSID_THISPC As String = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
-    Private Const CLSID_RECYCLEBIN As String = "::{645FF040-5081-101B-9F08-00AA002F954E}"
-    Private Const CLSID_USERFILES As String = "::{59031a47-3f72-44a7-89c5-5595fe6b30ee}"
-    Private Const CLSID_CONTROL_PANEL As String = "::{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}"
-    Private Const CLSID_NETWORK As String = "::{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}"
+    Private Sub StartExternalDrag()
+        Dim selectedFiles = Icons.Where(Function(i) i.IsSelected).Select(Function(i) i.FilePath).ToArray()
+
+        If selectedFiles.Length > 0 Then
+
+            IsDragging = False
+            PictureBoxWallpaper.Capture = False
+
+            Dim data As New DataObject(DataFormats.FileDrop, selectedFiles)
+
+            PictureBoxWallpaper.DoDragDrop(data, DragDropEffects.Move Or DragDropEffects.Copy)
+        End If
+    End Sub
+
+    Public Const CLSID_THISPC As String = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+    Public Const CLSID_RECYCLEBIN As String = "::{645FF040-5081-101B-9F08-00AA002F954E}"
+    Public Const CLSID_USERFILES As String = "::{59031a47-3f72-44a7-89c5-5595fe6b30ee}"
+    Public Const CLSID_CONTROL_PANEL As String = "::{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}"
+    Public Const CLSID_NETWORK As String = "::{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}"
 
     Private Function IsShellIconVisible(clsidGUID As String) As Boolean
         Dim cleanGUID As String = clsidGUID.Replace("::", "")
@@ -208,33 +485,361 @@ Public Class Desktop
         Return False
     End Function
 
-    Private Function GetShellItemName(clsid As String) As String
-        Try
-            Dim id As Guid = New Guid(clsid.Replace("::", ""))
-            Dim type As Type = Type.GetTypeFromCLSID(id)
+    Public Sub LoadDesktopIcons()
+        Dim ICON_WIDTH As Integer = SystemInformation.IconSpacingSize.Width
+        Dim ICON_HEIGHT As Integer = SystemInformation.IconSpacingSize.Height
+        Dim SPACE As Integer = 5 'SystemInformation.IconSize.Height
 
-            Select Case clsid
-                Case CLSID_THISPC : Return "This PC"
-                Case CLSID_RECYCLEBIN : Return "Recycle Bin"
-                Case CLSID_USERFILES : Return Environment.UserName
-                Case CLSID_NETWORK : Return "Network"
-                Case CLSID_CONTROL_PANEL : Return "Control Panel"
-                Case Else : Return "Unknown Item"
-            End Select
-        Catch ex As Exception
-            Return "System Item"
+        Dim targetPath As String = DesktopDir
+        Dim targetPathPublic As String = DesktopDirPublic
+
+        If Not Directory.Exists(targetPath) Then
+            MessageBox.Show("Failed to load Desktop Items! Path to your desktop doesn't exist.", "Error")
+            Return
+        End If
+
+        Icons.Clear()
+
+        Dim Items As New List(Of String)()
+
+        If IsShellIconVisible(CLSID_THISPC) Then Items.Add(CLSID_THISPC)
+        If IsShellIconVisible(CLSID_USERFILES) Then Items.Add(CLSID_USERFILES)
+        If IsShellIconVisible(CLSID_NETWORK) Then Items.Add(CLSID_NETWORK)
+        If IsShellIconVisible(CLSID_RECYCLEBIN) Then Items.Add(CLSID_RECYCLEBIN)
+        If IsShellIconVisible(CLSID_CONTROL_PANEL) Then Items.Add(CLSID_CONTROL_PANEL)
+
+        Dim directories() As String = Directory.GetDirectories(targetPath)
+        Dim files() As String = Directory.GetFiles(targetPath)
+
+        Dim publicdirectories() As String = Directory.GetDirectories(targetPathPublic)
+        Dim publicfiles() As String = Directory.GetFiles(targetPathPublic)
+
+        Items.AddRange(directories)
+        Items.AddRange(publicdirectories)
+
+        Items.AddRange(files)
+        Items.AddRange(publicfiles)
+
+        For i As Integer = 0 To Items.Count - 1
+            Dim isShellItem As Boolean = Items(i).StartsWith("::{")
+            Dim isDirectory As Boolean = Directory.Exists(Items(i))
+            Dim isFile As Boolean = File.Exists(Items(i))
+
+            If isFile = False AndAlso isDirectory = False AndAlso isShellItem = False Then Continue For
+
+            Dim DesktopItem As New DesktopIcon
+
+            DesktopItem.Bounds = New Rectangle(0, 0, 100, 100)
+
+            If isFile = True Then
+                Dim FI As New FileInfo(Items(i))
+
+                Try
+                    DesktopItem.IconImage = GetOptimizedIcon(FI.FullName, BaseIconSize.Width + 10)
+                Catch ex As Exception
+                    DesktopItem.IconImage = SystemIcons.Application.ToBitmap
+                End Try
+
+                If FI.Extension.ToLower = ".lnk" Then
+                    DesktopItem.Name = Path.GetFileNameWithoutExtension(FI.FullName)
+                Else
+                    DesktopItem.Name = FI.Name
+                End If
+
+                DesktopItem.FilePath = Items(i)
+
+            ElseIf isDirectory = True Then
+                Dim DI As New DirectoryInfo(Items(i))
+
+                Try
+                    DesktopItem.IconImage = GetOptimizedIcon(DI.FullName, BaseIconSize.Width + 10)
+                Catch ex As Exception
+                    DesktopItem.IconImage = SystemIcons.Question.ToBitmap
+                End Try
+
+                DesktopItem.Name = DI.Name
+                DesktopItem.FilePath = Items(i)
+
+
+            ElseIf isShellItem Then
+                Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(Items(i))
+
+                DesktopItem.Name = info.DisplayName
+
+                If info.Icon IsNot Nothing Then
+                    DesktopItem.IconImage = info.Icon
+                Else
+                    DesktopItem.IconImage = SystemIcons.Application.ToBitmap
+                End If
+
+                DesktopItem.FilePath = "shell:" & Items(i)
+            End If
+
+            Icons.Add(DesktopItem)
+        Next
+
+        ArrangeIcons()
+    End Sub
+
+    Private Sub PictureBoxWallpaper_DragEnter(sender As Object, e As DragEventArgs) Handles PictureBoxWallpaper.DragEnter
+        If e.Data.GetDataPresent(DataFormats.FileDrop) Then
+            e.Effect = DragDropEffects.Move
+        End If
+    End Sub
+
+    Private Function IsValidImage(filePath As String) As Boolean
+        Try
+            Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read)
+                Using img As Image = Image.FromStream(fs)
+                    Return True
+                End Using
+            End Using
+        Catch
+            Return False
         End Try
     End Function
 
-    Private Sub Desktop_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.DoubleBuffered = True
-        PictureBox1.AllowDrop = True
+    Private Sub PictureBoxWallpaper_DragOver(sender As Object, e As DragEventArgs) Handles PictureBoxWallpaper.DragOver
+        If e.Data.GetDataPresent(DataFormats.FileDrop) Then
+            Dim clientPoint = PictureBoxWallpaper.PointToClient(New Point(e.X, e.Y))
+            Dim target = Icons.FirstOrDefault(Function(i) i.Bounds.Contains(clientPoint) AndAlso IO.Directory.Exists(i.FilePath))
 
-        BackUpdate()
+
+            If target IsNot Nothing Then
+                e.Effect = DragDropEffects.Move
+            Else
+                e.Effect = DragDropEffects.Copy
+            End If
+        End If
+    End Sub
+    Public DesktopDir As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "DesktopDir", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
+    Public DesktopDirPublic As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "DesktopDirPublic", Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory))
+    Private Sub PictureBoxWallpaper_DragDrop(sender As Object, e As DragEventArgs) Handles PictureBoxWallpaper.DragDrop
+        If e.Data.GetDataPresent(DataFormats.FileDrop) Then
+            Dim files() As String = CType(e.Data.GetData(DataFormats.FileDrop), String())
+            Dim desktopPath = DesktopDir
+            Dim userFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+
+            Dim clientPoint = PictureBoxWallpaper.PointToClient(New Point(e.X, e.Y))
+            Dim targetIcon = Icons.FirstOrDefault(Function(i) i.Bounds.Contains(clientPoint))
+
+            For Each sourcePath In files
+                Dim fileName = IO.Path.GetFileName(sourcePath)
+                Dim finalDest As String = ""
+                Dim isRecycleAction As Boolean = False
+
+                If targetIcon IsNot Nothing Then
+
+                    Dim targetExt = IO.Path.GetExtension(targetIcon.FilePath).ToLower()
+                    If targetExt = ".exe" OrElse targetExt = ".lnk" OrElse targetExt = ".bat" Then
+                        Try
+
+                            Dim psi As New ProcessStartInfo(targetIcon.FilePath) With {
+                            .Arguments = $"""{sourcePath}""",
+                            .UseShellExecute = True
+                        }
+                            Process.Start(psi)
+                            Continue For
+                        Catch ex As Exception
+                            Debug.WriteLine("Failed to open program: " & ex.Message)
+                        End Try
+                    End If
+
+
+                    Select Case targetIcon.FilePath
+                        Case "shell:" & CLSID_RECYCLEBIN
+                            isRecycleAction = True
+                        Case "shell:" & CLSID_USERFILES
+                            finalDest = IO.Path.Combine(userFilesPath, fileName)
+                        Case Else
+                            If IO.Directory.Exists(targetIcon.FilePath) Then
+                                finalDest = IO.Path.Combine(targetIcon.FilePath, fileName)
+                            Else
+                                finalDest = IO.Path.Combine(desktopPath, fileName)
+                            End If
+                    End Select
+                Else
+                    finalDest = IO.Path.Combine(desktopPath, fileName)
+                End If
+
+
+                Try
+                    If isRecycleAction Then
+                        If IO.Directory.Exists(sourcePath) Then
+                            My.Computer.FileSystem.DeleteDirectory(sourcePath, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                        Else
+                            My.Computer.FileSystem.DeleteFile(sourcePath, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                        End If
+                        Continue For
+                    End If
+
+                    If sourcePath.Equals(finalDest, StringComparison.OrdinalIgnoreCase) Then Continue For
+
+                    Dim safeDest = finalDest
+                    If IO.File.Exists(safeDest) OrElse IO.Directory.Exists(safeDest) Then
+                        safeDest = GetNewFileName(finalDest)
+                    End If
+
+                    If IO.Directory.Exists(sourcePath) Then
+                        IO.Directory.Move(sourcePath, safeDest)
+                    Else
+                        IO.File.Move(sourcePath, safeDest)
+                    End If
+                Catch ex As Exception
+                    Debug.WriteLine("DragDrop Error: " & ex.Message)
+                End Try
+            Next
+            PictureBoxWallpaper.Invalidate()
+        End If
+    End Sub
+
+    Private Function GetNewFileName(path As String) As String
+        Dim count = 1
+        Dim dir = IO.Path.GetDirectoryName(path)
+        Dim name = IO.Path.GetFileNameWithoutExtension(path)
+        Dim ext = IO.Path.GetExtension(path)
+        Dim newPath = path
+        While IO.File.Exists(newPath)
+            count += 1
+            newPath = IO.Path.Combine(dir, $"{name} ({count}){ext}")
+        End While
+        Return newPath
+    End Function
+    Dim DragToGrid As Boolean = True
+
+    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Unicode)>
+    Public Structure SHELLEXECUTEINFO
+        Public cbSize As Integer
+        Public fMask As UInteger
+        Public hwnd As IntPtr
+        <MarshalAs(UnmanagedType.LPWStr)> Public lpVerb As String
+        <MarshalAs(UnmanagedType.LPWStr)> Public lpFile As String
+        <MarshalAs(UnmanagedType.LPWStr)> Public lpParameters As String
+        <MarshalAs(UnmanagedType.LPWStr)> Public lpDirectory As String
+        Public nShow As Integer
+        Public hInstApp As IntPtr
+        Public lpIDList As IntPtr
+        <MarshalAs(UnmanagedType.LPWStr)> Public lpClass As String
+        Public hkeyClass As IntPtr
+        Public dwHotKey As UInteger
+        Public hIcon As IntPtr
+        Public hProcess As IntPtr
+    End Structure
+
+    <DllImport("shell32.dll", EntryPoint:="ShellExecuteExW", CharSet:=CharSet.Unicode, SetLastError:=True)>
+    Public Shared Function ShellExecuteEx(ByRef lpExecInfo As SHELLEXECUTEINFO) As Boolean
+    End Function
+
+    Private Const SEE_MASK_INVOKEIDLIST As UInteger = &HC
+    Private Const SW_SHOWNORMAL As Integer = 1
+
+    Public Sub ShowFileProperties(ByVal Filename As String)
+        Dim sei As New SHELLEXECUTEINFO()
+        sei.cbSize = Marshal.SizeOf(sei)
+        sei.lpVerb = "properties"
+        sei.lpFile = Filename
+        sei.fMask = SEE_MASK_INVOKEIDLIST
+        sei.nShow = SW_SHOWNORMAL
+
+        If Not ShellExecuteEx(sei) Then
+            Dim err As Integer = Marshal.GetLastWin32Error()
+            MessageBox.Show("Failed to open properties. Error code: " & err)
+        End If
+    End Sub
+
+    Public Sub ShowCustomContextMenu(displayPoint As Point)
+        Dim selectedIcons = Icons.Where(Function(i) i.IsSelected).ToList()
+
+        If selectedIcons.Count = 0 Then
+            Dim desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
+            RegistryMenuManager.ShowRegistryMenu({desktopPath}, displayPoint)
+            Return
+        End If
+
+        Dim paths As String() = selectedIcons.Select(Function(x) x.FilePath).ToArray()
+        Dim mainPath As String = paths(0)
+
+        Dim cms As New ContextMenuStrip()
+        cms.RenderMode = ToolStripRenderMode.System
+
+        RegistryMenuManager.ShowRegistryMenu(paths, displayPoint)
+    End Sub
+
+    Private Sub PictureBoxWallpaper_MouseUp(sender As Object, e As MouseEventArgs) Handles PictureBoxWallpaper.MouseUp
+        If IsDragging AndAlso DragToGrid Then
+            Dim gridX As Integer = CInt(ItemWidth * ZoomLevel) + 10
+            Dim gridY As Integer = CInt(ItemHeight * ZoomLevel) + 10
+
+            For Each item In Icons.Where(Function(i) i.IsSelected)
+                Dim snappedX As Integer = CInt(Math.Round(item.Bounds.X / gridX) * gridX)
+                Dim snappedY As Integer = CInt(Math.Round(item.Bounds.Y / gridY) * gridY)
+
+                item.Bounds = New Rectangle(snappedX + 10, snappedY + 10, item.Bounds.Width, item.Bounds.Height)
+            Next
+
+            UpdateTotalWidth()
+        End If
+
+        If e.Button = MouseButtons.Right Then
+            Dim movement = Math.Abs(e.X - DragStart.X) + Math.Abs(e.Y - DragStart.Y)
+
+            If movement < 5 Then
+                Dim hitIcon = Icons.FirstOrDefault(Function(i) i.Bounds.Contains(e.Location))
+                If hitIcon IsNot Nothing Then
+                    RenamingIcon = hitIcon
+
+                    'Dim paths As String() = {hitIcon.FilePath}
+                    'RegistryMenuManager.ShowRegistryMenu(paths, MousePosition)
+                    ShowCustomContextMenu(MousePosition)
+                Else
+                    DesktopCM.Show(PictureBoxWallpaper, e.Location)
+                    DesktopCM.BringToFront()
+                End If
+            End If
+        End If
+
+        FinishRename(False)
+
+        IsSelecting = False
+        IsDragging = False
+        SelectionRect = Rectangle.Empty
+        PictureBoxWallpaper.Invalidate()
+    End Sub
+
+    Private Sub UpdateTotalWidth()
+        Dim maxRight As Integer = 0
+
+        For Each item In Icons
+            If item.Bounds.Right > maxRight Then
+                maxRight = item.Bounds.Right
+            End If
+        Next
+
+        TotalWidth = maxRight
+
+        If TotalWidth > PictureBoxWallpaper.Width Then
+            HScrollIcons.Maximum = TotalWidth
+            HScrollIcons.LargeChange = PictureBoxWallpaper.Width
+            HScrollIcons.Visible = True
+        Else
+            HScrollIcons.Visible = False
+            HScrollIcons.Value = 0
+        End If
+
+        PictureBoxWallpaper.Invalidate()
+    End Sub
+
+    Private Async Sub Desktop_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.SetStyle(ControlStyles.AllPaintingInWmPaint Or ControlStyles.UserPaint Or ControlStyles.DoubleBuffer, True)
+        PictureBoxWallpaper.AllowDrop = True
+
+        Dim deskIcon As Icon = AppBar.GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 105, False)
+        If deskIcon IsNot Nothing Then
+            Me.Icon = deskIcon
+        End If
+
+        Await BackUpdate()
         LoadDesktopIcons()
-
-        FSW.Path = DesktopDir
-        PFSW.Path = DesktopDirPublic
 
         Dim ShellIconsKey As String = "Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
         If Registry.CurrentUser.OpenSubKey(ShellIconsKey) Is Nothing Then
@@ -243,24 +848,416 @@ Public Class Desktop
             Registry.SetValue(ShellIconsKey, CLSID_RECYCLEBIN, "0")
         End If
 
-        ' Custom Alt+Tab
+        LoadSettings()
 
+        FSW = New IO.FileSystemWatcher()
+        FSW.Path = DesktopDir
+        FSW.EnableRaisingEvents = True
+
+        InitScrollbar()
+
+        ArrangeIcons()
+    End Sub
+
+    Public Sub LoadSettings()
+        Dim defView As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 2)
+
+        Select Case defView
+            Case 0 ' Mini icons
+                ZoomLevel = 0.5
+
+            Case 1 ' Small icons
+                ZoomLevel = 0.7
+
+            Case 2 ' Medium icons
+                ZoomLevel = 1
+
+            Case 3 ' Large icons
+                ZoomLevel = 2
+
+            Case 4 ' Extra Large icons
+                ZoomLevel = 3
+        End Select
+
+        DragToGrid = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DragToGrid", True)
+    End Sub
+
+    Private Sub DrawGlowText(g As Graphics, text As String, font As Font, rect As Rectangle, sf As StringFormat)
+
+        Dim glowColor As Color = Color.FromArgb(200, 0, 0, 0)
+        Using b As New SolidBrush(glowColor)
+
+            For x As Integer = -1 To 1
+                For y As Integer = 0 To 2
+                    If x = 0 And y = 0 Then Continue For
+                    g.DrawString(text, font, b, New Rectangle(rect.X + x, rect.Y + y, rect.Width, rect.Height), sf)
+                Next
+            Next
+        End Using
+
+
+        g.DrawString(text, font, Brushes.White, rect, sf)
+    End Sub
+
+    Private WithEvents FSW As IO.FileSystemWatcher
+
+    Private Sub FSW_Created(sender As Object, e As IO.FileSystemEventArgs) Handles FSW.Created
+        If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
+            Me.Invoke(Sub()
+                          Dim newItem = New DesktopIcon With {
+                          .Name = IO.Path.GetFileNameWithoutExtension(e.FullPath),
+                          .FilePath = e.FullPath,
+                          .IconImage = GetOptimizedIcon(e.FullPath, CInt(BaseIconSize.Width * ZoomLevel))
+                      }
+                          Icons.Add(newItem)
+                          ArrangeIcons()
+                      End Sub)
+        End If
+    End Sub
+
+    Private Sub FSW_Renamed(sender As Object, e As IO.RenamedEventArgs) Handles FSW.Renamed
+        If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
+            Me.Invoke(Sub()
+                          Dim item = Icons.FirstOrDefault(Function(i) i.FilePath.Equals(e.OldFullPath, StringComparison.OrdinalIgnoreCase))
+                          If item IsNot Nothing Then
+                              item.Name = IO.Path.GetFileNameWithoutExtension(e.FullPath)
+                              item.FilePath = e.FullPath
+                              PictureBoxWallpaper.Invalidate()
+                          End If
+                      End Sub)
+        End If
+    End Sub
+
+    Private Sub FSW_Deleted(sender As Object, e As IO.FileSystemEventArgs) Handles FSW.Deleted
+        If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
+            Me.Invoke(Sub()
+                          Icons.RemoveAll(Function(i) i.FilePath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase))
+                          PictureBoxWallpaper.Invalidate()
+                      End Sub)
+        End If
+    End Sub
+
+    Public Function GetShortcutTarget(shortcutPath As String) As String
         Try
+            If Not File.Exists(shortcutPath) Then Return String.Empty
 
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\AltTab", "Enabled", "0") = 1 Then
-                keyboardHookDelegate = New KeyboardHookProc(AddressOf LowLevelKeyboardProc)
+            Dim fileBytes As Byte() = File.ReadAllBytes(shortcutPath)
 
-                Dim appModule As IntPtr = GetModuleHandle(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name & ".exe")
-                hHook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardHookDelegate, appModule, 0)
+            If fileBytes.Length < &H4C OrElse fileBytes(0) <> &H4C Then Return String.Empty
 
+            Dim flags As UInteger = BitConverter.ToUInt32(fileBytes, &H14)
+            If (flags And &H2) = 0 Then Return String.Empty ' HasLinkInfo flag
+
+            Dim offset As Integer = &H4C
+            If (flags And &H1) <> 0 Then ' HasLinkTargetIDList flag
+                Dim idListSize As Short = BitConverter.ToInt16(fileBytes, offset)
+                offset += idListSize + 2
             End If
 
-        Catch ex As Exception
-            hHook = IntPtr.Zero
-            MessageBox.Show("Failed to implement Custom Alt+Tab hook. So we'll switching it back to Windows' Default.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        End Try
+            Dim localBaseNameOffset As Integer = BitConverter.ToInt32(fileBytes, offset + &H10)
+            Dim finalOffset As Integer = offset + localBaseNameOffset
 
-        SetWindowLayerBottom()
+            Dim pathBuilder As New StringBuilder()
+            While finalOffset < fileBytes.Length AndAlso fileBytes(finalOffset) <> 0
+                pathBuilder.Append(Chr(fileBytes(finalOffset)))
+                finalOffset += 1
+            End While
+
+            Return pathBuilder.ToString()
+        Catch
+            Return String.Empty
+        End Try
+    End Function
+
+
+    Private Sub PictureBoxWallpaper_Paint(sender As Object, e As PaintEventArgs) Handles PictureBoxWallpaper.Paint
+        Dim g = e.Graphics
+        Dim offsetX As Integer = HScrollIcons.Value
+
+        g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+        g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+        g.TextRenderingHint = Drawing.Text.TextRenderingHint.ClearTypeGridFit
+
+        ' Scrollbar Offset
+        g.TranslateTransform(-offsetX, 0)
+
+        Dim currentIconSize As Integer = CInt(BaseIconSize.Width * ZoomLevel)
+
+        For Each item In Icons
+            If item.Bounds.Right < offsetX OrElse item.Bounds.Left > offsetX + PictureBoxWallpaper.Width Then
+                Continue For
+            End If
+
+            ' Hover
+            If item.IsSelected Then
+                g.FillRectangle(New SolidBrush(Color.FromArgb(100, 51, 153, 255)), item.Bounds)
+                g.DrawRectangle(New Pen(Color.DodgerBlue, 1), item.Bounds)
+            ElseIf item.IsHovered Then
+                g.FillRectangle(New SolidBrush(Color.FromArgb(60, 51, 153, 255)), item.Bounds)
+                g.DrawRectangle(New Pen(Color.FromArgb(150, 51, 153, 255), 1), item.Bounds)
+            End If
+
+            ' Icon
+            Dim imgRect As New Rectangle(
+            item.Bounds.X + (item.Bounds.Width - currentIconSize) \ 2,
+            item.Bounds.Y + 5,
+            currentIconSize,
+            currentIconSize
+        )
+            g.DrawImage(item.IconImage, imgRect)
+
+            ' Text
+            Dim fontSize As Single = CSng(9 * ZoomLevel)
+            Using f As New Font("Segoe UI", fontSize, FontStyle.Regular)
+                Dim textRect As New Rectangle(item.Bounds.X, imgRect.Bottom + 5, item.Bounds.Width, 40)
+                Dim sf As New StringFormat With {.Alignment = StringAlignment.Center, .Trimming = StringTrimming.EllipsisCharacter}
+                DrawGlowText(g, item.Name, f, textRect, sf)
+            End Using
+        Next
+
+        If IsSelecting Then
+            Using br As New SolidBrush(Color.FromArgb(100, 51, 153, 255))
+                g.FillRectangle(br, SelectionRect)
+            End Using
+            Using p As New Pen(Color.FromArgb(220, 51, 153, 255))
+                g.DrawRectangle(p, SelectionRect)
+            End Using
+        End If
+
+        g.ResetTransform()
+    End Sub
+
+    Private LastIconState As Integer = -1
+
+    Private Sub PictureBoxWallpaper_MouseWheel(sender As Object, e As MouseEventArgs) Handles PictureBoxWallpaper.MouseWheel
+        If (ModifierKeys And Keys.Shift) = Keys.Shift Then
+            Dim newValue As Integer = HScrollIcons.Value - (e.Delta)
+
+            If newValue < 0 Then newValue = 0
+            If newValue > HScrollIcons.Maximum - HScrollIcons.LargeChange Then
+                newValue = HScrollIcons.Maximum - HScrollIcons.LargeChange
+            End If
+
+            HScrollIcons.Value = newValue
+            PictureBoxWallpaper.Invalidate()
+        End If
+
+        If (ModifierKeys And Keys.Control) = Keys.Control Then
+            Dim oldZoom = ZoomLevel
+            If e.Delta > 0 Then
+                ZoomLevel = Math.Min(ZoomLevel + 0.1, 3.0)
+            Else
+                ZoomLevel = Math.Max(ZoomLevel - 0.1, 0.5)
+            End If
+
+            Dim currentSize As Integer = CInt(BaseIconSize.Width * ZoomLevel)
+
+
+            Dim currentState As Integer
+            If currentSize <= 20 Then currentState = 0 Else If currentSize <= 36 Then currentState = 1 Else If currentSize <= 52 Then currentState = 2 Else currentState = 3
+
+
+            If currentState <> LastIconState Then
+                For Each item In Icons
+                    If item.IconImage IsNot Nothing Then item.IconImage.Dispose()
+                    item.IconImage = GetOptimizedIcon(item.FilePath, currentSize)
+                Next
+                LastIconState = currentState
+            End If
+
+            ArrangeIcons()
+        End If
+    End Sub
+
+    Private Sub LargeIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) 'Handles LargeIconsToolStripMenuItem.Click
+        ZoomLevel = 1.5
+        ArrangeIcons()
+    End Sub
+
+    Private Sub AutoArrangeToolStripMenuItem_Click(sender As Object, e As EventArgs) 'Handles AutoArrangeToolStripMenuItem.Click
+        ArrangeIcons()
+    End Sub
+
+    Private Sub ArrangeIcons()
+        Dim currentX As Integer = 10
+        Dim currentY As Integer = 10
+        Dim spacing As Integer = 10
+        Dim iconWidth As Integer = ItemWidth * ZoomLevel
+        Dim iconHeight As Integer = ItemHeight * ZoomLevel
+
+        Dim maxRight As Integer = 0
+
+        For Each item In Icons
+            item.Bounds = New Rectangle(currentX, currentY, iconWidth, iconHeight)
+
+            If item.Bounds.Right > maxRight Then
+                maxRight = item.Bounds.Right
+            End If
+
+            currentY += iconHeight + spacing
+
+            If currentY + iconHeight > PictureBoxWallpaper.Height Then
+                currentY = 10
+                currentX += iconWidth + spacing
+            End If
+        Next
+
+        TotalWidth = maxRight
+
+        If TotalWidth > PictureBoxWallpaper.Width Then
+            HScrollIcons.Location = New Point(0, SystemInformation.WorkingArea.Height - HScrollIcons.Height)
+            HScrollIcons.Size = New Size(SystemInformation.WorkingArea.Size.Width, HScrollIcons.Height)
+            HScrollIcons.Maximum = TotalWidth
+            HScrollIcons.LargeChange = PictureBoxWallpaper.Width
+            HScrollIcons.Visible = True
+            HScrollIcons.BringToFront()
+        Else
+            HScrollIcons.Visible = False
+            HScrollIcons.Value = 0
+        End If
+
+        PictureBoxWallpaper.Invalidate()
+    End Sub
+
+    Private WithEvents RenameBox As TextBox
+    Public RenamingIcon As DesktopIcon = Nothing
+
+    Public Sub StartRename(item As DesktopIcon)
+        If item Is Nothing Then Return
+
+        RenamingIcon = item
+        RenameBox = New TextBox()
+
+        RenameBox.Text = item.Name
+        RenameBox.TextAlign = HorizontalAlignment.Center
+        RenameBox.Multiline = True
+
+        Dim rect = item.Bounds
+        RenameBox.Bounds = New Rectangle(rect.X, rect.Y + (rect.Height - 30), rect.Width, 30)
+
+        PictureBoxWallpaper.Controls.Add(RenameBox)
+        RenameBox.Focus()
+        RenameBox.SelectAll()
+    End Sub
+
+    Private Sub RenameBox_KeyDown(sender As Object, e As KeyEventArgs) Handles RenameBox.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            e.SuppressKeyPress = True
+            FinishRename(True)
+        ElseIf e.KeyCode = Keys.Escape Then
+            FinishRename(False)
+        End If
+    End Sub
+
+    Private Sub RenameBox_LostFocus(sender As Object, e As EventArgs) Handles RenameBox.LostFocus
+        FinishRename(True)
+    End Sub
+
+    Private Sub FinishRename(save As Boolean)
+        If RenameBox Is Nothing Then Return
+
+        If RenamingIcon Is Nothing Then
+            CleanupRenameBox()
+            Return
+        End If
+
+        If save Then
+            Dim newBaseName = RenameBox.Text.Trim()
+            Dim selectedIcons = Icons.Where(Function(i) i.IsSelected).ToList()
+
+            If selectedIcons.Count = 0 Then selectedIcons.Add(RenamingIcon)
+
+            If newBaseName <> "" Then
+                Dim useIndex As Boolean = selectedIcons.Count > 1
+                Dim counter As Integer = 1
+
+                For Each item In selectedIcons
+                    Try
+                        Dim oldPath = item.FilePath
+
+                        If oldPath.StartsWith("shell:::") Then
+                            Dim clsid As String = oldPath.Replace("shell:::", "")
+
+                            If RenameShellItemInRegistry(clsid, newBaseName) Then
+                                item.Name = newBaseName
+                                PictureBoxWallpaper.Invalidate()
+                            End If
+                            Continue For
+                        End If
+
+                        Dim directory = IO.Path.GetDirectoryName(oldPath)
+                        Dim extension = IO.Path.GetExtension(oldPath)
+
+                        Dim finalName As String = If(useIndex, $"{newBaseName} ({counter})", newBaseName)
+                        Dim newPath = IO.Path.Combine(directory, finalName & extension)
+
+                        If Not oldPath.Equals(newPath, StringComparison.OrdinalIgnoreCase) Then
+                            If oldPath.StartsWith("shell:::") Then
+                                Dim clsid As String = oldPath.Replace("shell:::", "")
+                                RenameShellItemInRegistry(clsid, newBaseName)
+                                Continue For
+                            End If
+
+                            If IO.File.Exists(newPath) OrElse IO.Directory.Exists(newPath) Then
+                                newPath = GetNewFileName(newPath)
+                            End If
+
+                            If IO.Directory.Exists(oldPath) Then
+                                IO.Directory.Move(oldPath, newPath)
+                            Else
+                                IO.File.Move(oldPath, newPath)
+                            End If
+                        End If
+                        counter += 1
+                    Catch ex As Exception
+                        Debug.WriteLine("Chyba přejmenování: " & ex.Message)
+                    End Try
+                Next
+            End If
+        End If
+
+        CleanupRenameBox()
+    End Sub
+
+    Private Sub CleanupRenameBox()
+        If RenameBox IsNot Nothing Then
+            RemoveHandler RenameBox.LostFocus, AddressOf RenameBox_LostFocus
+
+            PictureBoxWallpaper.Controls.Remove(RenameBox)
+            RenameBox.Dispose()
+            RenameBox = Nothing
+        End If
+        RenamingIcon = Nothing
+        PictureBoxWallpaper.Focus()
+    End Sub
+
+    Private Function RenameShellItemInRegistry(clsid As String, newName As String) As Boolean
+        Try
+            Dim keyPath As String = "Software\Microsoft\Windows\CurrentVersion\Explorer\CLSID\" & clsid
+
+            Using key As RegistryKey = Registry.CurrentUser.CreateSubKey(keyPath)
+                If key IsNot Nothing Then
+                    key.SetValue("", newName)
+                    Return True
+                End If
+            End Using
+            Return False
+        Catch ex As Exception
+            Debug.WriteLine("Registry Write Error: " & ex.Message)
+            Return False
+        End Try
+    End Function
+
+    Private Sub PictureBoxWallpaper_Resize(sender As Object, e As EventArgs) Handles PictureBoxWallpaper.Resize, PictureBoxWallpaper.LocationChanged
+        ArrangeIcons()
+
+        If Me.WindowState <> FormWindowState.Maximized Then
+            Me.WindowState = FormWindowState.Maximized
+        End If
+
+        If Me.FormBorderStyle <> FormBorderStyle.None Then
+            Me.FormBorderStyle = FormBorderStyle.None
+        End If
     End Sub
     Public CanClose As Boolean = False
     Private Sub Desktop_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
@@ -285,725 +1282,32 @@ Public Class Desktop
         End If
     End Sub
 
-    Private Const SHGFI_ICON As UInteger = &H100
-    Private Const SHGFI_SMALLICON As UInteger = &H1
-    Private Const SHGFI_LARGEICON As UInteger = &H0
-    Private Const SHGFI_USEFILEATTRIBUTES As UInteger = &H10
-    Private Const SHGFI_DISPLAYNAME As UInteger = &H200
-    Private Const SHGFI_PIDL As UInteger = &H8
+    Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles DesktopCM.Opening
+        DesktopCM.Items.Clear()
 
-    Private Const FILE_ATTRIBUTE_NORMAL As UInteger = &H80
-    Private Const FILE_ATTRIBUTE_DIRECTORY As UInteger = &H10
+        DesktopCM.Items.Add(ViewToolStripMenuItem)
+        DesktopCM.Items.Add(RefreshToolStripMenuItem)
+        DesktopCM.Items.Add(New ToolStripSeparator())
 
-    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Unicode)>
-    Private Structure SHFILEINFO
-        Public hIcon As IntPtr
-        Public iIcon As Integer
-        Public dwAttributes As UInteger
-        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
-        Public szDisplayName As String
-        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=80)>
-        Public szTypeName As String
-    End Structure
+        DesktopCM.Items.Add(PasteToolStripMenuItem)
+        PasteToolStripMenuItem.Enabled = Clipboard.ContainsFileDropList
 
-    <DllImport("shell32.dll", CharSet:=CharSet.Unicode, SetLastError:=True)>
-    Private Shared Function SHGetFileInfo(
-    ByVal pszPath As String,
-    ByVal dwFileAttributes As UInteger,
-    ByRef psfi As SHFILEINFO,
-    ByVal cbFileInfo As UInteger,
-    ByVal uFlags As UInteger) As IntPtr
-    End Function
+        DesktopCM.Items.Add(NewToolStripMenuItem)
+        DesktopCM.Items.Add(New ToolStripSeparator())
 
-    <DllImport("shell32.dll", CharSet:=CharSet.Unicode, ExactSpelling:=True, PreserveSig:=False)>
-    Private Shared Function SHParseDisplayName(<MarshalAs(UnmanagedType.LPWStr)> ByVal pszName As String, ByVal pbc As IntPtr, ByRef ppidl As IntPtr, ByVal sfgaoIn As UInteger, ByRef psfgaoOut As UInteger) As Integer
-    End Function
+        LoadAndGenerateMenuItems(DesktopCM.Items, REG_KEY_PATH)
 
-    <DllImport("shell32.dll")>
-    Private Shared Sub ILFree(ByVal pidl As IntPtr)
+        DesktopCM.Items.Add(New ToolStripSeparator())
+        DesktopCM.Items.Add(PropertiesToolStripMenuItem)
     End Sub
 
-    Public Function GetFileIcon(ByVal filePath As String, ByVal isLargeIcon As Boolean) As Icon
-        Dim shInfo As SHFILEINFO = New SHFILEINFO()
-        Dim flags As UInteger = SHGFI_ICON
-
-        If isLargeIcon Then
-            flags = flags Or SHGFI_LARGEICON
-        Else
-            flags = flags Or SHGFI_SMALLICON
-        End If
-
-        Dim attributes As UInteger = FILE_ATTRIBUTE_NORMAL
-
-        If String.IsNullOrEmpty(filePath) OrElse System.IO.Directory.Exists(filePath) Then
-            If Not String.IsNullOrEmpty(filePath) AndAlso System.IO.Directory.Exists(filePath) Then
-                attributes = FILE_ATTRIBUTE_DIRECTORY
-            ElseIf String.IsNullOrEmpty(filePath) Then
-                flags = flags Or SHGFI_USEFILEATTRIBUTES
-                attributes = FILE_ATTRIBUTE_DIRECTORY
-            End If
-        End If
-
-        Dim result As IntPtr
-
-        Try
-            result = SHGetFileInfo(
-            filePath,
-            attributes,
-            shInfo,
-            CUInt(Marshal.SizeOf(shInfo)),
-            flags)
-        Catch ex As Exception
-            result = IntPtr.Zero
-        End Try
-
-        If Not result.Equals(IntPtr.Zero) AndAlso Not shInfo.hIcon.Equals(IntPtr.Zero) Then
-            Try
-                Dim iconResult As Icon = Icon.FromHandle(shInfo.hIcon)
-                Dim finalIcon As Icon = CType(iconResult.Clone(), Icon)
-
-                DestroyIcon(shInfo.hIcon)
-
-                Return finalIcon
-            Catch ex As Exception
-                Return Nothing
-            End Try
-        End If
-
-        Return Nothing
+    <DllImport("shlwapi.dll", CharSet:=CharSet.Unicode)>
+    Private Shared Function SHLoadIndirectString(
+        ByVal pszSource As String,
+        ByVal pszOutBuf As StringBuilder,
+        ByVal cchOutBuf As UInteger,
+        ByVal ppvReserved As IntPtr) As Integer
     End Function
-
-    Public Function GetFolderIcon(ByVal folderPath As String, ByVal isLargeIcon As Boolean) As Icon
-        If Not System.IO.Directory.Exists(folderPath) Then
-            Return Nothing
-        End If
-
-        Dim shInfo As SHFILEINFO = New SHFILEINFO()
-
-        Dim flags As UInteger = SHGFI_ICON
-
-        If isLargeIcon Then
-            flags = flags Or SHGFI_LARGEICON
-        Else
-            flags = flags Or SHGFI_SMALLICON
-        End If
-
-        Dim result As IntPtr = SHGetFileInfo(
-            folderPath,
-            FILE_ATTRIBUTE_DIRECTORY,
-            shInfo,
-            CUInt(Marshal.SizeOf(shInfo)),
-            flags)
-
-        If Not result.Equals(IntPtr.Zero) AndAlso Not shInfo.hIcon.Equals(IntPtr.Zero) Then
-            Try
-                Dim iconResult As Icon = Icon.FromHandle(shInfo.hIcon)
-                Dim finalIcon As Icon = CType(iconResult.Clone(), Icon)
-
-                DestroyIcon(shInfo.hIcon)
-
-                Return finalIcon
-            Catch ex As Exception
-                Return Nothing
-            End Try
-        End If
-
-        Return Nothing
-    End Function
-
-    Public Structure ShellItemInfo
-        Public Icon As Bitmap
-        Public DisplayName As String
-    End Structure
-
-    Public Shared Function GetShellItemInfo(shellPath As String) As ShellItemInfo
-        Dim info As New ShellItemInfo()
-        Dim pidl As IntPtr = IntPtr.Zero
-
-        Try
-            SHParseDisplayName(shellPath, IntPtr.Zero, pidl, 0, 0)
-
-            If pidl <> IntPtr.Zero Then
-                Dim shinfo As New SHFILEINFO()
-
-                SHGetFileInfo(pidl, 0, shinfo, CUInt(Marshal.SizeOf(shinfo)), SHGFI_ICON Or SHGFI_LARGEICON Or SHGFI_DISPLAYNAME Or SHGFI_PIDL)
-
-                info.DisplayName = shinfo.szDisplayName
-
-                If shinfo.hIcon <> IntPtr.Zero Then
-
-                    Using ico As Icon = Icon.FromHandle(shinfo.hIcon)
-                        info.Icon = ico.ToBitmap()
-                    End Using
-
-                    DestroyIcon(shinfo.hIcon)
-                End If
-            End If
-        Catch ex As Exception
-            info.DisplayName = "Unknown Item"
-            info.Icon = SystemIcons.Error.ToBitmap()
-        Finally
-            If pidl <> IntPtr.Zero Then ILFree(pidl)
-        End Try
-
-        Return info
-    End Function
-    Private currentDraggedButton As Button = Nothing
-    Private mouseOffset As Point
-    Private wasDragged As Boolean = False
-    Private isDraggingOut As Boolean = False
-    Private Sub Button_MouseMove(sender As Object, e As MouseEventArgs)
-        If e.Button = MouseButtons.None Then
-
-            currentDraggedButton = CType(sender, Button)
-            mouseOffset = New Point(e.X, e.Y)
-            currentDraggedButton.BringToFront()
-
-            wasDragged = False
-
-            isDraggingOut = False
-
-        ElseIf e.Button = MouseButtons.Middle Then
-
-            currentDraggedButton.Capture = True
-
-            If currentDraggedButton IsNot Nothing Then
-    Dim screenPosition As Point = Cursor.Position
-    Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
-
-                currentDraggedButton.Location = New Point(parentLocation.X - mouseOffset.X, parentLocation.Y - mouseOffset.Y)
-                wasDragged = True
-            End If
-    ElseIf e.Button = MouseButtons.Left Then
-    If currentDraggedButton IsNot Nothing Then
-    Dim screenPosition As Point = Cursor.Position
-    Dim parentLocation As Point = currentDraggedButton.Parent.PointToClient(screenPosition)
-
-    If e.Button = MouseButtons.Left AndAlso (Math.Abs(e.X) > 5 OrElse Math.Abs(e.Y) > 5) Then
-
-    Dim filePath As String = CStr(currentDraggedButton.Tag)
-
-    If String.IsNullOrEmpty(filePath) OrElse filePath.StartsWith("::{") Then
-                        isDraggingOut = False
-                    Else
-                        ' Drag and Drop is for me an Advanced code, even with Gemini.
-                        ' So I'll implement 2 options.
-
-                        ' 1. It will be normal moving the icons on Middle button
-                        ' 2. Drag&Drop will execute if you use Left click
-
-                        ' For those who are reading this and you manage to fix it
-                        ' to just use Left Click on the Drag&Drop and changing the
-                        ' size, please let me know!
-
-                        isDraggingOut = True
-
-                        Dim fileList As New System.Collections.Specialized.StringCollection()
-                        fileList.Add(filePath)
-
-                        Dim data As New DataObject()
-                        data.SetFileDropList(fileList)
-
-                        Dim dropResult As DragDropEffects = currentDraggedButton.DoDragDrop(data, DragDropEffects.Move)
-
-    If dropResult = DragDropEffects.Move Then
-    If MovedIconPositions.ContainsKey(filePath) Then
-                                MovedIconPositions.Remove(filePath)
-                            End If
-    End If
-
-                        currentDraggedButton.Capture = False
-                        currentDraggedButton = Nothing
-                        isDraggingOut = False
-
-                        LoadDesktopIcons()
-                        Return
-    End If
-    End If
-
-    If Not isDraggingOut Then
-                    currentDraggedButton.Capture = True
-                    currentDraggedButton.Location = New Point(parentLocation.X - mouseOffset.X, parentLocation.Y - mouseOffset.Y)
-                    wasDragged = True
-                End If
-    End If
-    End If
-    End Sub
-    Dim selectedPaths As New List(Of String)
-    Private Sub Button_MouseUp(sender As Object, e As MouseEventArgs)
-        DesktopCM.Close()
-        If wasDragged Then
-            If currentDraggedButton IsNot Nothing Then
-                currentDraggedButton.Capture = False
-
-                If MovedIconPositions.ContainsKey(currentDraggedButton.Tag.ToString()) Then
-                    MovedIconPositions(currentDraggedButton.Tag.ToString()) = currentDraggedButton.Location
-                Else
-                    MovedIconPositions.Add(currentDraggedButton.Tag.ToString(), currentDraggedButton.Location)
-                End If
-
-                currentDraggedButton = Nothing
-            End If
-
-            wasDragged = False
-            Return
-        Else
-            If e.Button = MouseButtons.Left Then
-                If CType(sender, Button).Tag.StartsWith("::{") Then
-                    If AppBar.UseExplorerFM = True Then
-                        If File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\explorer.exe") Then
-                            Process.Start("explorer.exe", CType(sender, Button).Tag)
-                        Else
-                            MsgBox("Default file explorer wasn't been found.")
-                        End If
-                    Else
-                        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "DisableCLSIDsWarnings", False) = False Then
-                            Select Case MessageBox.Show($"This item you want to open is a CLSID (with: ""{CType(sender, Button).Tag}"") It may happen your custom File Manager does not support CLSIDs. Do you still want to run this?", "CLSID detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
-                                Case DialogResult.Yes
-                                    AppBar.OpenDestination(CType(sender, Button).Tag)
-                            End Select
-                        Else
-                            AppBar.OpenDestination(CType(sender, Button).Tag)
-                        End If
-                    End If
-
-                Else
-                    If File.Exists(CType(sender, Button).Tag) Then
-                        Process.Start(CType(sender, Button).Tag)
-                    ElseIf Directory.Exists(CType(sender, Button).Tag) Then
-                        AppBar.OpenDestination("""" & CType(sender, Button).Tag & """")
-                    End If
-                End If
-            ElseIf e.Button = MouseButtons.Right Then
-                ShowShellContextMenu(CType(sender, Button).Tag, MousePosition)
-                renamingButton = CType(sender, Button)
-            End If
-        End If
-    End Sub
-    Private MovedIconPositions As New Dictionary(Of String, Point)()
-    Public Sub LoadDesktopIcons()
-        Dim ICON_WIDTH As Integer = SystemInformation.IconSpacingSize.Width
-        Dim ICON_HEIGHT As Integer = SystemInformation.IconSpacingSize.Height
-        Dim SPACE As Integer = 5 'SystemInformation.IconSize.Height
-
-        Dim targetPath As String = DesktopDir
-        Dim targetPathPublic As String = DesktopDirPublic
-
-        If Not Directory.Exists(targetPath) Then
-            MessageBox.Show("Failed to load Desktop Items! Path to your desktop doesn't exist.", "Error")
-            Return
-        End If
-
-        PictureBox1.Controls.Clear()
-
-        Dim Items As New List(Of String)()
-
-        If IsShellIconVisible(CLSID_THISPC) Then Items.Add(CLSID_THISPC)
-        If IsShellIconVisible(CLSID_USERFILES) Then Items.Add(CLSID_USERFILES)
-        If IsShellIconVisible(CLSID_NETWORK) Then Items.Add(CLSID_NETWORK)
-        If IsShellIconVisible(CLSID_RECYCLEBIN) Then Items.Add(CLSID_RECYCLEBIN)
-        If IsShellIconVisible(CLSID_CONTROL_PANEL) Then Items.Add(CLSID_CONTROL_PANEL)
-
-        Dim directories() As String = Directory.GetDirectories(targetPath)
-        Dim files() As String = Directory.GetFiles(targetPath)
-
-        Dim publicdirectories() As String = Directory.GetDirectories(targetPathPublic)
-        Dim publicfiles() As String = Directory.GetFiles(targetPathPublic)
-
-        'For Folders and Files all together:
-        'Dim items As String() = Directory.GetFileSystemEntries(targetPath)
-
-        Items.AddRange(directories)
-        Items.AddRange(publicdirectories)
-
-        Items.AddRange(files)
-        Items.AddRange(publicfiles)
-
-        Dim OccupiedGridPoints As New Dictionary(Of String, Boolean)()
-
-        Dim maxHeight As Integer = PictureBox1.Height
-
-        Dim columnItemCount As Integer = Math.Floor(maxHeight / (ICON_HEIGHT + SPACE))
-
-        If columnItemCount <= 0 Then columnItemCount = 1
-
-        For i As Integer = 0 To Items.Count - 1
-            Dim isShellItem As Boolean = Items(i).StartsWith("::{")
-            Dim isDirectory As Boolean = Directory.Exists(Items(i))
-            Dim isFile As Boolean = File.Exists(Items(i))
-
-            If isFile = False AndAlso isDirectory = False AndAlso isShellItem = False Then Continue For
-
-            Dim X As Integer
-            Dim Y As Integer
-            Dim itemPath As String = Items(i)
-
-            If MovedIconPositions.ContainsKey(itemPath) Then
-                Dim savedLocation As Point = MovedIconPositions(itemPath)
-                X = savedLocation.X
-                Y = savedLocation.Y
-            Else
-                Dim newPos As Point = FindNextFreePosition(OccupiedGridPoints, columnItemCount, ICON_WIDTH, ICON_HEIGHT, SPACE, Items.Count)
-                X = newPos.X
-                Y = newPos.Y
-
-                'Dim line As Integer = i Mod columnItemCount
-                'Dim column As Integer = i \ columnItemCount
-
-                'X = (column * (ICON_WIDTH + SPACE))
-                'Y = 5 + (line * (ICON_HEIGHT + SPACE))
-            End If
-
-            Dim DesktopItem As New ShadowButton()
-
-            DesktopItem.Parent = PictureBox1
-
-            DesktopItem.Size = New Size(ICON_WIDTH, ICON_HEIGHT)
-            DesktopItem.Location = New Point(X, Y)
-
-            If isFile = True Then
-                Dim FI As New FileInfo(Items(i))
-
-                Try
-                    DesktopItem.Image = GetFileIcon(Items(i), True).ToBitmap
-
-                    If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
-                        DesktopItem.BackgroundImage = DesktopItem.Image
-                        DesktopItem.Image = Nothing
-                    End If
-                Catch ex As Exception
-
-                End Try
-
-                If FI.Extension.ToLower = ".lnk" Then
-                    DesktopItem.Text = Path.GetFileNameWithoutExtension(FI.FullName)
-                Else
-                    DesktopItem.Text = FI.Name
-                End If
-
-                DesktopItem.Tag = Items(i)
-
-            ElseIf isDirectory = True Then
-                Dim DI As New DirectoryInfo(Items(i))
-
-                Try
-                    Dim bmp As Image = GetFolderIcon(Items(i), True).ToBitmap
-                    If bmp IsNot Nothing Then
-                        DesktopItem.Image = bmp
-
-                        If DesktopItem.Image.Size.Width > DesktopItem.Size.Width AndAlso DesktopItem.Image.Size.Height > DesktopItem.Size.Height Then
-                            DesktopItem.BackgroundImage = DesktopItem.Image
-                            DesktopItem.Image = Nothing
-                        End If
-                    End If
-                Catch ex As Exception
-
-                End Try
-
-                DesktopItem.Text = DI.Name
-                DesktopItem.Tag = Items(i)
-
-
-            ElseIf isShellItem Then
-                Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(itemPath)
-
-                DesktopItem.Text = info.DisplayName
-
-                If info.Icon IsNot Nothing Then
-                    DesktopItem.Image = info.Icon
-
-                    If DesktopItem.Image.Size.Width > DesktopItem.Size.Width Then
-                        DesktopItem.BackgroundImage = DesktopItem.Image
-                        DesktopItem.Image = Nothing
-                    End If
-                End If
-
-                DesktopItem.Tag = Items(i)
-
-            End If
-
-            ' Events
-            'AddHandler DesktopItem.MouseDown, AddressOf Button_MouseDown
-            AddHandler DesktopItem.MouseMove, AddressOf Button_MouseMove
-            AddHandler DesktopItem.MouseUp, AddressOf Button_MouseUp
-
-            ' Appearance
-            DesktopItem.TextAlign = ContentAlignment.BottomCenter
-            DesktopItem.TextImageRelation = TextImageRelation.ImageAboveText
-            DesktopItem.ForeColor = SystemColors.HighlightText
-            DesktopItem.BackColor = Color.Transparent
-            DesktopItem.FlatAppearance.BorderSize = 0
-            DesktopItem.FlatStyle = FlatStyle.Flat
-
-            'DesktopItem.Font = New Font(Me.Font, FontStyle.Bold)
-            'DesktopItem.ForeColor = Color.Black
-
-            PictureBox1.Controls.Add(DesktopItem)
-        Next
-    End Sub
-
-    Private Function FindNextFreePosition(ByRef OccupiedPoints As Dictionary(Of String, Boolean), ByVal columnItemCount As Integer, ByVal iconWidth As Integer, ByVal iconHeight As Integer, ByVal space As Integer, ByVal maxIndex As Integer) As Point
-
-        Dim X As Integer = 0
-        Dim Y As Integer = 0
-
-        For gridIndex As Integer = 0 To maxIndex
-
-            Dim line As Integer = gridIndex Mod columnItemCount
-            Dim column As Integer = gridIndex \ columnItemCount
-
-            Dim checkX As Integer = (column * (iconWidth + space))
-            Dim checkY As Integer = 5 + (line * (iconHeight + space))
-
-            Dim gridKey As String = $"{checkX}:{checkY}"
-
-            If Not OccupiedPoints.ContainsKey(gridKey) Then
-                OccupiedPoints.Add(gridKey, True)
-                Return New Point(checkX, checkY)
-            End If
-        Next
-
-        Dim finalLine As Integer = maxIndex Mod columnItemCount
-        Dim finalColumn As Integer = maxIndex \ columnItemCount
-
-        X = (finalColumn * (iconWidth + space))
-        Y = 5 + (finalLine * (iconHeight + space))
-
-        Return New Point(X, Y)
-    End Function
-
-    Private WithEvents renameTextBox As TextBox = Nothing
-    Private renamingButton As Button = Nothing
-
-    Public Sub StartRenaming(btn As Button)
-        If btn Is Nothing Then Return
-
-        renamingButton = btn
-
-        renamingButton.Enabled = False
-
-        renameTextBox = New TextBox()
-        renameTextBox.Parent = PictureBox1
-
-        Dim textHeight As Integer = 40
-        Dim boxWidth As Integer = btn.Width
-
-        renameTextBox.Size = New Size(boxWidth, 20)
-        renameTextBox.Location = New Point(btn.Left + (btn.Width - boxWidth) / 2, btn.Bottom - renameTextBox.Height)
-
-        renameTextBox.Text = btn.Text
-        renameTextBox.TextAlign = HorizontalAlignment.Center
-        renameTextBox.BorderStyle = BorderStyle.FixedSingle
-        renameTextBox.BringToFront()
-
-        renameTextBox.Focus()
-        renameTextBox.SelectAll()
-    End Sub
-
-    Private Sub renameTextBox_KeyDown(sender As Object, e As KeyEventArgs) Handles renameTextBox.KeyDown
-        If e.KeyCode = Keys.Enter Then
-            hasFinishedRenaming = True
-
-            FinishRenaming(True)
-            e.SuppressKeyPress = True
-        ElseIf e.KeyCode = Keys.Escape Then
-            hasFinishedRenaming = True
-            FinishRenaming(False)
-            e.SuppressKeyPress = True
-        End If
-    End Sub
-
-    Private Sub renameTextBox_LostFocus(sender As Object, e As EventArgs) Handles renameTextBox.LostFocus
-        If hasFinishedRenaming Then
-            hasFinishedRenaming = False
-            Return
-        End If
-
-        FinishRenaming(True)
-    End Sub
-    Private hasFinishedRenaming As Boolean = False
-    Private Sub FinishRenaming(saveChanges As Boolean)
-        If renameTextBox Is Nothing OrElse renamingButton Is Nothing Then Return
-
-        Dim newName As String = renameTextBox.Text.Trim()
-        Dim originalName As String = renamingButton.Text
-        Dim itemPath As String = CStr(renamingButton.Tag)
-
-        renameTextBox.Dispose()
-        renameTextBox = Nothing
-
-        If saveChanges AndAlso newName <> originalName AndAlso Not String.IsNullOrEmpty(newName) Then
-            Dim success As Boolean = RenameItem(itemPath, newName)
-
-            If success Then
-                renamingButton.Text = newName
-            Else
-                MessageBox.Show("Item renaming failed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                StartRenaming(renamingButton)
-            End If
-        End If
-
-        renamingButton.Enabled = True
-
-        renamingButton = Nothing
-    End Sub
-
-    Private Function RenameItem(currentPath As String, newName As String) As Boolean
-        Try
-            ' 1. SHELL ITEMS (::{GUID}...)
-            If currentPath.StartsWith("::{") Then
-                Dim clsid As String = currentPath.Replace("::", "")
-                Return RenameShellItemInRegistry(clsid, newName)
-
-                ' 2. FOLDERS
-            ElseIf Directory.Exists(currentPath) Then
-                Dim parentDir As String = Path.GetDirectoryName(currentPath)
-
-                My.Computer.FileSystem.RenameDirectory(currentPath, newName)
-
-                renamingButton.Tag = Path.Combine(parentDir, newName)
-                Return True
-
-                ' 3. FILES
-            ElseIf File.Exists(currentPath) Then
-                Dim parentDir As String = Path.GetDirectoryName(currentPath)
-
-                My.Computer.FileSystem.RenameFile(currentPath, newName)
-
-                renamingButton.Tag = Path.Combine(parentDir, newName)
-                Return True
-            End If
-
-            Return False
-        Catch ex As Exception
-            MessageBox.Show("Error: " & ex.Message)
-            Return False
-        End Try
-    End Function
-
-    Private Function RenameShellItemInRegistry(clsid As String, newName As String) As Boolean
-        Try
-            Dim keyPath As String = "Software\Microsoft\Windows\CurrentVersion\Explorer\CLSID\" & clsid
-
-            Using key As RegistryKey = Registry.CurrentUser.CreateSubKey(keyPath)
-                If key IsNot Nothing Then
-                    key.SetValue("", newName)
-                    Return True
-                End If
-            End Using
-            Return False
-        Catch ex As Exception
-            Debug.WriteLine("Registry Write Error: " & ex.Message)
-            Return False
-        End Try
-    End Function
-    Dim DesktopDir As String = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
-    Dim DesktopDirPublic As String = Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory)
-    Private Function IsCLSIDPath(ByVal path As String) As Boolean
-        If String.IsNullOrWhiteSpace(path) Then Return False
-        Return path.StartsWith("::{", StringComparison.OrdinalIgnoreCase) AndAlso path.EndsWith("}")
-    End Function
-
-    Public Sub ShowShellContextMenu(ByVal targetPath As String, ByVal displayPoint As Point)
-
-        If String.IsNullOrWhiteSpace(targetPath) Then Return
-
-        targetPath = targetPath.Trim()
-        Dim isVirtual As Boolean = IsCLSIDPath(targetPath)
-
-        If Not isVirtual AndAlso Not File.Exists(targetPath) AndAlso Not Directory.Exists(targetPath) Then
-            MessageBox.Show("Path is invalid or doesn't exist: " & targetPath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            Return
-        End If
-
-        ' UNDER DESTRUCTION!!!
-
-        Dim shell As Shell32.Shell = Nothing
-        Dim folder As Shell32.Folder = Nothing
-        Dim item As Shell32.FolderItem = Nothing
-
-        Try
-            shell = New Shell32.Shell()
-            If shell Is Nothing Then Throw New Exception("Cannot iniciate Shell.Application (Shell32.Shell).")
-
-            If isVirtual Then
-                folder = shell.NameSpace(targetPath)
-                If folder IsNot Nothing Then
-                    item = folder.Self
-                End If
-            Else
-                Dim directoryPath As String = Path.GetDirectoryName(targetPath)
-                Dim fileName As String = Path.GetFileName(targetPath)
-
-                If Directory.Exists(targetPath) AndAlso (String.IsNullOrEmpty(directoryPath) OrElse directoryPath = targetPath) Then
-                    folder = shell.NameSpace(targetPath)
-                    If folder IsNot Nothing Then
-                        item = folder.Self
-                    End If
-                Else
-                    folder = shell.NameSpace(directoryPath)
-                    If folder IsNot Nothing Then
-                        item = folder.ParseName(fileName)
-                    End If
-                End If
-            End If
-
-            If item Is Nothing Then item = shell.NameSpace(targetPath)
-            If item Is Nothing Then Throw New Exception("Failed to get Shell FolderItem for path. Check COM Reference.")
-
-            Dim verbsSource = item.Verbs()
-            If verbsSource Is Nothing Then Return
-
-            Dim cms As New ContextMenuStrip()
-            Dim verbsCount As Integer = 0
-            Dim groupBreakIndex As Integer = 3
-            Dim bmpIcon As Image = Nothing
-
-            For Each v As Object In verbsSource
-                Dim verb As Shell32.FolderItemVerb = CType(v, Shell32.FolderItemVerb)
-                Dim verbName As String = verb.Name
-
-                Dim cleanDisplayName As String = verbName.Replace("&", "").Trim()
-
-                If String.IsNullOrEmpty(cleanDisplayName) Then Continue For
-
-                If verbsCount > 0 AndAlso verbsCount = groupBreakIndex Then
-                    cms.Items.Add(New ToolStripSeparator())
-                End If
-
-                Dim tsmi As New ToolStripMenuItem(cleanDisplayName) With {.Tag = verb}
-
-                If verbsCount = 0 Then
-                    tsmi.Font = New Font(tsmi.Font, FontStyle.Bold)
-                End If
-
-                AddHandler tsmi.Click, Sub(s, ea)
-                                           Try
-                                               CType(DirectCast(s, ToolStripMenuItem).Tag, Shell32.FolderItemVerb).DoIt()
-                                           Catch ex As Exception
-                                               If ex.HResult = -2147467263 OrElse ex.Message.ToLower().Contains("implement") Then
-                                                   StartRenaming(renamingButton)
-                                               Else
-                                                   MessageBox.Show("Failed to execute command: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                                               End If
-                                           End Try
-                                       End Sub
-                cms.Items.Add(tsmi)
-                verbsCount += 1
-            Next
-
-            If cms.Items.Count > 0 Then
-                cms.Show(displayPoint)
-            End If
-
-        Catch ex As Exception
-            MessageBox.Show("Failed to make Shell Context Menu: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        Finally
-            If Not item Is Nothing Then Marshal.ReleaseComObject(item)
-            If Not folder Is Nothing Then Marshal.ReleaseComObject(folder)
-            If Not shell Is Nothing Then Marshal.ReleaseComObject(shell)
-        End Try
-    End Sub
 
     Private Structure ContextMenuItem
         Public Name As String
@@ -1170,7 +1474,7 @@ Public Class Desktop
 
                 If iconIndex = -1 Then iconIndex = 0
 
-                Dim extractedIcon As Icon = GetIcon(filePath, iconIndex, isSmallIcon:=True)
+                Dim extractedIcon As Icon = AppBar.GetIcon(filePath, iconIndex, isSmallIcon:=True)
 
                 If extractedIcon IsNot Nothing Then
                     menuItem.Image?.Dispose()
@@ -1196,227 +1500,187 @@ Public Class Desktop
     End Sub
 
     Private Sub MenuItem_Click(sender As Object, e As EventArgs)
-        Dim clickedItem As ToolStripMenuItem = CType(sender, ToolStripMenuItem)
-        Dim commandToExecute As String = clickedItem.Tag.ToString()
+        Try
+            Dim clickedItem As ToolStripMenuItem = CType(sender, ToolStripMenuItem)
+            Dim commandToExecute As String = clickedItem.Tag.ToString()
 
-        If Not String.IsNullOrEmpty(commandToExecute) Then
+            If Not String.IsNullOrEmpty(commandToExecute) Then
 
-            Dim inputString As String = commandToExecute
-            Dim fileName As String = ""
-            Dim arguments As String = ""
+                Dim inputString As String = commandToExecute
+                Dim fileName As String = ""
+                Dim arguments As String = ""
 
-            Dim firstSpace As Integer = inputString.IndexOf(" ")
+                Dim firstSpace As Integer = inputString.IndexOf(" ")
 
-            If firstSpace = -1 Then
-                fileName = inputString
-                arguments = String.Empty
-            Else
-                fileName = inputString.Substring(0, firstSpace)
-                arguments = inputString.Substring(firstSpace + 1)
-            End If
-
-            Try
-                Dim startInfo As New ProcessStartInfo(fileName, arguments)
-
-                Process.Start(startInfo)
-
-            Catch ex As Exception
-                MessageBox.Show($"Error while loading process: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End Try
-        End If
-    End Sub
-
-    Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles DesktopCM.Opening
-        DesktopCM.Items.Clear()
-
-        DesktopCM.Items.Add(ViewToolStripMenuItem)
-        DesktopCM.Items.Add(RefreshToolStripMenuItem)
-        DesktopCM.Items.Add(New ToolStripSeparator())
-
-        DesktopCM.Items.Add(PasteToolStripMenuItem)
-        PasteToolStripMenuItem.Enabled = Clipboard.ContainsFileDropList
-
-        DesktopCM.Items.Add(NewToolStripMenuItem)
-        DesktopCM.Items.Add(New ToolStripSeparator())
-
-        LoadAndGenerateMenuItems(DesktopCM.Items, REG_KEY_PATH)
-
-        DesktopCM.Items.Add(New ToolStripSeparator())
-        DesktopCM.Items.Add(DesktopOptionsToolStripMenuItem)
-    End Sub
-
-    Private Sub Desktop_MouseUp(sender As Object, e As MouseEventArgs) Handles Me.MouseUp, PictureBox1.MouseUp
-        If e.Button = MouseButtons.Right Then
-            'ShowShellContextMenu(DesktopDir, MousePosition)
-            DesktopCM.Show(MousePosition)
-        ElseIf e.Button = MouseButtons.Left Then
-            DesktopCM.Close()
-
-            selectRectangle = Rectangle.Empty
-            PictureBox1.Invalidate()
-        End If
-    End Sub
-
-    Private Sub PictureBox1_DragEnter(sender As Object, e As DragEventArgs) Handles PictureBox1.DragEnter
-        If e.Data.GetDataPresent(DataFormats.FileDrop) Then
-            e.Effect = DragDropEffects.Move
-        Else
-            e.Effect = DragDropEffects.None
-        End If
-    End Sub
-
-    Private Sub PictureBox1_DragDrop(sender As Object, e As DragEventArgs) Handles PictureBox1.DragDrop
-        Dim files() As String = CType(e.Data.GetData(DataFormats.FileDrop), String())
-
-        If files IsNot Nothing AndAlso files.Length > 0 Then
-
-            Dim dropLocation As Point = PictureBox1.PointToClient(New Point(e.X - SystemInformation.IconSpacingSize.Width / 2, e.Y - SystemInformation.IconSpacingSize.Height / 2))
-
-            For Each filePath As String In files
-                Dim fileName As String = Path.GetFileName(filePath)
-                Dim newPath As String = Path.Combine(DesktopDir, fileName)
-
-                Dim sourceDirectory As String = Path.GetDirectoryName(filePath)
+                If firstSpace = -1 Then
+                    fileName = inputString
+                    arguments = String.Empty
+                Else
+                    fileName = inputString.Substring(0, firstSpace)
+                    arguments = inputString.Substring(firstSpace + 1)
+                End If
 
                 Try
-                    If Not String.Equals(sourceDirectory, DesktopDir, StringComparison.OrdinalIgnoreCase) Then
+                    Dim startInfo As New ProcessStartInfo(fileName, arguments) With {.UseShellExecute = True}
 
-                        If Directory.Exists(filePath) Then
-                            My.Computer.FileSystem.MoveDirectory(filePath, newPath, True)
-                        ElseIf File.Exists(filePath) Then
-                            My.Computer.FileSystem.MoveFile(filePath, newPath, True)
-                        End If
-
-                    Else
-
-                    End If
-
-
-                    If Not MovedIconPositions.ContainsKey(newPath) Then
-                        MovedIconPositions.Add(newPath, dropLocation)
-                    Else
-                        MovedIconPositions(newPath) = dropLocation
-                    End If
-
+                    Shell(inputString)
+                    'Process.Start(startInfo)
                 Catch ex As Exception
-                    MessageBox.Show($"Chyba při přesunu '{fileName}': {ex.Message}", "Chyba DragDrop", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show($"Error while loading process: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End Try
-            Next
-
-            LoadDesktopIcons()
-        End If
-    End Sub
-
-    Private Sub Desktop_GotFocus(sender As Object, e As EventArgs) Handles Me.GotFocus, Me.Activated
-        SetWindowLayerBottom()
-    End Sub
-
-    Private Sub WallpaperRefleshToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RefreshToolStripMenuItem.Click
-        BackUpdate()
-        LoadDesktopIcons()
-    End Sub
-
-    Public Sub BackUpdate()
-        If IO.File.Exists(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", Nothing)) = True Then
-            Me.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", Nothing))
-            PictureBox1.Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", Nothing))
-            PictureBox1.Visible = True
-
-            ' Applies the "Style" of the Background
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", Nothing) = 0 AndAlso My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", Nothing) = 0 Then
-                Me.BackgroundImageLayout = ImageLayout.Center
-                PictureBox1.Visible = True
-                PictureBox1.SizeMode = PictureBoxSizeMode.CenterImage
-            ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", Nothing) = 0 AndAlso My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", Nothing) = 1 Then
-                Me.BackgroundImageLayout = ImageLayout.Tile
-                PictureBox1.Visible = True
-            ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", Nothing) = 2 OrElse My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", Nothing) = 10 Then
-                Me.BackgroundImageLayout = ImageLayout.Stretch
-                PictureBox1.Visible = True
-                PictureBox1.SizeMode = PictureBoxSizeMode.StretchImage
-            ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", Nothing) = 6 Then
-                Me.BackgroundImageLayout = ImageLayout.Zoom
-                PictureBox1.Visible = True
-                PictureBox1.SizeMode = PictureBoxSizeMode.Zoom
-            Else
-                Me.BackgroundImageLayout = ImageLayout.None
-                PictureBox1.SizeMode = PictureBoxSizeMode.Normal
             End If
-        Else
-            Me.BackgroundImage = Nothing
-            PictureBox1.Visible = False
-        End If
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Private Async Sub RefreshToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RefreshToolStripMenuItem.Click
+        Await BackUpdate()
+        LoadDesktopIcons()
+        ArrangeIcons()
+    End Sub
+
+    Private Sub ArrangeIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ArrangeIconsToolStripMenuItem.Click
+        ArrangeIcons()
+    End Sub
+
+    Private Sub GridSnappingToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GridSnappingToolStripMenuItem.Click
+        If DragToGrid = True Then DragToGrid = False Else DragToGrid = True
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DragToGrid", DragToGrid, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub ViewToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles ViewToolStripMenuItem.DropDownOpening
+        GridSnappingToolStripMenuItem.Checked = DragToGrid
+
+        ExtraLargeToolStripMenuItem.Checked = False
+        LargeIconsToolStripMenuItem.Checked = False
+        MediumIconsToolStripMenuItem.Checked = False
+        SmallIconsToolStripMenuItem.Checked = False
+        MiniIconsToolStripMenuItem.Checked = False
+
+        PasteToolStripMenuItem.Enabled = Clipboard.ContainsFileDropList
+
+        Select Case ZoomLevel
+            Case 3 ' Extra Large
+                ExtraLargeToolStripMenuItem.CheckState = CheckState.Indeterminate
+
+            Case 2 ' Large
+                LargeIconsToolStripMenuItem.CheckState = CheckState.Indeterminate
+
+            Case 1 ' Medium
+                MediumIconsToolStripMenuItem.CheckState = CheckState.Indeterminate
+
+            Case 0.7 ' Small
+                SmallIconsToolStripMenuItem.CheckState = CheckState.Indeterminate
+
+            Case 0.5 ' Mini
+                MiniIconsToolStripMenuItem.CheckState = CheckState.Indeterminate
+
+        End Select
+    End Sub
+
+    Private Sub ExtraLargeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExtraLargeToolStripMenuItem.Click
+        ZoomLevel = 3
+        ArrangeIcons()
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 4, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub LargeIconsToolStripMenuItem_Click_1(sender As Object, e As EventArgs) Handles LargeIconsToolStripMenuItem.Click
+        ZoomLevel = 2
+        ArrangeIcons()
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 3, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub MediumIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MediumIconsToolStripMenuItem.Click
+        ZoomLevel = 1
+        ArrangeIcons()
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 2, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub SmallIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SmallIconsToolStripMenuItem.Click
+        ZoomLevel = 0.7
+        ArrangeIcons()
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 1, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub MiniIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MiniIconsToolStripMenuItem.Click
+        ZoomLevel = 0.5
+        ArrangeIcons()
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "DefaultView", 0, RegistryValueKind.DWord)
     End Sub
 
     Private Sub PasteToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PasteToolStripMenuItem.Click
-        If Clipboard.ContainsFileDropList() = True Then
+        Dim data As IDataObject = Clipboard.GetDataObject()
 
-            For Each filePath As String In Clipboard.GetFileDropList()
-                If Directory.Exists(filePath) = True Then
-                    Dim DI As New DirectoryInfo(filePath)
-                    My.Computer.FileSystem.MoveDirectory(filePath, DesktopDir & "\" & DI.Name, True)
-                ElseIf File.Exists(filePath) Then
-                    Dim FI As New FileInfo(filePath)
-                    My.Computer.FileSystem.MoveFile(filePath, DesktopDir & "\" & FI.Name, True)
+        If data IsNot Nothing AndAlso data.GetDataPresent(DataFormats.FileDrop) Then
+            Dim files As String() = DirectCast(data.GetData(DataFormats.FileDrop), String())
+
+            Dim dropEffect As IO.MemoryStream = DirectCast(data.GetData("Preferred DropEffect"), IO.MemoryStream)
+
+            Dim moveFiles As Boolean = False
+
+            If dropEffect IsNot Nothing Then
+                Dim reader As New IO.BinaryReader(dropEffect)
+                Dim effect As Integer = reader.ReadInt32()
+
+                ' flag: 1 = Copy, 2 = Move, 4 = Link
+                If (effect And 2) = 2 Then
+                    moveFiles = True
                 End If
+            End If
 
+            For Each sourcePath In files
+                Try
+                    Dim fileName As String = Path.GetFileName(sourcePath)
+                    Dim destPath As String = Path.Combine(DesktopDir, fileName)
+
+                    If File.Exists(sourcePath) Then
+                        If moveFiles Then
+                            If File.Exists(destPath) Then
+                                If MessageBox.Show($"A file called ""{destPath}"" already exists. Do you want overwrite the current file with the new one?", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+                                    File.Delete(destPath)
+                                    File.Move(sourcePath, destPath)
+                                End If
+                            Else
+                                File.Move(sourcePath, destPath)
+                            End If
+                        Else
+                            If File.Exists(destPath) Then
+                                If MessageBox.Show($"A file called ""{destPath}"" already exists. Do you want overwrite the current file with the new one?", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+                                    File.Copy(sourcePath, destPath, True)
+                                End If
+                            Else
+                                File.Copy(sourcePath, destPath, False)
+                            End If
+                        End If
+
+                    ElseIf Directory.Exists(sourcePath) Then
+                        If moveFiles Then
+                            My.Computer.FileSystem.MoveDirectory(sourcePath, destPath, True)
+                        Else
+                            My.Computer.FileSystem.CopyDirectory(sourcePath, destPath, True)
+                        End If
+                    End If
+
+                Catch ex As Exception
+                    MessageBox.Show($"Failed to process path {sourcePath}: {ex.Message}")
+                End Try
             Next
 
-            Clipboard.Clear()
-
-        End If
-    End Sub
-
-    Private Sub DesktopOptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DesktopOptionsToolStripMenuItem.Click
-        DesktopProperties.ShowDialog(Me)
-    End Sub
-    Private selectRectangle As Rectangle = Rectangle.Empty
-    Private startPoint As Point
-    Private isDragging As Boolean = False
-    Private Sub PictureBox1_MouseMove(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseMove
-        If e.Button = MouseButtons.None Then
-            currentDraggedButton = Nothing
-            startPoint = e.Location
-
-            If isDragging = True Then isDragging = False
-            PictureBox1.Capture = False
-
-        ElseIf e.Button = MouseButtons.Left Then
-            isDragging = True
-            PictureBox1.Capture = True
-
-            Dim currentPoint As Point = e.Location
-
-            Dim left As Integer = Math.Min(startPoint.X, currentPoint.X)
-            Dim top As Integer = Math.Min(startPoint.Y, currentPoint.Y)
-            Dim width As Integer = Math.Abs(startPoint.X - currentPoint.X)
-            Dim height As Integer = Math.Abs(startPoint.Y - currentPoint.Y)
-
-            selectRectangle = New Rectangle(left, top, width, height)
-
-            PictureBox1.Invalidate()
+            If moveFiles Then Clipboard.Clear()
         End If
     End Sub
 
     Private Sub NewToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles NewToolStripMenuItem.DropDownOpening
-        NewFileToolStripMenuItem.Image = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 2, True).ToBitmap
-        NewFolderToolStripMenuItem.Image = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 3, True).ToBitmap
-        NewLinkToolStripMenuItem.Image = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 154, True).ToBitmap
-    End Sub
-
-    Private Sub PictureBox1_Paint(sender As Object, e As PaintEventArgs) Handles PictureBox1.Paint
-        If Not selectRectangle.IsEmpty Then
-            Dim fillColor As Color = Color.FromArgb(80, Color.LightBlue)
-
-            Using brush As New SolidBrush(fillColor)
-                e.Graphics.FillRectangle(brush, selectRectangle)
-            End Using
-
-            Using pen As New Pen(Color.Blue, 1)
-                pen.DashStyle = Drawing2D.DashStyle.Solid
-                e.Graphics.DrawRectangle(pen, selectRectangle)
-            End Using
-        End If
+        NewFileToolStripMenuItem.Image = AppBar.GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 2, True).ToBitmap
+        NewFolderToolStripMenuItem.Image = AppBar.GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 3, True).ToBitmap
+        NewLinkToolStripMenuItem.Image = AppBar.GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\imageres.dll", 154, True).ToBitmap
     End Sub
 
     Private Sub NewFolderToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NewFolderToolStripMenuItem.Click
@@ -1445,70 +1709,83 @@ Public Class Desktop
         End If
     End Sub
 
-    Private Sub FSW_Changed(sender As Object, e As FileSystemEventArgs) Handles FSW.Changed, FSW.Created, PFSW.Changed, PFSW.Created
-        LoadDesktopIcons()
+    Private Sub PropertiesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PropertiesToolStripMenuItem.Click
+        DesktopProperties.ShowDialog(Me)
     End Sub
 
-    Private Sub FSW_Renamed(sender As Object, e As RenamedEventArgs) Handles FSW.Renamed, PFSW.Renamed
-        Me.Invoke(Sub()
-                      Dim oldFileName As String = Path.GetFileName(e.OldName)
-                      Dim newFileName As String = Path.GetFileName(e.Name)
-                      Dim buttonToUpdate As Control = Nothing
+    Private Sub PictureBoxWallpaper_KeyUp(sender As Object, e As KeyEventArgs) Handles PictureBoxWallpaper.KeyUp, Me.KeyUp
+        If e.Control AndAlso e.KeyCode = Keys.A Then
+            For Each desktopIcon In Icons
+                desktopIcon.IsSelected = True
+            Next
+            PictureBoxWallpaper.Invalidate() ' Překreslíme plochu, aby byl vidět výběr
+            e.Handled = True
+            Return
+        End If
 
-                      For Each ctrl As Control In PictureBox1.Controls
-                          If ctrl.Text = oldFileName Then
-                              buttonToUpdate = ctrl
-                              Exit For
-                          End If
-                      Next
+        Dim selectedIcons = Icons.Where(Function(i) i.IsSelected).ToList()
+        If selectedIcons.Count = 0 Then Return
 
-                      If buttonToUpdate IsNot Nothing Then
-                          buttonToUpdate.Name = newFileName
-                          buttonToUpdate.Text = newFileName
-                          buttonToUpdate.Tag = e.FullPath
-                      Else
-                          Console.WriteLine($"Cannot find an item called: {oldFileName}")
-                      End If
-                  End Sub)
+        ' --- CTRL + C (Copy) ---
+        If e.Control AndAlso e.KeyCode = Keys.C Then
+            Dim paths As New StringCollection()
+            paths.AddRange(selectedIcons.Select(Function(i) i.FilePath).ToArray())
+            Clipboard.SetFileDropList(paths)
+            e.Handled = True
+
+            ' --- CTRL + X (Cut) ---
+        ElseIf e.Control AndAlso e.KeyCode = Keys.X Then
+            Dim paths As New StringCollection()
+            paths.AddRange(selectedIcons.Select(Function(i) i.FilePath).ToArray())
+            ' Tady by se mohl přidat ten Preferred DropEffect, ale pro teď:
+            Clipboard.SetFileDropList(paths)
+            e.Handled = True
+
+            ' --- DELETE / SHIFT + DELETE ---
+        ElseIf e.KeyCode = Keys.Delete Then
+            ' Shift+Delete = Permanentní smazání (bez koše)
+            Dim recycleBin As FileIO.RecycleOption = If(e.Shift, FileIO.RecycleOption.DeletePermanently, FileIO.RecycleOption.SendToRecycleBin)
+            Dim msg = If(e.Shift, "Are you sure do you want permanently delete those selected items?", "Move items into the Recycle Bin?")
+
+            If MessageBox.Show(msg, "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+                For Each item In selectedIcons
+                    Try
+                        If Directory.Exists(item.FilePath) Then
+                            My.Computer.FileSystem.DeleteDirectory(item.FilePath, FileIO.UIOption.OnlyErrorDialogs, recycleBin)
+                        Else
+                            My.Computer.FileSystem.DeleteFile(item.FilePath, FileIO.UIOption.OnlyErrorDialogs, recycleBin)
+                        End If
+                    Catch ex As Exception
+                        Debug.WriteLine("Error while removing items with Keyboard: " & ex.Message)
+                    End Try
+                Next
+            End If
+            e.Handled = True
+
+            ' --- F2 (Rename) ---
+        ElseIf e.KeyCode = Keys.F2 AndAlso selectedIcons.Count = 1 Then
+            StartRename(selectedIcons(0))
+            e.Handled = True
+
+            ' --- ENTER (Open) ---
+        ElseIf e.KeyCode = Keys.Enter Then
+            For Each item In selectedIcons
+                Try
+                    Process.Start(New ProcessStartInfo(item.FilePath) With {.UseShellExecute = True})
+                Catch : End Try
+            Next
+            e.Handled = True
+        End If
     End Sub
+End Class
 
-    Private Sub FSW_Deleted(sender As Object, e As FileSystemEventArgs) Handles FSW.Deleted, PFSW.Deleted
-        Me.Invoke(Sub()
-                      Dim FileName As String = Path.GetFileName(e.Name)
-                      Dim buttonToUpdate As Control = Nothing
-
-                      For Each ctrl As Control In PictureBox1.Controls
-                          If ctrl.Text = e.Name Then
-                              buttonToUpdate = ctrl
-                              Exit For
-                          End If
-                      Next
-
-                      If buttonToUpdate IsNot Nothing Then
-                          buttonToUpdate.Dispose()
-                      Else
-                          Console.WriteLine($"Cannot find an deleted item called: {FileName}")
-                      End If
-                  End Sub)
-    End Sub
-
-    Private Sub DesktopCM_LostFocus(sender As Object, e As EventArgs) Handles DesktopCM.LostFocus
-        DesktopCM.Close()
-    End Sub
-
-    Private Sub AutoArrangeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AutoArrangeToolStripMenuItem.Click
-        MovedIconPositions.Clear()
-
-        LoadDesktopIcons()
-    End Sub
-
-    Private Sub DesktopCM_GotFocus(sender As Object, e As EventArgs) Handles DesktopCM.GotFocus
-        DesktopCM.BringToFront()
-    End Sub
-
-    Private Sub Desktop_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
-        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
-    End Sub
+Public Class DesktopIcon
+    Public Property Name As String
+    Public Property FilePath As String
+    Public Property IconImage As Image
+    Public Property Bounds As Rectangle
+    Public Property IsHovered As Boolean = False
+    Public Property IsSelected As Boolean = False
 End Class
 
 Public Class ShellHelpers
@@ -1654,47 +1931,40 @@ Public Class ShellHelpers
     End Function
 End Class
 
-Public Class ShadowButton
-    Inherits Button
+Public Module ShellIconHelper
+    <ComImport()>
+    <Guid("46EB5926-582E-4017-9FDF-E8998DAA0950")>
+    <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
+    Interface IImageList
+        Function GetIcon(i As Integer, flags As Integer, ByRef picon As IntPtr) As Integer
+    End Interface
 
-    Private _OriginalText As String = String.Empty
-    Public Property OriginalText() As String
-        Get
-            Return _OriginalText
-        End Get
+    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto)>
+    Public Structure SHFILEINFO
+        Public hIcon As IntPtr
+        Public iIcon As Integer
+        Public dwAttributes As Integer
+        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=260)>
+        Public szDisplayName As String
+        <MarshalAs(UnmanagedType.ByValTStr, SizeConst:=80)>
+        Public szTypeName As String
+    End Structure
 
-        Set(ByVal value As String)
-            _OriginalText = value
-        End Set
-    End Property
+    Public Const SHGFI_SYSICONINDEX As UInteger = &H4000
+    Public Const SHIL_LARGE As Integer = &H0      ' 32x32
+    Public Const SHIL_SMALL As Integer = &H1      ' 16x16
+    Public Const SHIL_EXTRALARGE As Integer = &H2 ' 48x48
+    Public Const SHIL_JUMBO As Integer = &H4      ' 256x256
 
-    Protected Overrides Sub OnPaint(ByVal pevent As PaintEventArgs)
-        MyBase.OnPaint(pevent)
+    <DllImport("shell32.dll", CharSet:=CharSet.Auto)>
+    Public Function SHGetFileInfo(pszPath As String, dwFileAttributes As UInteger, ByRef psfi As SHFILEINFO, cbFileInfo As UInteger, uFlags As UInteger) As IntPtr
+    End Function
 
-        Me.OriginalText = Me.Text
+    <DllImport("shell32.dll", EntryPoint:="#727")>
+    Public Function SHGetImageList(iImageList As Integer, ByRef riid As Guid, ByRef ppv As IImageList) As Integer
+    End Function
 
-        Dim g As Graphics = pevent.Graphics
-        Dim textToDraw As String = Me.Text
-        Dim font As Font = New Font(Me.Font, FontStyle.Regular)
-        Dim textColor As Color = Color.White
-        Dim shadowColor As Color = Color.FromArgb(255, 0, 0, 0)
-
-        Dim format As New StringFormat()
-        format.Alignment = StringAlignment.Center
-        format.LineAlignment = StringAlignment.Center
-        Dim textRect As New Rectangle(0, 0, Me.Width - 3, Me.Height + 30)
-
-        Using shadowBrush As New SolidBrush(shadowColor)
-            'g.DrawString(textToDraw, font, shadowBrush, textRect.X + 1, textRect.Y + 1, format)
-        End Using
-
-        Using textBrush As New SolidBrush(textColor)
-            ' Trying to add Shadow to the Icons... it is failing.
-
-            'g.DrawString(textToDraw, font, textBrush, textRect, format)
-        End Using
-
-        format.Dispose()
-    End Sub
-
-End Class
+    <DllImport("user32.dll", SetLastError:=True)>
+    Public Function DestroyIcon(hIcon As IntPtr) As Boolean
+    End Function
+End Module

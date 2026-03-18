@@ -86,9 +86,7 @@ Partial Class AppBar
         Me.PropertiesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Splitter2 = New System.Windows.Forms.Splitter()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.Panel2 = New System.Windows.Forms.Panel()
         Me.AppStrip = New System.Windows.Forms.ToolStrip()
-        Me.Panel5 = New System.Windows.Forms.Panel()
         Me.Pcm = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripMenuItem()
@@ -99,7 +97,7 @@ Partial Class AppBar
         Me.ProcessStrip = New System.Windows.Forms.ToolStrip()
         Me.Controller = New System.Windows.Forms.Timer(Me.components)
         Me.ProcessTimer = New System.Windows.Forms.Timer(Me.components)
-        Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.ReBar32 = New System.Windows.Forms.Panel()
         Me.TPCM = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.MoreOptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HideProcessFromAppbarToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -145,13 +143,15 @@ Partial Class AppBar
         Me.ToolStripButton3 = New System.Windows.Forms.ToolStripButton()
         Me.Button3 = New System.Windows.Forms.Button()
         Me.TimeDatePanel = New System.Windows.Forms.Panel()
-        Me.DayLabel = New System.Windows.Forms.Label()
+        Me.TimeLabel = New System.Windows.Forms.Label()
         Me.TaDCM = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.TimeAndDateSettingsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ShowTimeAndDateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DateLabel = New System.Windows.Forms.Label()
-        Me.TimeLabel = New System.Windows.Forms.Label()
         Me.Button2 = New System.Windows.Forms.Button()
+        Me.ShowDesktopCM = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.PeekDesktopToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator10 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ShowDesktopToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.Splitter3 = New System.Windows.Forms.Splitter()
         Me.ToolStripButton2 = New System.Windows.Forms.ToolStripButton()
         Me.BlockingProcesses = New System.Windows.Forms.Timer(Me.components)
@@ -174,20 +174,21 @@ Partial Class AppBar
         Me.OpenFileLocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator28 = New System.Windows.Forms.ToolStripSeparator()
         Me.RemoveEntirelyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.Button1 = New System.Windows.Forms.Button()
+        Me.Start = New System.Windows.Forms.Button()
         Me.LLCM = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.NoLanguagesInstalledToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ActionCM.SuspendLayout()
         Me.CMMAIN.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.Pcm.SuspendLayout()
-        Me.Panel3.SuspendLayout()
+        Me.ReBar32.SuspendLayout()
         Me.TPCM.SuspendLayout()
         Me.Panel4.SuspendLayout()
         Me.TrayPanel.SuspendLayout()
         Me.ToolStrip1.SuspendLayout()
         Me.TimeDatePanel.SuspendLayout()
         Me.TaDCM.SuspendLayout()
+        Me.ShowDesktopCM.SuspendLayout()
         Me.VCM.SuspendLayout()
         Me.MCM.SuspendLayout()
         Me.PIcm.SuspendLayout()
@@ -651,45 +652,30 @@ Partial Class AppBar
         'Panel1
         '
         Me.Panel1.BackColor = System.Drawing.Color.Transparent
-        Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Controls.Add(Me.AppStrip)
-        Me.Panel1.Controls.Add(Me.Panel5)
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Left
         Me.Panel1.Location = New System.Drawing.Point(55, 0)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(107, 37)
         Me.Panel1.TabIndex = 5
         '
-        'Panel2
-        '
-        Me.Panel2.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.Panel2.Location = New System.Drawing.Point(5, 35)
-        Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(102, 2)
-        Me.Panel2.TabIndex = 5
-        '
         'AppStrip
         '
         Me.AppStrip.AllowItemReorder = True
         Me.AppStrip.AllowMerge = False
+        Me.AppStrip.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.AppStrip.AutoSize = False
         Me.AppStrip.BackColor = System.Drawing.Color.Transparent
-        Me.AppStrip.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.AppStrip.Dock = System.Windows.Forms.DockStyle.None
         Me.AppStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.AppStrip.Location = New System.Drawing.Point(5, 0)
         Me.AppStrip.Name = "AppStrip"
         Me.AppStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
-        Me.AppStrip.Size = New System.Drawing.Size(102, 37)
+        Me.AppStrip.Size = New System.Drawing.Size(102, 39)
         Me.AppStrip.TabIndex = 4
-        Me.AppStrip.Text = "ToolStrip1"
-        '
-        'Panel5
-        '
-        Me.Panel5.Dock = System.Windows.Forms.DockStyle.Left
-        Me.Panel5.Location = New System.Drawing.Point(0, 0)
-        Me.Panel5.Name = "Panel5"
-        Me.Panel5.Size = New System.Drawing.Size(5, 37)
-        Me.Panel5.TabIndex = 0
+        Me.AppStrip.Text = "Pinned Applications"
         '
         'Pcm
         '
@@ -751,7 +737,7 @@ Partial Class AppBar
         Me.ProcessStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
         Me.ProcessStrip.Size = New System.Drawing.Size(747, 39)
         Me.ProcessStrip.TabIndex = 6
-        Me.ProcessStrip.Text = "ToolStrip2"
+        Me.ProcessStrip.Text = "Running applications"
         '
         'Controller
         '
@@ -760,15 +746,15 @@ Partial Class AppBar
         'ProcessTimer
         '
         '
-        'Panel3
+        'ReBar32
         '
-        Me.Panel3.BackColor = System.Drawing.Color.Transparent
-        Me.Panel3.Controls.Add(Me.ProcessStrip)
-        Me.Panel3.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Panel3.Location = New System.Drawing.Point(167, 0)
-        Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(747, 37)
-        Me.Panel3.TabIndex = 6
+        Me.ReBar32.BackColor = System.Drawing.Color.Transparent
+        Me.ReBar32.Controls.Add(Me.ProcessStrip)
+        Me.ReBar32.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.ReBar32.Location = New System.Drawing.Point(167, 0)
+        Me.ReBar32.Name = "ReBar32"
+        Me.ReBar32.Size = New System.Drawing.Size(747, 37)
+        Me.ReBar32.TabIndex = 6
         '
         'TPCM
         '
@@ -1052,7 +1038,7 @@ Partial Class AppBar
         Me.ToolStrip1.RightToLeft = System.Windows.Forms.RightToLeft.Yes
         Me.ToolStrip1.Size = New System.Drawing.Size(110, 39)
         Me.ToolStrip1.TabIndex = 7
-        Me.ToolStrip1.Text = "ToolStrip2"
+        Me.ToolStrip1.Text = "User Promoted Notification Area"
         '
         'ToolStripButton1
         '
@@ -1094,8 +1080,6 @@ Partial Class AppBar
         '
         'TimeDatePanel
         '
-        Me.TimeDatePanel.Controls.Add(Me.DayLabel)
-        Me.TimeDatePanel.Controls.Add(Me.DateLabel)
         Me.TimeDatePanel.Controls.Add(Me.TimeLabel)
         Me.TimeDatePanel.Dock = System.Windows.Forms.DockStyle.Right
         Me.TimeDatePanel.Location = New System.Drawing.Point(154, 0)
@@ -1103,24 +1087,24 @@ Partial Class AppBar
         Me.TimeDatePanel.Size = New System.Drawing.Size(74, 37)
         Me.TimeDatePanel.TabIndex = 2
         '
-        'DayLabel
+        'TimeLabel
         '
-        Me.DayLabel.ContextMenuStrip = Me.TaDCM
-        Me.DayLabel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.DayLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.DayLabel.ForeColor = System.Drawing.Color.White
-        Me.DayLabel.Location = New System.Drawing.Point(0, 13)
-        Me.DayLabel.Name = "DayLabel"
-        Me.DayLabel.Size = New System.Drawing.Size(74, 12)
-        Me.DayLabel.TabIndex = 2
-        Me.DayLabel.Text = "Wednesday"
-        Me.DayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.TimeLabel.ContextMenuStrip = Me.TaDCM
+        Me.TimeLabel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TimeLabel.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.TimeLabel.ForeColor = System.Drawing.Color.White
+        Me.TimeLabel.Location = New System.Drawing.Point(0, 0)
+        Me.TimeLabel.Name = "TimeLabel"
+        Me.TimeLabel.Size = New System.Drawing.Size(74, 37)
+        Me.TimeLabel.TabIndex = 1
+        Me.TimeLabel.Text = "00:00:00"
+        Me.TimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'TaDCM
         '
         Me.TaDCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TimeAndDateSettingsToolStripMenuItem, Me.ShowTimeAndDateToolStripMenuItem})
         Me.TaDCM.Name = "TaDCM"
-        Me.TaDCM.Size = New System.Drawing.Size(196, 70)
+        Me.TaDCM.Size = New System.Drawing.Size(196, 48)
         '
         'TimeAndDateSettingsToolStripMenuItem
         '
@@ -1135,43 +1119,42 @@ Partial Class AppBar
         Me.ShowTimeAndDateToolStripMenuItem.Size = New System.Drawing.Size(195, 22)
         Me.ShowTimeAndDateToolStripMenuItem.Text = "Show Time and Date"
         '
-        'DateLabel
-        '
-        Me.DateLabel.ContextMenuStrip = Me.TaDCM
-        Me.DateLabel.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.DateLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.DateLabel.ForeColor = System.Drawing.Color.White
-        Me.DateLabel.Location = New System.Drawing.Point(0, 25)
-        Me.DateLabel.Name = "DateLabel"
-        Me.DateLabel.Size = New System.Drawing.Size(74, 12)
-        Me.DateLabel.TabIndex = 3
-        Me.DateLabel.Text = "01. 01. 1661"
-        Me.DateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'TimeLabel
-        '
-        Me.TimeLabel.ContextMenuStrip = Me.TaDCM
-        Me.TimeLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.TimeLabel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.TimeLabel.ForeColor = System.Drawing.Color.White
-        Me.TimeLabel.Location = New System.Drawing.Point(0, 0)
-        Me.TimeLabel.Name = "TimeLabel"
-        Me.TimeLabel.Size = New System.Drawing.Size(74, 13)
-        Me.TimeLabel.TabIndex = 1
-        Me.TimeLabel.Text = "00:00:00"
-        Me.TimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
         'Button2
         '
         Me.Button2.AutoEllipsis = True
+        Me.Button2.ContextMenuStrip = Me.ShowDesktopCM
         Me.Button2.Dock = System.Windows.Forms.DockStyle.Right
         Me.Button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.Button2.Location = New System.Drawing.Point(228, 0)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(12, 37)
         Me.Button2.TabIndex = 7
-        Me.Button2.Text = "Show Desktop"
+        Me.MainToolTip.SetToolTip(Me.Button2, "Show Desktop")
         Me.Button2.UseVisualStyleBackColor = True
+        '
+        'ShowDesktopCM
+        '
+        Me.ShowDesktopCM.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PeekDesktopToolStripMenuItem, Me.ToolStripSeparator10, Me.ShowDesktopToolStripMenuItem1})
+        Me.ShowDesktopCM.Name = "ShowDesktopCM"
+        Me.ShowDesktopCM.Size = New System.Drawing.Size(156, 54)
+        '
+        'PeekDesktopToolStripMenuItem
+        '
+        Me.PeekDesktopToolStripMenuItem.Name = "PeekDesktopToolStripMenuItem"
+        Me.PeekDesktopToolStripMenuItem.Size = New System.Drawing.Size(155, 22)
+        Me.PeekDesktopToolStripMenuItem.Text = "Peek Desktop"
+        '
+        'ToolStripSeparator10
+        '
+        Me.ToolStripSeparator10.Name = "ToolStripSeparator10"
+        Me.ToolStripSeparator10.Size = New System.Drawing.Size(152, 6)
+        '
+        'ShowDesktopToolStripMenuItem1
+        '
+        Me.ShowDesktopToolStripMenuItem1.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.ShowDesktopToolStripMenuItem1.Name = "ShowDesktopToolStripMenuItem1"
+        Me.ShowDesktopToolStripMenuItem1.Size = New System.Drawing.Size(155, 22)
+        Me.ShowDesktopToolStripMenuItem1.Text = "Show Desktop"
         '
         'Splitter3
         '
@@ -1196,12 +1179,6 @@ Partial Class AppBar
         'AlarmController
         '
         Me.AlarmController.Interval = 10
-        '
-        'MainToolTip
-        '
-        Me.MainToolTip.IsBalloon = True
-        Me.MainToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info
-        Me.MainToolTip.ToolTipTitle = "Success!"
         '
         'VCM
         '
@@ -1234,7 +1211,6 @@ Partial Class AppBar
         '
         'VolumeSliderWindowsToolStripMenuItem
         '
-        Me.VolumeSliderWindowsToolStripMenuItem.Enabled = False
         Me.VolumeSliderWindowsToolStripMenuItem.Name = "VolumeSliderWindowsToolStripMenuItem"
         Me.VolumeSliderWindowsToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
         Me.VolumeSliderWindowsToolStripMenuItem.Text = "Volume Slider (Windows)"
@@ -1308,20 +1284,20 @@ Partial Class AppBar
         Me.RemoveEntirelyToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.RemoveEntirelyToolStripMenuItem.Text = "Remove"
         '
-        'Button1
+        'Start
         '
-        Me.Button1.BackColor = System.Drawing.Color.Transparent
-        Me.Button1.BackgroundImage = Global.NewShell.My.Resources.Resources.StartRight
-        Me.Button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.Button1.ContextMenuStrip = Me.ActionCM
-        Me.Button1.Dock = System.Windows.Forms.DockStyle.Left
-        Me.Button1.FlatAppearance.BorderSize = 0
-        Me.Button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.Button1.Location = New System.Drawing.Point(0, 0)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(50, 37)
-        Me.Button1.TabIndex = 0
-        Me.Button1.UseVisualStyleBackColor = False
+        Me.Start.BackColor = System.Drawing.Color.Transparent
+        Me.Start.BackgroundImage = Global.NewShell.My.Resources.Resources.StartRight
+        Me.Start.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
+        Me.Start.ContextMenuStrip = Me.ActionCM
+        Me.Start.Dock = System.Windows.Forms.DockStyle.Left
+        Me.Start.FlatAppearance.BorderSize = 0
+        Me.Start.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Start.Location = New System.Drawing.Point(0, 0)
+        Me.Start.Name = "Start"
+        Me.Start.Size = New System.Drawing.Size(50, 37)
+        Me.Start.TabIndex = 0
+        Me.Start.UseVisualStyleBackColor = False
         '
         'LLCM
         '
@@ -1345,12 +1321,12 @@ Partial Class AppBar
         Me.ClientSize = New System.Drawing.Size(1159, 37)
         Me.ContextMenuStrip = Me.CMMAIN
         Me.ControlBox = False
-        Me.Controls.Add(Me.Panel3)
+        Me.Controls.Add(Me.ReBar32)
         Me.Controls.Add(Me.Splitter3)
         Me.Controls.Add(Me.Splitter2)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.Splitter1)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.Start)
         Me.Controls.Add(Me.Panel4)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
@@ -1368,7 +1344,7 @@ Partial Class AppBar
         Me.CMMAIN.ResumeLayout(False)
         Me.Panel1.ResumeLayout(False)
         Me.Pcm.ResumeLayout(False)
-        Me.Panel3.ResumeLayout(False)
+        Me.ReBar32.ResumeLayout(False)
         Me.TPCM.ResumeLayout(False)
         Me.Panel4.ResumeLayout(False)
         Me.TrayPanel.ResumeLayout(False)
@@ -1376,6 +1352,7 @@ Partial Class AppBar
         Me.ToolStrip1.PerformLayout()
         Me.TimeDatePanel.ResumeLayout(False)
         Me.TaDCM.ResumeLayout(False)
+        Me.ShowDesktopCM.ResumeLayout(False)
         Me.VCM.ResumeLayout(False)
         Me.MCM.ResumeLayout(False)
         Me.PIcm.ResumeLayout(False)
@@ -1383,18 +1360,17 @@ Partial Class AppBar
         Me.ResumeLayout(False)
 
     End Sub
-    Public WithEvents Button1 As System.Windows.Forms.Button
+    Public WithEvents Start As System.Windows.Forms.Button
     Public WithEvents Splitter1 As System.Windows.Forms.Splitter
     Public WithEvents CMMAIN As System.Windows.Forms.ContextMenuStrip
     Public WithEvents LockAppbarToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Public WithEvents Splitter2 As System.Windows.Forms.Splitter
     Public WithEvents Panel1 As System.Windows.Forms.Panel
-    Public WithEvents Panel2 As System.Windows.Forms.Panel
     Public WithEvents AppStrip As System.Windows.Forms.ToolStrip
     Public WithEvents ProcessStrip As System.Windows.Forms.ToolStrip
     Public WithEvents Controller As System.Windows.Forms.Timer
     Public WithEvents ProcessTimer As System.Windows.Forms.Timer
-    Public WithEvents Panel3 As System.Windows.Forms.Panel
+    Public WithEvents ReBar32 As System.Windows.Forms.Panel
     Public WithEvents TPCM As System.Windows.Forms.ContextMenuStrip
     Public WithEvents SetPriorityLevelToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Public WithEvents PRprcmb1 As System.Windows.Forms.ToolStripMenuItem
@@ -1435,14 +1411,11 @@ Partial Class AppBar
     Public WithEvents ToolStrip1 As System.Windows.Forms.ToolStrip
     Public WithEvents ToolStripButton1 As System.Windows.Forms.ToolStripButton
     Public WithEvents TimeDatePanel As System.Windows.Forms.Panel
-    Public WithEvents DayLabel As System.Windows.Forms.Label
-    Public WithEvents DateLabel As System.Windows.Forms.Label
     Public WithEvents TimeLabel As System.Windows.Forms.Label
     Public WithEvents Button2 As System.Windows.Forms.Button
     Public WithEvents Splitter3 As System.Windows.Forms.Splitter
     Public WithEvents ToolStripButton2 As System.Windows.Forms.ToolStripButton
     Public WithEvents ToolStripButton3 As System.Windows.Forms.ToolStripButton
-    Public WithEvents Panel5 As Panel
     Public WithEvents BlockingProcesses As Timer
     Public WithEvents ActionCM As ContextMenuStrip
     Public WithEvents ClipboardToolStripMenuItem As ToolStripMenuItem
@@ -1541,4 +1514,8 @@ Partial Class AppBar
     Friend WithEvents Button3 As Button
     Friend WithEvents LLCM As ContextMenuStrip
     Friend WithEvents NoLanguagesInstalledToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ShowDesktopCM As ContextMenuStrip
+    Friend WithEvents PeekDesktopToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator10 As ToolStripSeparator
+    Friend WithEvents ShowDesktopToolStripMenuItem1 As ToolStripMenuItem
 End Class

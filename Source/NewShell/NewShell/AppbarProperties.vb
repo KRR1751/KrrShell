@@ -122,6 +122,8 @@ Public Class AppbarProperties
 
         CheckBox12.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\ShutdownDialog", "Style", False)
 
+        CheckBox18.Checked = AppBar.UseLegacyVolumeSlider
+
         GroupBox3.Enabled = CheckBox6.Checked
 
         ComboBox5.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\", "CombineMode", "0")
@@ -221,7 +223,7 @@ Public Class AppbarProperties
             Button11.Enabled = False
         End If
 
-        If AppBar.Button1.BackgroundImageLayout = ImageLayout.Stretch Then
+        If AppBar.Start.BackgroundImageLayout = ImageLayout.Stretch Then
             ComboBox4.SelectedIndex = 0
         Else
             ComboBox4.SelectedIndex = 1
@@ -402,7 +404,7 @@ Public Class AppbarProperties
 
     Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
         AppBar.StartButtonToolStripMenuItem.Checked = CheckBox2.Checked
-        AppBar.Button1.Visible = AppBar.StartButtonToolStripMenuItem.Checked
+        AppBar.Start.Visible = AppBar.StartButtonToolStripMenuItem.Checked
         If AppBar.LockAppbarToolStripMenuItem.Checked = False Then
             AppBar.Splitter1.Visible = AppBar.StartButtonToolStripMenuItem.Checked
         End If
@@ -745,18 +747,18 @@ Public Class AppbarProperties
         If RadioButton8.Checked = True Then
             SB2.Enabled = False
             SB3.Enabled = False
-            AppBar.Button1.BackgroundImage = My.Resources.StartRight
-            AppBar.Button1.BackgroundImageLayout = ImageLayout.Stretch
+            AppBar.Start.BackgroundImage = My.Resources.StartRight
+            AppBar.Start.BackgroundImageLayout = ImageLayout.Stretch
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0", Microsoft.Win32.RegistryValueKind.DWord)
 
         ElseIf RadioButton9.Checked = True Then
             SB2.Enabled = True
             SB3.Enabled = False
-            AppBar.Button1.BackgroundImage = PictureBox4.Image
+            AppBar.Start.BackgroundImage = PictureBox4.Image
             If ComboBox4.SelectedIndex = 0 Then
-                AppBar.Button1.BackgroundImageLayout = ImageLayout.Stretch
+                AppBar.Start.BackgroundImageLayout = ImageLayout.Stretch
             Else
-                AppBar.Button1.BackgroundImageLayout = ImageLayout.Center
+                AppBar.Start.BackgroundImageLayout = ImageLayout.Center
             End If
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "1", Microsoft.Win32.RegistryValueKind.DWord)
 
@@ -769,7 +771,7 @@ Public Class AppbarProperties
                 AppBar.LoadAndSplitOrb(ComboBox1.Text)
 
             End If
-            AppBar.Button1.BackgroundImage = AppBar.OrbNormal
+            AppBar.Start.BackgroundImage = AppBar.OrbNormal
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "2", Microsoft.Win32.RegistryValueKind.DWord)
         End If
     End Sub
@@ -785,7 +787,7 @@ Public Class AppbarProperties
         OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
         If OFD.ShowDialog = DialogResult.OK Then
             PictureBox4.Image = Image.FromFile(OFD.FileName)
-            AppBar.Button1.BackgroundImage = Image.FromFile(OFD.FileName)
+            AppBar.Start.BackgroundImage = Image.FromFile(OFD.FileName)
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", OFD.FileName)
         End If
     End Sub
@@ -830,10 +832,10 @@ Public Class AppbarProperties
 
     Private Sub ComboBox4_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox4.SelectedIndexChanged
         If ComboBox4.SelectedIndex = 0 Then
-            AppBar.Button1.BackgroundImageLayout = ImageLayout.Stretch
+            AppBar.Start.BackgroundImageLayout = ImageLayout.Stretch
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Layout", "0", Microsoft.Win32.RegistryValueKind.DWord)
         Else
-            AppBar.Button1.BackgroundImageLayout = ImageLayout.Center
+            AppBar.Start.BackgroundImageLayout = ImageLayout.Center
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Layout", "1", Microsoft.Win32.RegistryValueKind.DWord)
         End If
     End Sub
@@ -890,7 +892,7 @@ Public Class AppbarProperties
             ComboBox1.Text = OFD.FileName
 
             AppBar.LoadAndSplitOrb(OFD.FileName)
-            AppBar.Button1.BackgroundImage = AppBar.OrbNormal
+            AppBar.Start.BackgroundImage = AppBar.OrbNormal
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "CustomORB", OFD.FileName)
 
         End If
@@ -1257,6 +1259,11 @@ Public Class AppbarProperties
     Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "LanguageList", CheckBox9.Checked, Microsoft.Win32.RegistryValueKind.DWord)
         AppBar.Button3.Visible = CheckBox9.Checked
+    End Sub
+
+    Private Sub CheckBox18_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox18.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Volume", "UseLegacy", CheckBox18.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+        AppBar.UseLegacyVolumeSlider = CheckBox18.Checked
     End Sub
 End Class
 

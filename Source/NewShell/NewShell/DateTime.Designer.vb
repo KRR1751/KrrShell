@@ -1271,7 +1271,6 @@ Partial Class DateAndTime
         '
         'MonthCalendar1
         '
-        Me.MonthCalendar1.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.MonthCalendar1.Location = New System.Drawing.Point(17, 0)
         Me.MonthCalendar1.Name = "MonthCalendar1"
         Me.MonthCalendar1.TabIndex = 6

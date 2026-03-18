@@ -29,6 +29,7 @@ Partial Class AppbarProperties
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.CheckBox5 = New System.Windows.Forms.CheckBox()
+        Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
         Me.CheckBox3 = New System.Windows.Forms.CheckBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
@@ -170,7 +171,7 @@ Partial Class AppbarProperties
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.RestartShellToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RestartAndRunAsAdministratorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.CheckBox9 = New System.Windows.Forms.CheckBox()
+        Me.CheckBox18 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -278,6 +279,16 @@ Partial Class AppbarProperties
         Me.CheckBox5.TabIndex = 7
         Me.CheckBox5.Text = "Show Desktop button"
         Me.CheckBox5.UseVisualStyleBackColor = True
+        '
+        'CheckBox9
+        '
+        Me.CheckBox9.AutoSize = True
+        Me.CheckBox9.Location = New System.Drawing.Point(6, 62)
+        Me.CheckBox9.Name = "CheckBox9"
+        Me.CheckBox9.Size = New System.Drawing.Size(99, 19)
+        Me.CheckBox9.TabIndex = 8
+        Me.CheckBox9.Text = "Language List"
+        Me.CheckBox9.UseVisualStyleBackColor = True
         '
         'CheckBox4
         '
@@ -522,6 +533,7 @@ Partial Class AppbarProperties
         'GroupBox5
         '
         Me.GroupBox5.Controls.Add(Me.ComboBox5)
+        Me.GroupBox5.Controls.Add(Me.CheckBox18)
         Me.GroupBox5.Controls.Add(Me.CheckBox8)
         Me.GroupBox5.Controls.Add(Me.CheckBox1)
         Me.GroupBox5.Location = New System.Drawing.Point(8, 110)
@@ -1818,15 +1830,15 @@ Partial Class AppbarProperties
         Me.RestartAndRunAsAdministratorToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.RestartAndRunAsAdministratorToolStripMenuItem.Text = "Restart with Administrator"
         '
-        'CheckBox9
+        'CheckBox18
         '
-        Me.CheckBox9.AutoSize = True
-        Me.CheckBox9.Location = New System.Drawing.Point(6, 62)
-        Me.CheckBox9.Name = "CheckBox9"
-        Me.CheckBox9.Size = New System.Drawing.Size(99, 19)
-        Me.CheckBox9.TabIndex = 8
-        Me.CheckBox9.Text = "Language List"
-        Me.CheckBox9.UseVisualStyleBackColor = True
+        Me.CheckBox18.AutoEllipsis = True
+        Me.CheckBox18.Location = New System.Drawing.Point(131, 16)
+        Me.CheckBox18.Name = "CheckBox18"
+        Me.CheckBox18.Size = New System.Drawing.Size(104, 35)
+        Me.CheckBox18.TabIndex = 12
+        Me.CheckBox18.Text = "Use System's Volume Slider"
+        Me.CheckBox18.UseVisualStyleBackColor = True
         '
         'AppbarProperties
         '
@@ -2064,4 +2076,5 @@ Partial Class AppbarProperties
     Friend WithEvents GroupBox18 As GroupBox
     Friend WithEvents Button7 As Button
     Friend WithEvents CheckBox9 As CheckBox
+    Friend WithEvents CheckBox18 As CheckBox
 End Class

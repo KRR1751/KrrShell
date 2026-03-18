@@ -40,7 +40,7 @@ Public Class TileCreator
             OK_Button.Enabled = True
 
             If CheckBox2.Checked = True Then
-                Dim bmp As Bitmap = Desktop.GetFileIcon(ComboBox1.Text, True).ToBitmap
+                Dim bmp As Bitmap = AppBar.GetFileIcon(ComboBox1.Text, True).ToBitmap
 
                 If bmp IsNot Nothing Then
                     Label6.Image = bmp
@@ -178,7 +178,7 @@ Public Class TileCreator
 
         If File.Exists(ComboBox1.Text) Then
 
-            Dim bmp As Bitmap = Desktop.GetFileIcon(ComboBox1.Text, True).ToBitmap
+            Dim bmp As Bitmap = AppBar.GetFileIcon(ComboBox1.Text, True).ToBitmap
 
             If bmp IsNot Nothing Then
                 Label6.Image = bmp

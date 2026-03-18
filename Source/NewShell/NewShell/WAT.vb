@@ -92,6 +92,69 @@ Public Class WAT
     Public Shared Function DwmGetColorizationColor(ByRef pcrColorization As UInteger, ByRef pfOpaqueBlend As Boolean) As Integer
     End Function
 
+    Private TargetBounds As Rectangle
+    Private WithEvents AnimTimer As New Timer With {.Interval = 10} ' Mírně vyšší interval uleví CPU
+    Private ReadOnly Smoothness As Double = 0.3
+    Private ReadOnly Epsilon As Integer = 1 ' Práh pro zastavení v pixelech
+
+    Public Sub MoveTo(newBounds As Rectangle)
+        If Me.IsDisposed OrElse Me.Disposing Then Return
+
+        ' KRITICKÁ KONTROLA: Pokud už na toto místo míříme, nic nedělej
+        If TargetBounds = newBounds AndAlso Me.Visible Then
+            Return
+        End If
+
+        TargetBounds = newBounds
+
+        If Not Me.Visible Then
+            Me.Opacity = 0
+            ' Nastavíme počáteční pozici, aby Slide-up začínal zespodu
+            Me.SetBounds(newBounds.X, newBounds.Y, newBounds.Width, newBounds.Height)
+            MyBase.Show()
+        End If
+
+        AnimTimer.Start()
+    End Sub
+
+    Private Sub AnimTimer_Tick(sender As Object, e As EventArgs) Handles AnimTimer.Tick
+        If Me.IsDisposed OrElse Me.Disposing Then
+            AnimTimer.Stop()
+            Return
+        End If
+
+        ' 1. Animace Opacity - děláme jen, pokud je potřeba
+        If Me.Opacity < 1.0 Then
+            Me.Opacity = Math.Min(1.0, Me.Opacity + 0.1)
+        End If
+
+        ' 2. Výpočet vzdáleností
+        Dim dX As Double = TargetBounds.X - Me.Left
+        Dim dY As Double = TargetBounds.Y - Me.Top
+        Dim dW As Double = TargetBounds.Width - Me.Width
+        Dim dH As Double = TargetBounds.Height - Me.Height
+
+        ' 3. Kontrola, zda jsme v cíli (Epsilon)
+        ' Pokud jsou všechny rozdíly pod 1 pixel, okamžitě zastavíme
+        If Math.Abs(dX) < Epsilon AndAlso Math.Abs(dY) < Epsilon AndAlso
+       Math.Abs(dW) < Epsilon AndAlso Math.Abs(dH) < Epsilon Then
+
+            Me.Bounds = TargetBounds
+            ' Zastavíme timer, jen pokud je i Opacity na max
+            If Me.Opacity >= 1.0 Then AnimTimer.Stop()
+        Else
+            ' Výpočet nové pozice s plynulým dojezdem
+            ' Používáme Floor, abychom předešli sub-pixelovému kmitání
+            Dim nextL As Integer = CInt(Me.Left + (dX * Smoothness))
+            Dim nextT As Integer = CInt(Me.Top + (dY * Smoothness))
+            Dim nextW As Integer = CInt(Me.Width + (dW * Smoothness))
+            Dim nextH As Integer = CInt(Me.Height + (dH * Smoothness))
+
+            ' Změníme velikost a pozici najednou (méně překreslování)
+            Me.SetBounds(nextL, nextT, nextW, nextH)
+        End If
+    End Sub
+
     Public Shadows Sub Show()
         Me.Opacity = 0
         MyBase.Show()
@@ -99,9 +162,11 @@ Public Class WAT
     End Sub
 
     Public Shadows Sub Hide()
-        FadeTimer.Stop()
-        Me.Opacity = 0
-        MyBase.Hide()
+        AnimTimer.Stop()
+        If Not Me.IsDisposed Then
+            Me.Opacity = 0
+            MyBase.Hide()
+        End If
     End Sub
 
     Private Sub FadeTimer_Tick(sender As Object, e As EventArgs) Handles FadeTimer.Tick
@@ -153,6 +218,11 @@ Public Class WAT
                                liveBar.CloseTimer.Start()
                            End Sub)
         End If
+    End Sub
+
+    Private Sub Button4_MouseEnter1(sender As Object, e As EventArgs) Handles Button4.MouseEnter
+        Me.Select()
+        Button4.Select()
     End Sub
 
     Private Sub Button4_MouseEnter(sender As Object, e As EventArgs) Handles Button4.MouseEnter, Me.MouseEnter, Button1.MouseEnter, Button2.MouseEnter, Button3.MouseEnter, Panel1.MouseEnter, Panel4.MouseEnter, Label1.MouseEnter
@@ -216,39 +286,6 @@ Public Class WAT
     <DllImport("user32.dll")>
     Private Shared Function IsIconic(hWnd As IntPtr) As Boolean
     End Function
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click, Label1.Click
-        TimerPeek.Stop()
-        AeroPeek.HidePeek()
-        AeroPeekScreen.Hide()
-
-        If Not Me.Tag Is Nothing AndAlso TypeOf Me.Tag Is IntPtr Then
-            Dim windowHandle As IntPtr = CType(Me.Tag, IntPtr)
-
-            Try
-                Dim currentState As String = GetWindowState(windowHandle)
-
-                Select Case currentState
-                    Case "Normal"
-                        SetForegroundWindow(windowHandle)
-
-                    Case "Maximized"
-                        SetForegroundWindow(windowHandle)
-
-                    Case "Minimized"
-                        SetForegroundWindow(windowHandle)
-                        ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
-
-                    Case Else
-                        SetForegroundWindow(windowHandle)
-                        ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
-                End Select
-            Catch ex As Exception
-
-            End Try
-        End If
-
-        Me.Close()
-    End Sub
 
     Private Sub Label1_MouseUp(sender As Object, e As MouseEventArgs) Handles Label1.MouseUp
         If e.Button = MouseButtons.Right Then
@@ -288,19 +325,6 @@ Public Class WAT
         End If
     End Sub
 
-    Private Sub WAT_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
-        If Button4.BackgroundImage IsNot Nothing Then
-            Dim targetHeight As Integer = 140
-            If Button4.BackgroundImage.Height > targetHeight Then
-                Dim aspectRatio As Double = CDbl(Button4.BackgroundImage.Width) / CDbl(Button4.BackgroundImage.Height)
-                Dim targetWidth As Integer = CInt(targetHeight * aspectRatio)
-                Me.Size = New Size(targetWidth - 32, 140)
-            Else
-                Me.Size = New Size(178, Button4.BackgroundImage.Height)
-            End If
-        End If
-    End Sub
-
     Private Sub WAT_BackColorChanged(sender As Object, e As EventArgs) Handles Me.BackColorChanged
         Label1.BackColor = Me.BackColor
         Panel1.BackColor = Me.BackColor
@@ -321,6 +345,45 @@ Public Class WAT
             Me.BringToFront()
 
             AeroPeek.ShowPeek(targetHWnd, AeroPeekScreen.Handle, targetPos)
+        End If
+    End Sub
+
+    Private Sub Button4_MouseUp(sender As Object, e As MouseEventArgs) Handles Button4.MouseUp, Label1.Click
+        If e.Button = MouseButtons.Right Then
+            AppBar.WindowStateToolStripMenuItem.DropDown.Show(AppBar, Cursor.Position)
+            Exit Sub
+        End If
+
+        TimerPeek.Stop()
+        AeroPeek.HidePeek()
+        AeroPeekScreen.Hide()
+
+        Me.Hide()
+
+        If Not Me.Tag Is Nothing AndAlso TypeOf Me.Tag Is IntPtr Then
+            Dim windowHandle As IntPtr = CType(Me.Tag, IntPtr)
+
+            Try
+                Dim currentState As String = GetWindowState(windowHandle)
+
+                Select Case currentState
+                    Case "Normal"
+                        SetForegroundWindow(windowHandle)
+
+                    Case "Maximized"
+                        SetForegroundWindow(windowHandle)
+
+                    Case "Minimized"
+                        SetForegroundWindow(windowHandle)
+                        ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
+
+                    Case Else
+                        SetForegroundWindow(windowHandle)
+                        ShowWindow(windowHandle, SHOW_WINDOW.SW_RESTORE)
+                End Select
+            Catch ex As Exception
+
+            End Try
         End If
     End Sub
 End Class
@@ -410,19 +473,29 @@ Public Class AeroPeek
         Public fSourceClientAreaOnly As Boolean
     End Structure
 
-    <StructLayout(LayoutKind.Sequential)>
-    Public Structure Rect
-        Public Left, Top, Right, Bottom As Integer
+    <StructLayout(LayoutKind.Sequential)> Structure RECT
+        Public left As Integer
+        Public top As Integer
+        Public right As Integer
+        Public bottom As Integer
+
         Public ReadOnly Property Width As Integer
             Get
-                Return Right - Left
+                Return right - left
             End Get
         End Property
         Public ReadOnly Property Height As Integer
             Get
-                Return Bottom - Top
+                Return bottom - top
             End Get
         End Property
+
+        Public Sub New(ByVal X As Integer, ByVal Y As Integer, ByVal X2 As Integer, ByVal Y2 As Integer)
+            Me.left = X
+            Me.top = Y
+            Me.right = X2
+            Me.bottom = Y2
+        End Sub
     End Structure
 
     Private Shared _currentThumbnail As IntPtr = IntPtr.Zero
@@ -465,14 +538,14 @@ Public Class AeroPeek
         End If
     End Function
 
-    Public Shared Sub ShowPeek(hWndToPeek As IntPtr, destinationHandle As IntPtr, targetRect As Rect)
+    Public Shared Sub ShowPeek(hWndToPeek As IntPtr, destinationHandle As IntPtr, targetRect As RECT, Optional clientAreaOnly As Boolean = False)
         HidePeek()
 
         If DwmRegisterThumbnail(destinationHandle, hWndToPeek, _currentThumbnail) = 0 Then
             Dim props As New DWM_THUMBNAIL_PROPERTIES()
             props.dwFlags = &H1 Or &H4 Or &H8 Or &H10
             props.fVisible = True
-            props.fSourceClientAreaOnly = False
+            props.fSourceClientAreaOnly = clientAreaOnly
             props.opacity = 255
 
             props.rcDestination = targetRect

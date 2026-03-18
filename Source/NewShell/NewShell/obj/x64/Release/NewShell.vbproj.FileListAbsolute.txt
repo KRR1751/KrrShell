@@ -124,3 +124,4 @@ C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\bin
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DateAndTimeProperties.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DateAndTime.resources
 C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.AeroPeekScreen.resources
+C:\Users\Kristian\Documents\!Osobní\!MAIN\KrrShell\Source\NewShell\NewShell\obj\x64\Release\NewShell.DateTimeProperties.resources

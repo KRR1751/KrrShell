@@ -13,6 +13,7 @@ Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Button
 Imports Microsoft.VisualBasic.Devices
 Imports Microsoft.Win32
+Imports NAudio.CoreAudioApi
 
 Public Class AppBar
 
@@ -39,11 +40,12 @@ Public Class AppBar
         If m.Msg = WM_MOUSEACTIVATE Then
             Dim clickedControl As Control = Me.GetChildAtPoint(Me.PointToClient(Cursor.Position))
 
-            If Not clickedControl Is Nothing AndAlso clickedControl Is Me.ProcessStrip Then
+            If clickedControl IsNot Nothing AndAlso clickedControl Is Me.ProcessStrip Then
                 m.Result = CType(MA_NOACTIVATE, IntPtr)
             End If
         End If
     End Sub
+
     <Runtime.InteropServices.DllImport("dwmapi.dll")> Public Shared Function DwmExtendFrameIntoClientArea(ByVal hWnd As IntPtr, ByRef pMarinset As side) As Integer
     End Function
 
@@ -76,6 +78,10 @@ Public Class AppBar
 
     <DllImport("user32.dll")>
     Private Shared Function GetClientRect(hWnd As IntPtr, ByRef lpRect As RECT) As Boolean
+    End Function
+
+    <DllImport("dwmapi.dll")>
+    Public Shared Function DwmSetWindowAttribute(hwnd As IntPtr, attr As Integer, ByRef attrValue As Integer, attrSize As Integer) As Integer
     End Function
 
     <DllImport("dwmapi.dll")>
@@ -120,38 +126,30 @@ Public Class AppBar
     End Enum
 
     Public Shared Function RenderWindow(hWnd As IntPtr, clientAreaOnly As Boolean) As Bitmap
+        Dim windowRect As New RECT()
+        DwmGetWindowAttribute(hWnd, 9, windowRect, Marshal.SizeOf(Of RECT)()) ' 9 = DWMWA_EXTENDED_FRAME_BOUNDS
 
-        If IsIconic(hWnd) Then
+        If windowRect.Width <= 0 OrElse windowRect.Height <= 0 Then
             Return GeneratePlaceholder(hWnd)
         End If
-
-        Dim windowRect As New RECT()
-        Dim screenPos As New Point(0, 0)
-
-        If clientAreaOnly Then
-            GetClientRect(hWnd, windowRect)
-        Else
-            DwmGetWindowAttribute(hWnd, CInt(DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS), windowRect, Marshal.SizeOf(Of RECT)())
-            screenPos.X = windowRect.left
-            screenPos.Y = windowRect.top
-        End If
-
-        If windowRect.Width <= 0 OrElse windowRect.Height <= 0 Then Return Nothing
 
         Dim bmp As New Bitmap(windowRect.Width, windowRect.Height)
 
         Using g = Graphics.FromImage(bmp)
             Dim hdcDest = g.GetHdc()
-            Dim success As Boolean = PrintWindow(hWnd, hdcDest, PrintWindowOptions.PW_RENDERFULLCONTENT Or If(clientAreaOnly, PrintWindowOptions.PW_CLIENTONLY, 0))
+
+            Dim success As Boolean = PrintWindow(hWnd, hdcDest, &H2)
 
             If Not success OrElse IsResultBlack(bmp) Then
-                Dim hdcSrc = GetWindowDC(IntPtr.Zero)
-                BitBlt(hdcDest, 0, 0, windowRect.Width, windowRect.Height, hdcSrc, screenPos.X, screenPos.Y, &HCC0020) ' SRCCOPY
-                ReleaseDC(IntPtr.Zero, hdcSrc)
+                PrintWindow(hWnd, hdcDest, If(clientAreaOnly, &H1, 0))
             End If
 
             g.ReleaseHdc(hdcDest)
         End Using
+
+        If IsResultBlack(bmp) Then
+            Return GeneratePlaceholder(hWnd)
+        End If
 
         Return bmp
     End Function
@@ -162,30 +160,33 @@ Public Class AppBar
     End Function
 
     Private Shared Function GeneratePlaceholder(hWnd As IntPtr) As Bitmap
-        Dim w As Integer = 300
-        Dim h As Integer = 100
+        Dim w As Integer = 200
+        Dim h As Integer = 120
 
-        Dim r As New RECT()
-        If GetClientRect(hWnd, r) AndAlso r.Width > 0 Then
-            w = r.Width
-            h = r.Height
-        End If
-
+        Dim appIcon As Icon = Icon.ExtractAssociatedIcon(GetProcessPath(hWnd))
         Dim bmp As New Bitmap(w, h)
-        Dim accentColor As Color
-
-        If AppBar.ActiveWindowHandle <> hWnd Then
-            accentColor = SystemColors.InactiveCaption
-        Else
-            accentColor = SystemColors.ActiveCaption
-        End If
 
         Using g = Graphics.FromImage(bmp)
-            g.Clear(accentColor)
-            TextRenderer.DrawText(g, "Minimized", SystemFonts.CaptionFont, New Point(5, 2), Color.White)
+            g.Clear(GetAccentColor)
+
+            If appIcon IsNot Nothing Then
+                g.DrawIcon(appIcon, New Rectangle((w \ 2) - 16, (h \ 2) - 16, 32, 32))
+            End If
+
+            TextRenderer.DrawText(g, "Minimized", SystemFonts.CaptionFont, New Point(5, h - 20), Color.White)
         End Using
 
         Return bmp
+    End Function
+
+    Private Shared Function GetProcessPath(hWnd As IntPtr) As String
+        Try
+            Dim pid As Integer
+            GetWindowThreadProcessId(hWnd, pid)
+            Return Process.GetProcessById(pid).MainModule.FileName
+        Catch
+            Return ""
+        End Try
     End Function
 
 #Region " Process System"
@@ -272,6 +273,26 @@ Public Class AppBar
     End Function
     Private Const MONITOR_DEFAULTTONULL As UInteger = 0
     Private Const MONITOR_DEFAULTTOPRIMARY As UInteger = 1
+
+    Private Sub CleanupDeadWindows()
+        For i As Integer = ProcessStrip.Items.Count - 1 To 0 Step -1
+            Dim item = ProcessStrip.Items(i)
+
+            If item.Tag IsNot Nothing AndAlso TypeOf item.Tag Is IntPtr Then
+                Dim hwnd As IntPtr = CType(item.Tag, IntPtr)
+
+                If Not IsWindow(hwnd) Then
+                    StopAlert(hwnd)
+
+                    ProcessStrip.Items.RemoveAt(i)
+                    item.Dispose()
+
+                    Debug.WriteLine($"Non-existent Window has been removed: {hwnd}")
+                End If
+            End If
+        Next
+    End Sub
+
     Private Sub RefreshTaskbarForMonitor()
         If Not OnlyShowWindowsOnCurrentMonitor Then Return
 
@@ -1302,6 +1323,103 @@ Public Class AppBar
 ) As UInteger
     End Function
 
+    Private Const SHGFI_ICON As UInteger = &H100
+    Private Const SHGFI_SMALLICON As UInteger = &H1
+    Private Const SHGFI_LARGEICON As UInteger = &H0
+    Private Const SHGFI_USEFILEATTRIBUTES As UInteger = &H10
+    Private Const SHGFI_DISPLAYNAME As UInteger = &H200
+    Private Const SHGFI_PIDL As UInteger = &H8
+
+    Private Const FILE_ATTRIBUTE_NORMAL As UInteger = &H80
+    Private Const FILE_ATTRIBUTE_DIRECTORY As UInteger = &H10
+    Public Function GetFileIcon(ByVal filePath As String, ByVal isLargeIcon As Boolean) As Icon
+        Dim shInfo As SHFILEINFO = New SHFILEINFO()
+        Dim flags As UInteger = SHGFI_ICON
+
+        If isLargeIcon Then
+            flags = flags Or SHGFI_LARGEICON
+        Else
+            flags = flags Or SHGFI_SMALLICON
+        End If
+
+        Dim attributes As UInteger = FILE_ATTRIBUTE_NORMAL
+
+        If String.IsNullOrEmpty(filePath) OrElse System.IO.Directory.Exists(filePath) Then
+            If Not String.IsNullOrEmpty(filePath) AndAlso System.IO.Directory.Exists(filePath) Then
+                attributes = FILE_ATTRIBUTE_DIRECTORY
+            ElseIf String.IsNullOrEmpty(filePath) Then
+                flags = flags Or SHGFI_USEFILEATTRIBUTES
+                attributes = FILE_ATTRIBUTE_DIRECTORY
+            End If
+        End If
+
+        Dim result As IntPtr
+
+        Try
+            result = Desktop.SHGetFileInfo(
+            filePath,
+            attributes,
+            shInfo,
+            CUInt(Marshal.SizeOf(shInfo)),
+            flags)
+        Catch ex As Exception
+            result = IntPtr.Zero
+        End Try
+
+        If Not result.Equals(IntPtr.Zero) AndAlso Not shInfo.hIcon.Equals(IntPtr.Zero) Then
+            Try
+                Dim iconResult As Icon = Icon.FromHandle(shInfo.hIcon)
+                Dim finalIcon As Icon = CType(iconResult.Clone(), Icon)
+
+                DestroyIcon(shInfo.hIcon)
+
+                Return finalIcon
+            Catch ex As Exception
+                Return Nothing
+            End Try
+        End If
+
+        Return Nothing
+    End Function
+
+    Public Function GetFolderIcon(ByVal folderPath As String, ByVal isLargeIcon As Boolean) As Icon
+        If Not System.IO.Directory.Exists(folderPath) Then
+            Return Nothing
+        End If
+
+        Dim shInfo As SHFILEINFO = New SHFILEINFO()
+
+        Dim flags As UInteger = SHGFI_ICON
+
+        If isLargeIcon Then
+            flags = flags Or SHGFI_LARGEICON
+        Else
+            flags = flags Or SHGFI_SMALLICON
+        End If
+
+        Dim result As IntPtr = Desktop.SHGetFileInfo(
+            folderPath,
+            FILE_ATTRIBUTE_DIRECTORY,
+            shInfo,
+            CUInt(Marshal.SizeOf(shInfo)),
+            flags)
+
+        If Not result.Equals(IntPtr.Zero) AndAlso Not shInfo.hIcon.Equals(IntPtr.Zero) Then
+            Try
+                Dim iconResult As Icon = Icon.FromHandle(shInfo.hIcon)
+                Dim finalIcon As Icon = CType(iconResult.Clone(), Icon)
+
+                DestroyIcon(shInfo.hIcon)
+
+                Return finalIcon
+            Catch ex As Exception
+                Return Nothing
+            End Try
+        End If
+
+        Return Nothing
+    End Function
+
     Public Shared Function GetIcon(ByVal filePath As String, ByVal iconIndex As Integer, ByVal isSmallIcon As Boolean) As Icon
         Dim hIconLarge(0) As IntPtr
         Dim hIconSmall(0) As IntPtr
@@ -1381,6 +1499,10 @@ Public Class AppBar
     Private Shared Function GetWindowText(hWnd As IntPtr, lpString As StringBuilder, nMaxCount As Integer) As Integer
     End Function
 
+    <DllImport("user32.dll")>
+    Private Shared Function IsWindow(ByVal hWnd As IntPtr) As Boolean
+    End Function
+
     Private hHook As IntPtr
     Private procDelegate As WinEventDelegate = AddressOf WinEventProc
 
@@ -1398,6 +1520,10 @@ Public Class AppBar
     End Sub
     Private Const EVENT_OBJECT_STATECHANGE As UInteger = &H800A
     Private Sub WinEventProc(hWinEventHook As IntPtr, eventType As UInteger, hwnd As IntPtr, idObject As Integer, idChild As Integer, dwEventThread As UInteger, dwmsEventTime As UInteger)
+        If Not Me.IsHandleCreated OrElse Me.IsDisposed Then Return
+
+        Me.Invoke(Sub() CleanupDeadWindows())
+
         If idObject <> OBJID_WINDOW Then Return
 
         Select Case eventType
@@ -1464,6 +1590,59 @@ Public Class AppBar
     Public CustomFMPath As String = String.Empty
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If My.Computer.Registry.CurrentUser.OpenSubKey("Shell") IsNot Nothing Then
+
+            Dim currentpath As String = Application.StartupPath
+
+            Dim pathsuccessful As String = String.Empty
+
+            Dim result = MessageBox.Show("Krr's Shell didn't found its Registry key where all the settings will be. Without it the shell cannot continue, to avoid the Shell being corrupted." & Environment.NewLine & Environment.NewLine &
+                            "If you downloaded the Shell from GitHub, please check if you have another file called ""Import_me.reg"" and execute it first." & Environment.NewLine &
+                            "Do you want to locate the file from the Shell directly?", "No Settings found.", MessageBoxButtons.YesNo, MessageBoxIcon.Hand, MessageBoxDefaultButton.Button1)
+
+            Select Case result
+                Case DialogResult.Yes
+                    For Each f As String In Directory.GetFiles(currentpath)
+
+                        ' Searching for Import_me.reg...
+                        If Path.GetFileName(f).ToLower = "import_me.reg" Then
+                            pathsuccessful = f
+                            Exit For
+                        End If
+
+                    Next
+
+                    If File.Exists(pathsuccessful) AndAlso Path.GetFileName(pathsuccessful).ToLower = "import_me.reg" Then
+                        Dim result1 = MessageBox.Show("SUCCESS! The file ""Import_me.reg"" has been found, do you want to import it right now?", "Import_me.reg found", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1)
+
+                        Select Case result1
+                            Case DialogResult.Yes
+                                Try
+                                    Shell(pathsuccessful, AppWinStyle.NormalFocus, True)
+
+                                    MessageBox.Show("Now please check your Registry Editor and look to those key path: ""HKEY_CURRENT_USER\Shell"" and if the key is there, now close this message box, start the program again and enjoy!", "Program Restart required", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+                                    End
+                                Catch ex As Exception
+                                    MessageBox.Show(ex.Message)
+
+                                    End
+                                End Try
+                            Case DialogResult.No
+                                End
+                        End Select
+                    Else
+                        MessageBox.Show("File not found! Please check the file ""Import_me.reg"" somewhere else to continue. This Shell will be now ended.", "Failed to locate Import_me.reg", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+                        End
+                    End If
+                Case DialogResult.No
+                    MessageBox.Show("This Shell will be now ended. As the Registry keys are the main part the Shell needs to communicate with.", "Canceled.", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+                    End
+            End Select
+        End If
+
         ' Other
         Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layout", 2)
             Case 0
@@ -1615,27 +1794,27 @@ Public Class AppBar
             Splitter2.Visible = True
             'If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 0 Then
             Splitter3.Visible = True
-                'Else
-                'Panel6.Visible = True
-                'Splitter3.Visible = False
-                'End If
-            End If
+            'Else
+            'Panel6.Visible = True
+            'Splitter3.Visible = False
+            'End If
+        End If
 
         ' Start button
 
-        Button1.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "StartButton", True)
+        Start.Visible = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "StartButton", True)
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 0 Then
 
             AppbarProperties.RadioButton8.Checked = True
-            Button1.BackgroundImage = My.Resources.StartRight
+            Start.BackgroundImage = My.Resources.StartRight
 
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             AppbarProperties.RadioButton9.Checked = True
 
             Try
-                Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
+                Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
             Catch ex As Exception
-                Button1.BackgroundImage = My.Resources.StartRight
+                Start.BackgroundImage = My.Resources.StartRight
             End Try
 
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
@@ -1646,17 +1825,17 @@ Public Class AppBar
                 Try
                     LoadAndSplitOrb(orbPath)
 
-                    Button1.BackgroundImage = OrbNormal
+                    Start.BackgroundImage = OrbNormal
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             End If
         End If
 
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Layout", "0") = 0 Then
-            Button1.BackgroundImageLayout = ImageLayout.Stretch
+            Start.BackgroundImageLayout = ImageLayout.Stretch
         Else
-            Button1.BackgroundImageLayout = ImageLayout.Center
+            Start.BackgroundImageLayout = ImageLayout.Center
         End If
 
         'If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 0 Then
@@ -1670,12 +1849,12 @@ Public Class AppBar
             Me.WindowState = FormWindowState.Normal
         End If
 
-        StartButtonToolStripMenuItem.Checked = Button1.Visible
+        StartButtonToolStripMenuItem.Checked = Start.Visible
 
         Try
-            Button1.Width = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer1", "50")
+            Start.Width = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "Layer1", "50")
         Catch ex As Exception
-            Button1.Width = 50
+            Start.Width = 50
         End Try
 
         If GlobalKeyboardHook.SetHook() Then
@@ -1842,23 +2021,40 @@ CheckAgainIfFileExist:
 
     End Sub
 
+    Public SC_isSecondsEnabled As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSecondsInSystemClock", False)
+    Public SC_ShowTime As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\DateTime", "ShowTime", True)
+    Public SC_ShowDay As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\DateTime", "ShowDay", True)
+    Public SC_ShowDate As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\DateTime", "ShowDate", True)
+
     Private Sub StartClockUpdate()
         Task.Run(Sub()
                      While True
-                         Dim currentTime As String = DateTime.Now.ToString("HH:mm:ss")
-                         Dim currentDay As String = DateTime.Now.DayOfWeek.ToString
-                         Dim currentDate As String = DateTime.Now.ToString("dd. MM. yyyy")
+                         Dim currentTime As String = String.Empty
+                         Dim currentDay As String = String.Empty
+                         Dim currentDate As String = String.Empty
 
+                         ' Options
+                         If SC_ShowTime = True Then : If SC_isSecondsEnabled Then
+                                 currentTime = DateTime.Now.ToString("HH:mm:ss")
+                             Else
+                                 currentTime = DateTime.Now.ToString("HH:mm")
+                             End If
+                         End If
+
+                         If SC_ShowDay = True Then currentDay = DateTime.Now.DayOfWeek.ToString
+                         If SC_ShowDate = True Then currentDate = DateTime.Now.ToString("dd. MM. yyyy")
+
+                         ' Showing time
                          If Me.InvokeRequired Then
                              Me.Invoke(Sub()
                                            TimeLabel.Text = currentTime
-                                           DayLabel.Text = currentDay
-                                           DateLabel.Text = currentDate
+                                           If SC_ShowDay = True Then TimeLabel.Text += Environment.NewLine & currentDay
+                                           If SC_ShowDate = True Then TimeLabel.Text += Environment.NewLine & currentDate
                                        End Sub)
                          Else
                              TimeLabel.Text = currentTime
-                             DayLabel.Text = currentDay
-                             DateLabel.Text = currentDate
+                             If SC_ShowDay = True Then TimeLabel.Text += Environment.NewLine & currentDay
+                             If SC_ShowDate = True Then TimeLabel.Text += Environment.NewLine & currentDate
                          End If
 
                          Thread.Sleep(1000)
@@ -2320,10 +2516,10 @@ CheckAgainIfFileExist:
             Case 0
                 If Startmenu.Visible = True Then
                     Startmenu.Hide()
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 Else
                     Startmenu.Show()
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End If
 
             ' Custom Images start menu look
@@ -2332,17 +2528,17 @@ CheckAgainIfFileExist:
                     Startmenu.Hide()
 
                     Try
-                        Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
+                        Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
                     Catch ex As Exception
-                        Button1.BackgroundImage = My.Resources.StartRight
+                        Start.BackgroundImage = My.Resources.StartRight
                     End Try
                 Else
                     Startmenu.Show()
 
                     Try
-                        Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
+                        Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
                     Catch ex As Exception
-                        Button1.BackgroundImage = My.Resources.StartLeft
+                        Start.BackgroundImage = My.Resources.StartLeft
                     End Try
                 End If
 
@@ -2352,51 +2548,76 @@ CheckAgainIfFileExist:
                     Startmenu.Hide()
 
                     Try
-                        Button1.BackgroundImage = OrbNormal
+                        Start.BackgroundImage = OrbNormal
                     Catch ex As Exception
-                        Button1.BackgroundImage = My.Resources.StartRight
+                        Start.BackgroundImage = My.Resources.StartRight
                     End Try
                 Else
                     Startmenu.Show()
 
                     Try
-                        Button1.BackgroundImage = OrbPressed
+                        Start.BackgroundImage = OrbPressed
                     Catch ex As Exception
-                        Button1.BackgroundImage = My.Resources.StartLeft
+                        Start.BackgroundImage = My.Resources.StartLeft
                     End Try
                 End If
 
             Case Else
                 If Startmenu.Visible = True Then
                     Startmenu.Hide()
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 Else
                     Startmenu.Show()
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End If
         End Select
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Start.Click
         Me.BringToFront()
         Startmenu.FST = True
         StartMenuShowAndHide()
     End Sub
-
-    Private Sub ToolStripButton1_MouseUp(sender As Object, e As MouseEventArgs) Handles ToolStripButton1.MouseUp
+    Public UseLegacyVolumeSlider As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Volume", "UseLegacy", False)
+    Private Async Sub ToolStripButton1_MouseUp(sender As Object, e As MouseEventArgs) Handles ToolStripButton1.MouseUp
         If e.Button = MouseButtons.Left Then
-            Try
-                If VolumeControl.Visible = True Then
-                    VolumeControl.Focus()
-                Else
-                    ToolStripButton1.Checked = True
-                    VolumeControl.Show(Me)
-                End If
-            Catch ex As Exception
-                MsgBox(ex.Message, MsgBoxStyle.Critical)
-            End Try
+            If UseLegacyVolumeSlider Then
+                Try
+                    Dim p As Process = Process.Start(soundcontrolPath, "-f")
+
+                    Dim hwnd As IntPtr = IntPtr.Zero
+                    Dim attempts As Integer = 0
+
+                    While hwnd = IntPtr.Zero AndAlso attempts < 20
+                        Await Task.Delay(50)
+                        p.Refresh()
+                        hwnd = p.MainWindowHandle
+                        attempts += 1
+                    End While
+
+                    If hwnd <> IntPtr.Zero Then
+                        Dim cursorPoint = Cursor.Position
+                        SetWindowPos(hwnd, IntPtr.Zero, cursorPoint.X - 45, cursorPoint.Y - 290, 0, 0, SWP_NOSIZE Or SWP_NOZORDER Or SWP_SHOWWINDOW)
+                    End If
+                Catch ex As Exception
+                    MsgBox(ex.Message, MsgBoxStyle.Critical)
+                End Try
+            Else ' Classic Shell's volume slider
+                Try
+                    If VolumeControl.Visible = True Then
+                        VolumeControl.Focus()
+                    Else
+                        ToolStripButton1.Checked = True
+                        VolumeControl.Show(Me)
+                    End If
+                Catch ex As Exception
+                    MsgBox(ex.Message, MsgBoxStyle.Critical)
+                End Try
+            End If
+
         ElseIf e.Button = MouseButtons.Right Then
             ToolStripButton1.Checked = True
+
             VCM.Show(MousePosition)
         End If
     End Sub
@@ -2423,11 +2644,6 @@ CheckAgainIfFileExist:
         End If
 
         If hHook <> IntPtr.Zero Then UnhookWinEvent(hHook)
-        'For Each pr As Process In Process.GetProcesses
-        ' If pr.ProcessName = "emergeTray.exe" Then
-        '        pr.Kill()
-        ' End If
-        ' Next
     End Sub
 
     Private Sub LockAppbarToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LockAppbarToolStripMenuItem.Click
@@ -2439,64 +2655,13 @@ CheckAgainIfFileExist:
         Else
             Splitter1.Visible = True
             Splitter2.Visible = True
-            'If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "SpaceForEmergeTray", "0") = 0 Then
             Splitter3.Visible = True
-            'Else
-            'Panel6.Visible = True
-            'Splitter3.Visible = False
-            'End If
         End If
     End Sub
 
     Private Sub TaskManagerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TaskManagerToolStripMenuItem.Click
         On Error Resume Next
         Process.Start(New ProcessStartInfo(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Taskmgr", Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\taskmgr.exe")) With {.UseShellExecute = True})
-    End Sub
-
-    Public Sub LoadAppsOld()
-        ProcessStrip.Items.Clear()
-        For Each p As Process In Process.GetProcesses
-            If Not p.MainWindowTitle = "" Then
-                Try
-                    Dim ico As Icon = Icon.ExtractAssociatedIcon(p.MainModule.FileName)
-                    Dim item As New ToolStripMenuItem
-                    With item
-                        item.Text = p.MainWindowTitle
-                        item.Image = ico.ToBitmap
-                        item.ToolTipText = p.ProcessName.ToString
-                        item.DisplayStyle = ToolStripItemDisplayStyle.Image
-                        item.CheckOnClick = True
-                        item.Size = New Size(55, 40)
-                        item.Tag = p.Id
-                        If p.Responding = False Then
-                            .BackColor = Color.Red
-                        End If
-                        AddHandler item.MouseUp, AddressOf ProcessStripItemClick
-                        'AddHandler item.MouseHover, AddressOf ProcessStripItemMouseHover
-                        AddHandler item.MouseLeave, AddressOf ProcessStripItemMouseLeave
-                    End With
-                    ProcessStrip.Items.Add(item)
-                Catch ex As Exception
-                    Dim item As New ToolStripMenuItem
-                    With item
-                        item.Text = p.MainWindowTitle
-                        item.Image = My.Resources.Program
-                        item.ToolTipText = p.ProcessName.ToString
-                        item.DisplayStyle = ToolStripItemDisplayStyle.Image
-                        item.CheckOnClick = True
-                        item.Size = New Size(55, 40)
-                        item.Tag = p.Id
-                        If p.Responding = False Then
-                            .BackColor = Color.Red
-                        End If
-                        AddHandler item.MouseUp, AddressOf ProcessStripItemClick
-                        'AddHandler item.MouseHover, AddressOf ProcessStripItemMouseHover
-                        AddHandler item.MouseLeave, AddressOf ProcessStripItemMouseLeave
-                    End With
-                    ProcessStrip.Items.Add(item)
-                End Try
-            End If
-        Next
     End Sub
 
     <DllImport("user32.dll")>
@@ -2508,7 +2673,6 @@ CheckAgainIfFileExist:
     Private OriginalIndex As Integer = -1
 
     Public Sub LoadApps()
-
         If Me.InvokeRequired Then
             Me.Invoke(Sub() LoadApps())
             Exit Sub
@@ -2531,91 +2695,85 @@ CheckAgainIfFileExist:
         EnumWindows(AddressOf EnumWindowsCallback, IntPtr.Zero)
     End Sub
 
-    Private Sub ProcessStripItemMouseEnter(sender As Object, e As EventArgs)
-        If Startmenu.Visible = True Then : Startmenu.Focus() : Exit Sub : End If
+    Private Async Sub ProcessStripItemMouseEnter(sender As Object, e As EventArgs)
+        If Startmenu.Visible Then
+            Startmenu.Focus()
+            Exit Sub
+        End If
 
-        Dim item As ToolStripButton = CType(sender, ToolStripButton)
+        Dim item As ToolStripButton = TryCast(sender, ToolStripButton)
+        If item Is Nothing OrElse item.Tag Is Nothing Then Exit Sub
 
         Try
-            If Not item.Tag Is Nothing AndAlso TypeOf item.Tag Is IntPtr Then
-                Dim windowHandle As IntPtr = CType(item.Tag, IntPtr)
+            Dim windowHandle As IntPtr = CType(item.Tag, IntPtr)
 
-                TPCM.Tag = windowHandle
-                WAT.Tag = windowHandle
-
-                If IsHungAppWindow(windowHandle) Then
-                    'WAT.Label1.Text = item.Text & " (Not Responding)"
-                    'WAT.Button4.BackgroundImage = Nothing
-                    'WAT.Button4.Image = My.Resources.ProgramMedium
-                    'WAT.Show()
-                    Exit Sub
-                End If
-
-                Dim renderedImage As Image = RenderWindow(windowHandle, True)
-
-                WAT.Label1.Text = item.Text
-
-                WAT.Button4.Image = Nothing
-
-                If renderedImage IsNot Nothing Then
-                    WAT.Button4.BackgroundImage = renderedImage
-                Else
-                    WAT.Button4.BackgroundImage = item.Image
-                End If
-
-                Dim magicNumber As Integer = 178
-                Dim targetHeight As Integer = 140
-                If WAT.Button4.BackgroundImage.Height > targetHeight Then
-                    Dim aspectRatio As Double = CDbl(WAT.Button4.BackgroundImage.Width) / CDbl(WAT.Button4.BackgroundImage.Height)
-                    Dim targetWidth As Integer = CInt(targetHeight * aspectRatio)
-                    WAT.Size = New Size(targetWidth - 10, 140)
-                Else
-                    WAT.Size = New Size(magicNumber, WAT.Button4.BackgroundImage.Height)
-                End If
-
-                Dim SpawnPoint As Point = Me.PointToClient(item.Bounds.Location)
-
-                SpawnPoint.X -= (WAT.Width / 2) - magicNumber
-                SpawnPoint.Y = SystemInformation.WorkingArea.Height - WAT.Height
-
-                WAT.Location = SpawnPoint
-
+            If WAT.Visible AndAlso WAT.Tag.Equals(windowHandle) Then
                 CloseTimer.Stop()
-
-                If Not WAT.Visible Then
-                    WAT.Show()
-                End If
+                Exit Sub
             End If
+
+            TPCM.Tag = windowHandle
+            WAT.Tag = windowHandle
+
+            If IsHungAppWindow(windowHandle) Then Exit Sub
+
+            Dim renderedImage As Image = Await Task.Run(Function()
+                                                            Return RenderWindow(windowHandle, False)
+                                                        End Function)
+            WAT.Label1.Text = item.Text
+            WAT.Button4.Image = Nothing
+            WAT.Button4.BackgroundImage = If(renderedImage, item.Image)
+
+            Dim targetHeight As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband", "MinThumbSizePx", 178)
+            Dim magicWidth As Integer = 178
+
+            Dim finalWidth As Integer
+            Dim finalHeight As Integer
+
+            If WAT.Button4.BackgroundImage IsNot Nothing Then
+                Dim img As Image = WAT.Button4.BackgroundImage
+
+                If img.Height > targetHeight Then
+                    Dim ratio As Double = targetHeight / img.Height
+                    finalHeight = targetHeight
+                    finalWidth = CInt(img.Width * ratio) - (WAT.Panel3.Width * 4) - (WAT.Panel2.Width * 4)
+                Else
+                    finalHeight = img.Height
+                    finalWidth = img.Width - WAT.Panel3.Width - WAT.Panel2.Width
+                End If
+            Else
+                finalHeight = targetHeight
+                finalWidth = magicWidth
+            End If
+
+            finalWidth = Math.Max(finalWidth, WAT.MinimumSize.Width)
+            finalHeight = Math.Max(finalHeight, WAT.MinimumSize.Height)
+
+            Dim itemScreenBounds As Rectangle = item.Bounds
+            If item.Owner IsNot Nothing Then
+                itemScreenBounds = item.Owner.RectangleToScreen(item.Bounds)
+            End If
+
+            Dim targetX As Integer = CInt(itemScreenBounds.Left + (itemScreenBounds.Width / 2) - (finalWidth / 2))
+            Dim targetY As Integer = SystemInformation.WorkingArea.Height - finalHeight - 5
+
+            Dim targetRect As New Rectangle(targetX, targetY, finalWidth, finalHeight)
+            CloseTimer.Stop()
+            WAT.MoveTo(targetRect)
 
         Catch ex As Exception
             WAT.Label1.Text = item.Text
-
             WAT.Button4.BackgroundImage = Nothing
             WAT.Button4.Image = My.Resources.ProgramMedium
 
-            WAT.Location = New Point(Control.MousePosition.X - WAT.Width / 2, SystemInformation.WorkingArea.Height - WAT.Height)
-            CloseTimer.Stop()
-
-            If Not WAT.Visible Then
-                WAT.Show()
-            End If
+            Dim fallbackX As Integer = Control.MousePosition.X - (WAT.Width / 2)
+            Dim fallbackY As Integer = SystemInformation.WorkingArea.Height - WAT.Height
+            WAT.MoveTo(New Rectangle(fallbackX, fallbackY, 150, 100))
         End Try
     End Sub
 
-    Private Sub ProcessStripSubItemMouseEnter(sender As Object, e As EventArgs)
-        If Startmenu.Visible = False Then
-            ProcessStrip.Focus()
-
-            Dim item As ToolStripDropDownButton = CType(sender, ToolStripDropDownButton)
-
-            If item.HasDropDownItems = True Then
-                item.ShowDropDown()
-            End If
-        End If
-    End Sub
-
     Private Sub StartButtonToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StartButtonToolStripMenuItem.Click
-        Button1.Visible = StartButtonToolStripMenuItem.Checked
+        Start.Visible = StartButtonToolStripMenuItem.Checked
         If LockAppbarToolStripMenuItem.Checked = False Then Splitter1.Visible = StartButtonToolStripMenuItem.Checked
     End Sub
 
@@ -2649,12 +2807,12 @@ CheckAgainIfFileExist:
         'If AutoHideToolStripMenuItem.Checked = True Then
         'Else
         If Not Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height) Then
-                Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
-            End If
+            Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
+        End If
         'End If
     End Sub
 
-    Private Sub ProcessStrip_MouseLeave1(sender As Object, e As EventArgs) Handles ProcessStrip.MouseLeave, AppStrip.MouseLeave, TimeLabel.MouseLeave, DateLabel.MouseLeave, DayLabel.MouseLeave
+    Private Sub ProcessStrip_MouseLeave1(sender As Object, e As EventArgs) Handles ProcessStrip.MouseLeave, AppStrip.MouseLeave, TimeLabel.MouseLeave
         Hidden = True
         'Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - 2)
         AutoHideOnOff()
@@ -2664,16 +2822,15 @@ CheckAgainIfFileExist:
 
     End Sub
 
-    Private Sub ToolStrip1_MouseEnter(sender As Object, e As EventArgs) Handles ToolStrip1.MouseEnter, ProcessStrip.MouseEnter, AppStrip.MouseEnter, TimeLabel.MouseEnter, DateLabel.MouseEnter, DayLabel.MouseEnter
+    Private Sub ToolStrip1_MouseEnter(sender As Object, e As EventArgs) Handles ToolStrip1.MouseEnter, ProcessStrip.MouseEnter, AppStrip.MouseEnter, TimeLabel.MouseEnter
         Hidden = False
 
         Startmenu.FST = False
-        'Me.Location = New Point(0, SystemInformation.PrimaryMonitorSize.Height - Me.Height)
         AutoHideOnOff()
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click, ShowDesktopToolStripMenuItem.Click
-        Desktop.BringToFront()
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click, ShowDesktopToolStripMenuItem.Click, ShowDesktopToolStripMenuItem1.Click
+        Desktop.ShowDesktop()
     End Sub
 
     Private Sub PropertiesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PropertiesToolStripMenuItem.Click
@@ -2754,7 +2911,7 @@ CheckAgainIfFileExist:
                     item.Tag = IIO.FullName
 
                     Try
-                        Dim ico As Icon = Desktop.GetFileIcon(IIO.FullName, False)
+                        Dim ico As Icon = GetFileIcon(IIO.FullName, False)
                         item.Image = ico.ToBitmap
                     Catch ex As Exception
 
@@ -2787,7 +2944,7 @@ CheckAgainIfFileExist:
                     item.Tag = IIO.FullName
 
                     Try
-                        Dim ico As Icon = Desktop.GetFileIcon(IIO.FullName, False)
+                        Dim ico As Icon = GetFileIcon(IIO.FullName, False)
                         item.Image = ico.ToBitmap
                     Catch ex As Exception
 
@@ -2819,7 +2976,7 @@ CheckAgainIfFileExist:
                     item.Tag = IIO.FullName
 
                     Try
-                        Dim ico As Icon = Desktop.GetFileIcon(IIO.FullName, False)
+                        Dim ico As Icon = GetFileIcon(IIO.FullName, False)
                         item.Image = ico.ToBitmap
                     Catch ex As Exception
 
@@ -2994,26 +3151,34 @@ CheckAgainIfFileExist:
         VolumeControl.Show(Me)
     End Sub
     Public soundcontrolPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\SndVol.exe"
-    Private Sub SoundControlToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SoundControlToolStripMenuItem.Click
-        On Error Resume Next
-
+    Private Async Sub SoundControlToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SoundControlToolStripMenuItem.Click
         If Not File.Exists(soundcontrolPath) Then Exit Sub
         If Not New FileInfo(soundcontrolPath).Extension.ToLower = ".exe" Then Exit Sub
 
-        Dim targetPR As Process = Process.Start(soundcontrolPath)
+        Try : Dim p As Process = Process.Start(soundcontrolPath)
 
-        targetPR.WaitForInputIdle()
+            Dim hwnd As IntPtr = IntPtr.Zero
+            Dim attempts As Integer = 0
 
-        If targetPR IsNot Nothing Then
-            Dim targetHandle As IntPtr = GetMainWindowHandleByProcessId(targetPR.Id)
+            While hwnd = IntPtr.Zero AndAlso attempts < 20
+                Await Task.Delay(50)
+                p.Refresh()
+                hwnd = p.MainWindowHandle
+                attempts += 1
+            End While
 
-            Dim rect As New RECT()
-            GetWindowRect(targetHandle, rect)
-            Dim width As Integer = rect.right - rect.left
-            Dim height As Integer = rect.bottom - rect.top
+            If hwnd <> IntPtr.Zero Then
+                'Dim rect As New RECT()
+                'GetWindowRect(hwnd, rect)
 
-            SetWindowPos(targetHandle, HWND_NOTOPMOST, SystemInformation.WorkingArea.Width - width, SystemInformation.WorkingArea.Height - height, 800, 600, SWP_NOZORDER Or SWP_SHOWWINDOW)
-        End If
+                'Dim width As Integer = rect.right - rect.left
+                'Dim height As Integer = rect.bottom - rect.top
+
+                SetWindowPos(hwnd, HWND_NOTOPMOST, SystemInformation.WorkingArea.Width - 440, SystemInformation.WorkingArea.Height - 340, 450, 400, SWP_NOZORDER Or SWP_SHOWWINDOW)
+            End If
+        Catch ex As Exception
+
+        End Try
     End Sub
 
     Private Sub AboutShellToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutShellToolStripMenuItem.Click
@@ -3040,7 +3205,7 @@ CheckAgainIfFileExist:
 
                 If Not String.Equals(FI.Name.ToLower, "desktop.ini") Then
 
-                    Dim ico As Icon = Desktop.GetFileIcon(FI.FullName, False)
+                    Dim ico As Icon = GetFileIcon(FI.FullName, False)
 
                     Dim Item As New ToolStripButton
                     With Item
@@ -3295,39 +3460,39 @@ CheckAgainIfFileExist:
         Me.WindowState = FormWindowState.Normal
     End Sub
 
-    Private Sub Button1_MouseHover(sender As Object, e As EventArgs) Handles Button1.MouseHover
+    Private Sub Button1_MouseHover(sender As Object, e As EventArgs) Handles Start.MouseHover
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Hover", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Hover", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = OrbHover
+                    Start.BackgroundImage = OrbHover
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = OrbPressed
+                    Start.BackgroundImage = OrbPressed
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         End If
     End Sub
 
-    Private Sub Button1_MouseLeave(sender As Object, e As EventArgs) Handles Button1.MouseLeave
+    Private Sub Button1_MouseLeave(sender As Object, e As EventArgs) Handles Start.MouseLeave
         Hidden = True
 
         Startmenu.FST = False
@@ -3336,39 +3501,39 @@ CheckAgainIfFileExist:
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = OrbNormal
+                    Start.BackgroundImage = OrbNormal
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = OrbPressed
+                    Start.BackgroundImage = OrbPressed
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         End If
     End Sub
 
-    Private Sub Button1_MouseEnter(sender As Object, e As EventArgs) Handles Button1.MouseEnter
+    Private Sub Button1_MouseEnter(sender As Object, e As EventArgs) Handles Start.MouseEnter
         Hidden = False
 
         If Startmenu.Visible = False Then
-            Button1.Focus()
+            Start.Focus()
         End If
 
         Startmenu.FST = True
@@ -3377,39 +3542,32 @@ CheckAgainIfFileExist:
         If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 1 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Hover", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Hover", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
+                    Start.BackgroundImage = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", ""))
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         ElseIf My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Type", "0") = 2 Then
             If Startmenu.Visible = False Then
                 Try
-                    Button1.BackgroundImage = OrbHover
+                    Start.BackgroundImage = OrbHover
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartRight
+                    Start.BackgroundImage = My.Resources.StartRight
                 End Try
             Else
                 Try
-                    Button1.BackgroundImage = OrbPressed
+                    Start.BackgroundImage = OrbPressed
                 Catch ex As Exception
-                    Button1.BackgroundImage = My.Resources.StartLeft
+                    Start.BackgroundImage = My.Resources.StartLeft
                 End Try
             End If
         End If
-    End Sub
-
-    Private Sub ProcessStrip_MouseUp(sender As Object, e As MouseEventArgs) Handles ProcessStrip.MouseUp
-        'SaveToolStripOrder()
-
-        'IsReordering = True
-        'CheckForProcessUpdates()
     End Sub
 
     Private Sub ReloadAppsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReloadAppsToolStripMenuItem.Click
@@ -3512,7 +3670,7 @@ CheckAgainIfFileExist:
         ToolStripButton3.Checked = False
     End Sub
 
-    Private Sub TimeLabel_Click(sender As Object, e As EventArgs) Handles TimeLabel.Click, DateLabel.Click, DayLabel.Click, ShowTimeAndDateToolStripMenuItem.Click
+    Private Sub TimeLabel_Click(sender As Object, e As EventArgs) Handles TimeLabel.Click, ShowTimeAndDateToolStripMenuItem.Click
         If DateAndTime.Visible = True Then
             DateAndTime.Focus()
         Else
@@ -3548,7 +3706,8 @@ CheckAgainIfFileExist:
     End Sub
 
     Private Sub VolumeSliderWindowsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles VolumeSliderWindowsToolStripMenuItem.Click
-
+        On Error Resume Next
+        Process.Start(soundcontrolPath, "-f")
     End Sub
 
     Private Sub LLCM_Opening(sender As Object, e As CancelEventArgs) Handles LLCM.Opening
@@ -3634,6 +3793,83 @@ CheckAgainIfFileExist:
 
     Private Sub Button3_MouseEnter(sender As Object, e As EventArgs) Handles Button3.MouseEnter
         Button3.Focus()
+    End Sub
+
+    Private WithEvents TimerPeek As New System.Windows.Forms.Timer() With {.Interval = 250}
+    Public isDesktopPeekEnabled As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarSd", True)
+
+    Private Sub TimerPeek_Tick(sender As Object, e As EventArgs) Handles TimerPeek.Tick
+        TimerPeek.Stop()
+
+        If Desktop.IsHandleCreated Then
+            Dim targetHWnd As IntPtr = Desktop.Handle
+            Dim targetPos = AeroPeek.GetVisibleWindowRect(targetHWnd)
+
+            AeroPeekScreen.Show()
+            Me.BringToFront()
+
+            AeroPeek.ShowPeek(targetHWnd, AeroPeekScreen.Handle, targetPos)
+        End If
+    End Sub
+
+    Private Sub Button2_MouseEnter(sender As Object, e As EventArgs) Handles Button2.MouseEnter
+        If isDesktopPeekEnabled Then
+            If Not Desktop.IsShowDesktopMode Then TimerPeek.Start()
+        End If
+    End Sub
+
+    Private Sub Button2_MouseLeave(sender As Object, e As EventArgs) Handles Button2.MouseLeave
+        If Not isDesktopPeekEnabled Then Exit Sub
+        'If Desktop.IsShowDesktopMode Then Exit Sub
+
+        TimerPeek.Stop()
+        AeroPeek.HidePeek()
+
+        AeroPeekScreen.Hide()
+    End Sub
+
+    Private Sub ShowDesktopCM_Opening(sender As Object, e As CancelEventArgs) Handles ShowDesktopCM.Opening
+        PeekDesktopToolStripMenuItem.Checked = isDesktopPeekEnabled
+    End Sub
+
+    Private Sub PeekDesktopToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PeekDesktopToolStripMenuItem.Click
+        If isDesktopPeekEnabled = True Then isDesktopPeekEnabled = False Else isDesktopPeekEnabled = True
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarSd", isDesktopPeekEnabled, RegistryValueKind.DWord)
+    End Sub
+
+    Private Sub ProcessStrip_MouseWheel(sender As Object, e As MouseEventArgs) Handles ProcessStrip.MouseWheel
+        Dim item As ToolStripItem = ProcessStrip.GetItemAt(e.Location)
+
+        If item IsNot Nothing AndAlso item.Tag IsNot Nothing Then
+            Dim handle As IntPtr = CType(item.Tag, IntPtr)
+            Dim pr As Process = GetProcessFromWindowHandle(handle)
+
+            ChangeAppVolume(pr, e.Delta)
+        End If
+    End Sub
+
+    Public Sub ChangeAppVolume(targetPid As Process, delta As Integer)
+        Dim enumerator As New MMDeviceEnumerator()
+        Dim device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+        Dim sessions = device.AudioSessionManager.Sessions
+
+        For i As Integer = 0 To sessions.Count - 1
+            Dim session = sessions(i)
+            If session.GetProcessID = targetPid.Id Then
+                Dim currentVol As Single = session.SimpleAudioVolume.Volume
+                Dim stepSize As Single = 0.05F '5 %
+
+                If delta > 0 Then
+                    currentVol = Math.Min(1.0F, currentVol + stepSize)
+                Else
+                    currentVol = Math.Max(0.0F, currentVol - stepSize)
+                End If
+
+                session.SimpleAudioVolume.Volume = currentVol
+                Exit For
+            End If
+        Next
     End Sub
 End Class
 

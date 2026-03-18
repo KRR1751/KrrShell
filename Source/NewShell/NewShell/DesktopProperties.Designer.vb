@@ -58,6 +58,7 @@ Partial Class DesktopProperties
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.ComboBoxSchemes = New System.Windows.Forms.ComboBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.Label6 = New System.Windows.Forms.Label()
@@ -71,9 +72,8 @@ Partial Class DesktopProperties
         Me.PanelCurrentColor = New System.Windows.Forms.Panel()
         Me.ComboBoxColors = New System.Windows.Forms.ComboBox()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
-        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label7 = New System.Windows.Forms.Label()
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.BackPreview.SuspendLayout()
         CType(Me.pbb_Preview, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
@@ -482,6 +482,16 @@ Partial Class DesktopProperties
         Me.TabPage2.Text = "Colors"
         Me.TabPage2.UseVisualStyleBackColor = True
         '
+        'Label7
+        '
+        Me.Label7.Enabled = False
+        Me.Label7.Location = New System.Drawing.Point(7, 161)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(231, 47)
+        Me.Label7.TabIndex = 14
+        Me.Label7.Text = "USE THIS AT YOUR OWN RISK!" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Bad theme config cannot be set back." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "So don't rather" &
+    " mess up here much..."
+        '
         'ComboBoxSchemes
         '
         Me.ComboBoxSchemes.Enabled = False
@@ -614,16 +624,6 @@ Partial Class DesktopProperties
         Me.Label5.Size = New System.Drawing.Size(88, 15)
         Me.Label5.TabIndex = 0
         Me.Label5.Text = "Coming soon..."
-        '
-        'Label7
-        '
-        Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(6, 149)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(231, 63)
-        Me.Label7.TabIndex = 14
-        Me.Label7.Text = "USE THIS AT YOUR OWN RISK!" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Bad theme config cannot be set back." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "So here don't r" &
-    "ather mess up with everything..."
         '
         'DesktopProperties
         '

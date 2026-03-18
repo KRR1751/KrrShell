@@ -10,10 +10,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("Krr's Shell")>
-<Assembly: AssemblyDescription("This program replaces the Windows' shell functions with this one! Make your own Taskbar, Startmenu and Desktop! Made by one guy called @KRR1751 on YouTube! :)")>
+<Assembly: AssemblyDescription("This program replaces Windows' shell functions! Make your own Taskbar, Startmenu and Desktop! Made by one guy called @KRR1751 on YouTube! :)")>
 <Assembly: AssemblyCompany("@Safrely-Production")>
 <Assembly: AssemblyProduct("KrrShell")>
-<Assembly: AssemblyCopyright("Copyright ©6. 3. 2025")>
+<Assembly: AssemblyCopyright("Copyright ©18. 3. 2026")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -32,6 +32,6 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("0.4.0")>
-<Assembly: AssemblyFileVersion("0.4.0")>
+<Assembly: AssemblyVersion("0.5.0")>
+<Assembly: AssemblyFileVersion("0.5.0")>
 <Assembly: NeutralResourcesLanguage("en-001")>

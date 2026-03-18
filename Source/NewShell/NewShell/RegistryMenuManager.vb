@@ -2,6 +2,7 @@
 Imports System.Runtime.InteropServices
 Imports System.Text
 Imports Microsoft.Win32
+Imports System.Collections.Specialized
 
 Public Class ShellItemRules
     Private Const SFGAO_CANCOPY As UInteger = &H1
@@ -181,94 +182,110 @@ Public Class RegistryMenuManager
         Return Nothing
     End Function
 
-    Public Shared Sub ShowRegistryMenu(ByVal paths As String(), ByVal pos As Drawing.Point, Optional isTreeViewContextMenu As Boolean = False)
+    <DllImport("shell32.dll", CharSet:=CharSet.Unicode)>
+    Private Shared Function SHEmptyRecycleBin(ByVal hwnd As IntPtr,
+                                       ByVal root As String,
+                                       ByVal flags As UInt32) As Integer
+    End Function
+
+    ' Definice příznaků (flags)
+    Const SHERB_NOCONFIRMATION As UInt32 = &H1 ' Žádné potvrzovací okno
+    Const SHERB_NOPROGRESSUI As UInt32 = &H2    ' Žádný ukazatel průběhu
+    Const SHERB_NOSOUND As UInt32 = &H4         ' Žádný zvuk po dokončení
+
+    Public Shared Sub EmptyRecycleBin()
+        Dim result As Integer = SHEmptyRecycleBin(IntPtr.Zero, Nothing, 0)
+
+        If result = 0 Then
+            Console.WriteLine("Recycle bin successfully emptied.")
+        Else
+            Console.WriteLine("Recycle bin wasn't been emptied")
+        End If
+    End Sub
+
+    Public Shared Sub ShowRegistryMenu(ByVal paths As String(), ByVal pos As Drawing.Point)
+        If paths Is Nothing OrElse paths.Length = 0 Then Return
+
         Dim cms As New ContextMenuStrip()
         cms.RenderMode = ToolStripRenderMode.System
         Dim items As New List(Of ContextMenuItem)()
 
-        Dim desktopPath As String = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
-        Dim isBackground As Boolean = (paths IsNot Nothing AndAlso paths.Length = 1)
-        Dim isThisPC As Boolean = (paths Is Nothing OrElse paths.Length = 0)
+        Dim mainPath As String = paths(0)
+        Dim isVirtual As Boolean = mainPath.StartsWith("shell:::", StringComparison.OrdinalIgnoreCase)
+        Dim isDir As Boolean = Not isVirtual AndAlso Directory.Exists(mainPath)
 
-        If isThisPC OrElse isBackground Then
-            If Not isTreeViewContextMenu Then
-                cms.Items.Add(New ToolStripSeparator())
-            End If
-        End If
-
-        If isThisPC Then
-
-            LoadFromRegistry(items, "CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell")
-            GenerateMenu(cms.Items, items, paths, True, "", cms)
-
-        ElseIf isBackground Then
-
-            Dim currentDir As String = paths(0)
-
-            LoadFromRegistry(items, "Directory\Background\shell")
-            LoadFromRegistry(items, "Directory\shell")
-            LoadFromRegistry(items, "Folder\shell")
-
-            If currentDir.Equals(desktopPath, StringComparison.OrdinalIgnoreCase) Then
-                LoadFromRegistry(items, "DesktopBackground\Shell")
-            End If
-
-            items.RemoveAll(Function(i)
-                                Dim n = i.Name.ToLower()
-                                Dim t = i.Text.ToLower()
-                                Return n = "open"
-                            End Function)
-
-            GenerateMenu(cms.Items, items, paths, True, "", cms)
-            'AddBackgroundTools(cms, currentDir, isTreeViewContextMenu)
-
+        If isVirtual Then
+            items.Add(New ContextMenuItem() With {.Name = "open", .Text = "Open", .Command = mainPath})
         Else
-            Dim mainPath As String = paths(0)
-            Dim extension As String = Path.GetExtension(mainPath).ToLower()
-            Dim isDir As Boolean = Directory.Exists(mainPath)
-            Dim isDrive As Boolean = isDir AndAlso (mainPath.Length <= 3 OrElse mainPath.EndsWith(":\"))
-
-            If isDrive Then
-                LoadFromRegistry(items, "Drive\shell", "drive")
-            ElseIf isDir Then
+            If isDir Then
                 LoadFromRegistry(items, "Directory\shell")
                 LoadFromRegistry(items, "Folder\shell")
             Else
+                Dim extension As String = Path.GetExtension(mainPath).ToLower()
                 LoadFromRegistry(items, extension & "\shell")
+
                 Dim progId = Registry.ClassesRoot.OpenSubKey(extension)?.GetValue("")?.ToString()
                 If Not String.IsNullOrEmpty(progId) Then LoadFromRegistry(items, progId & "\shell")
 
                 Dim category = GetFileCategory(extension)
                 If Not String.IsNullOrEmpty(category) Then LoadFromRegistry(items, "SystemFileAssociations\" & category & "\shell")
-                LoadFromRegistry(items, "SystemFileAssociations\" & extension & "\shell")
             End If
-
-            Dim hasOpen = items.Any(Function(i) i.Name.ToLower.Contains("open"))
-            If Not hasOpen Then
-                items.Add(New ContextMenuItem() With {.Name = "open", .Text = "Open"})
-            End If
-
-            If Not isDir AndAlso Registry.ClassesRoot.OpenSubKey("Applications")?.GetValue("NoOpenWith") Is Nothing Then
-                items.Add(New ContextMenuItem() With {.Name = "openwith", .Text = "Open With...", .Command = "rundll32.exe shell32.dll,OpenAs_RunDLL", .Position = "top"})
-            End If
-
             LoadFromRegistry(items, "*\shell")
             LoadFromRegistry(items, "AllFilesystemObjects\shell")
-
-            GenerateMenu(cms.Items, items, paths, True, "", cms)
-
-            'AddStandardFileTools(cms, paths, isTreeViewContextMenu)
         End If
 
+        ' Vynucení Open
+        If Not items.Any(Function(i) i.Name.ToLower() = "open") Then
+            items.Insert(0, New ContextMenuItem() With {.Name = "open", .Text = "Open", .Position = "top"})
+        End If
+
+        ' --- B) Generování menu ---
+        GenerateMenu(cms.Items, items, paths, True, If(isVirtual, "", Path.GetExtension(mainPath)), cms)
+
+        ' --- C) Standardní operace (Cut, Copy, Delete, Rename) ---
+        cms.Items.Add(New ToolStripSeparator())
+
+        ' CUT / COPY
+        If Not isVirtual Then
+            If ShellItemRules.CanCopy(mainPath) Then
+                cms.Items.Add(New ToolStripMenuItem("Copy", Nothing, Sub() Clipboard.SetFileDropList(New StringCollection() From {mainPath})))
+            End If
+            If ShellItemRules.CanMove(mainPath) Then
+                cms.Items.Add(New ToolStripMenuItem("Cut", Nothing, Sub()
+                                                                        Clipboard.SetFileDropList(New StringCollection() From {mainPath})
+                                                                    End Sub))
+            End If
+        Else
+            If mainPath.ToLower.Contains(Desktop.CLSID_RECYCLEBIN.ToLower) Then
+                cms.Items.Add(New ToolStripMenuItem("Empty Recycle Bin", Nothing, Sub() EmptyRecycleBin()))
+            End If
+        End If
+
+            ' DELETE
+            If Not isVirtual AndAlso ShellItemRules.CanDelete(mainPath) Then
+            cms.Items.Add(New ToolStripMenuItem("Delete", Nothing, Sub()
+                                                                       For Each p In paths
+                                                                           My.Computer.FileSystem.DeleteFile(p, FileIO.UIOption.AllDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                                                                       Next
+                                                                   End Sub))
+        End If
+
+        ' RENAME (pouze pro jeden prvek)
+        If paths.Length = 1 AndAlso ShellItemRules.CanRename(mainPath) OrElse isVirtual Then
+            cms.Items.Add(New ToolStripMenuItem("Rename", Nothing, Sub()
+                                                                       Desktop.StartRename(Desktop.RenamingIcon)
+                                                                   End Sub))
+        End If
+
+        ' PROPERTIES
         cms.Items.Add(New ToolStripSeparator())
         cms.Items.Add(New ToolStripMenuItem("Properties", Nothing, Sub()
-                                                                       If isBackground Then
-                                                                           'ShowFileProperties(paths(0))
-                                                                       End If
+                                                                       For Each p In paths
+                                                                           Desktop.ShowFileProperties(p)
+                                                                       Next
                                                                    End Sub))
-        'ReleaseCapture()
-        cms.Show(pos)
 
+        cms.Show(pos)
     End Sub
 
     Private Shared Function GetNewMenuPrototypes() As List(Of ContextMenuItem)
@@ -438,7 +455,7 @@ Public Class RegistryMenuManager
                                        For Each i As String In paths
                                            If Directory.Exists(i) Then
                                                If btn.Name.ToLower = "open" Then
-
+                                                   Process.Start(New ProcessStartInfo(i) With {.UseShellExecute = True})
                                                Else
                                                    ExecuteCommand(btn.Tag.ToString(), i)
                                                End If
@@ -451,7 +468,9 @@ Public Class RegistryMenuManager
                                                    ExecuteCommand(btn.Tag.ToString(), i)
                                                End If
                                            Else
-                                               '...
+                                               If i.StartsWith("shell:::") Then
+                                                   Process.Start(New ProcessStartInfo(i) With {.UseShellExecute = True})
+                                               End If
                                            End If
                                        Next
                                    Else

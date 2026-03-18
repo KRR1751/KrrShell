@@ -201,23 +201,23 @@ Public Class Startmenu
                                        Case 1 : Try
                                                Dim customImage As Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
                                                If customImage IsNot Nothing Then
-                                                   liveBar.Button1.BackgroundImage = customImage
+                                                   liveBar.Start.BackgroundImage = customImage
                                                Else
-                                                   liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                                   liveBar.Start.BackgroundImage = My.Resources.StartRight
                                                End If
 
                                            Catch ex As Exception
-                                               liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                               liveBar.Start.BackgroundImage = My.Resources.StartRight
                                            End Try
 
                                        Case 2 : Try
-                                               liveBar.Button1.BackgroundImage = liveBar.OrbNormal
+                                               liveBar.Start.BackgroundImage = liveBar.OrbNormal
                                            Catch ex As Exception
-                                               liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                               liveBar.Start.BackgroundImage = My.Resources.StartRight
                                            End Try
 
                                        Case Else
-                                           liveBar.Button1.BackgroundImage = My.Resources.StartRight
+                                           liveBar.Start.BackgroundImage = My.Resources.StartRight
 
                                    End Select
                                End Sub) : End If
@@ -397,7 +397,7 @@ Public Class Startmenu
 
                             ' Image/Icon
                             Try
-                                Dim bmp As Bitmap = Desktop.GetFileIcon(FI.FullName, True).ToBitmap
+                                Dim bmp As Bitmap = AppBar.GetFileIcon(FI.FullName, True).ToBitmap
 
                                 If bmp IsNot Nothing Then .Image = bmp Else .Image = My.Resources.ProgramMedium
                             Catch ex As Exception

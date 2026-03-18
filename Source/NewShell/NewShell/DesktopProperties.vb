@@ -24,8 +24,9 @@ Public Class DesktopProperties
         Span = 22
     End Enum
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Async Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
         ApplyTheme()
+        Await Desktop.BackUpdate()
 
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
@@ -147,40 +148,7 @@ Public Class DesktopProperties
         ImageList1.Images.Clear()
         ListView1.Items.Clear()
 
-        Dim i As Integer = 0
-
-        Using key As RegistryKey = Registry.CurrentUser.OpenSubKey(regWallpaperHistory)
-
-            If key Is Nothing Then
-                Return
-            End If
-
-            For Each v As String In key.GetValueNames()
-
-                If IO.File.Exists(key.GetValue(v)) Then
-                    Dim FI As New IO.FileInfo(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\" & regWallpaperHistory, v, Nothing))
-
-                    Try
-                        Dim wallpaperImg As Image = Image.FromFile(key.GetValue(v))
-
-                        If wallpaperImg IsNot Nothing AndAlso IsValidImage(key.GetValue(v)) Then
-                            ImageList1.Images.Add(wallpaperImg)
-                        End If
-
-                    Catch ex As Exception : End Try
-
-                    Dim item As New ListViewItem With {
-                        .Text = FI.Name,
-                        .ToolTipText = FI.FullName,
-                        .ImageIndex = i}
-
-                    ListView1.Items.Add(item)
-
-                    i += 1
-                End If
-            Next
-        End Using
-
+        BackUpdateList()
         BackUpdate()
 
         R_NUD.Value = SystemColors.Desktop.R
@@ -191,6 +159,74 @@ Public Class DesktopProperties
 
         LoadSchemesToComboBox()
         LoadAllFromRegistry()
+    End Sub
+
+    Public Sub BackUpdateList()
+        ImageList1.Images.Clear()
+        ListView1.Items.Clear()
+
+        Try : Dim i As Integer = 0
+
+            Using key As RegistryKey = Registry.CurrentUser.OpenSubKey(regWallpaperHistory)
+
+                If key Is Nothing Then
+                    Return
+                End If
+
+                For Each v As String In key.GetValueNames()
+
+                    If IO.File.Exists(key.GetValue(v)) Then
+                        Dim FI As New IO.FileInfo(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\" & regWallpaperHistory, v, Nothing))
+
+                        Try
+                            Dim wallpaperImg As Image = Image.FromFile(key.GetValue(v))
+
+                            If wallpaperImg IsNot Nothing AndAlso IsValidImage(key.GetValue(v)) Then
+                                ImageList1.Images.Add(wallpaperImg)
+                            End If
+
+                        Catch ex As Exception : End Try
+
+                        Dim item As New ListViewItem With {
+                            .Text = FI.Name,
+                            .ToolTipText = FI.FullName,
+                            .ImageIndex = i}
+
+                        ListView1.Items.Add(item)
+
+                        i += 1
+                    End If
+                Next
+            End Using
+        Catch ex As Exception
+        End Try
+
+        ' Check if any items were spawned:
+        Try
+            If ListView1.Items.Count = 0 Then
+                ImageList1.Images.Clear()
+
+                Dim FI As New IO.FileInfo(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\" & regDefaultWallpaper, "Wallpaper", Nothing))
+                Dim mainWallpaperPath As String = FI.FullName
+
+                Try
+                    Dim wallpaperImg As Image = Image.FromFile(mainWallpaperPath)
+
+                    If wallpaperImg IsNot Nothing AndAlso IsValidImage(mainWallpaperPath) Then
+                        ImageList1.Images.Add(wallpaperImg)
+                    End If
+
+                Catch ex As Exception : End Try
+
+                Dim item As New ListViewItem With {
+                    .Text = FI.Name,
+                    .ToolTipText = FI.FullName,
+                    .ImageIndex = 0}
+
+                ListView1.Items.Add(item)
+            End If
+        Catch ex As Exception
+        End Try
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
@@ -308,7 +344,7 @@ Public Class DesktopProperties
                     pbb_Preview.Visible = True
                     pbb_Preview.SizeMode = PictureBoxSizeMode.CenterImage
 
-                    rbb_Tile.Checked = True
+                    rbb_Center.Checked = True
 
                 Case WallpaperStyle.Tiled
                     BackPreview.BackgroundImageLayout = ImageLayout.Tile
@@ -346,18 +382,18 @@ Public Class DesktopProperties
         End If
     End Sub
 
-    Private Sub ComboBox2_TextChanged(sender As Object, e As EventArgs) Handles ComboBox2.TextChanged
+    Private Async Sub ComboBox2_TextChanged(sender As Object, e As EventArgs) Handles ComboBox2.TextChanged
         If String.IsNullOrWhiteSpace(ComboBox2.Text) Then
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\" & regDefaultWallpaper, "Wallpaper", "")
 
             BackUpdate()
-            Desktop.BackUpdate()
+            Await Desktop.BackUpdate()
         Else
             If IO.File.Exists(ComboBox2.Text) = True Then
                 My.Computer.Registry.SetValue("HKEY_CURRENT_USER\" & regDefaultWallpaper, "Wallpaper", ComboBox2.Text)
 
                 BackUpdate()
-                Desktop.BackUpdate()
+                Await Desktop.BackUpdate()
             End If
         End If
     End Sub
@@ -476,9 +512,9 @@ Public Class DesktopProperties
         SetWallpaperStyle(WallpaperStyle.Fit)
     End Sub
 
-    Private Sub LinkLabel4_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel4.LinkClicked
+    Private Async Sub LinkLabel4_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel4.LinkClicked
         BackUpdate()
-        Desktop.BackUpdate()
+        Await Desktop.BackUpdate()
     End Sub
 
     ' System Colors here:
@@ -1116,7 +1152,8 @@ Public Class DesktopProperties
         End Select
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Async Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Await Desktop.BackUpdate()
         ApplyTheme()
     End Sub
 
@@ -1130,5 +1167,9 @@ Public Class DesktopProperties
                 CheckBox1.Checked = False
             End If
         End If
+    End Sub
+
+    Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
+        ComboBoxSchemes.Enabled = CheckBox2.Checked
     End Sub
 End Class

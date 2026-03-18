@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class WAT
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class WAT
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -50,7 +50,7 @@ Partial Class WAT
         Me.Panel1.Location = New System.Drawing.Point(0, 0)
         Me.Panel1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(272, 28)
+        Me.Panel1.Size = New System.Drawing.Size(278, 28)
         Me.Panel1.TabIndex = 0
         '
         'Label1
@@ -64,7 +64,7 @@ Partial Class WAT
         Me.Label1.Location = New System.Drawing.Point(0, 0)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(181, 28)
+        Me.Label1.Size = New System.Drawing.Size(187, 28)
         Me.Label1.TabIndex = 3
         Me.Label1.Text = "WindowText"
         Me.Label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -76,7 +76,7 @@ Partial Class WAT
         Me.Button3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
         Me.Button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.Button3.Font = New System.Drawing.Font("Webdings", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.Button3.Location = New System.Drawing.Point(189, 1)
+        Me.Button3.Location = New System.Drawing.Point(195, 1)
         Me.Button3.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(26, 25)
@@ -90,7 +90,7 @@ Partial Class WAT
         Me.Button2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.Button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.Button2.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button2.Location = New System.Drawing.Point(217, 1)
+        Me.Button2.Location = New System.Drawing.Point(223, 1)
         Me.Button2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(26, 25)
@@ -105,7 +105,7 @@ Partial Class WAT
         Me.Button1.FlatAppearance.BorderSize = 0
         Me.Button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.Button1.Font = New System.Drawing.Font("Webdings", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.Button1.Location = New System.Drawing.Point(245, 1)
+        Me.Button1.Location = New System.Drawing.Point(251, 1)
         Me.Button1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(26, 25)
@@ -120,7 +120,7 @@ Partial Class WAT
         Me.PictureBox1.Location = New System.Drawing.Point(6, 28)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(260, 167)
+        Me.PictureBox1.Size = New System.Drawing.Size(266, 167)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox1.TabIndex = 1
         Me.PictureBox1.TabStop = False
@@ -139,7 +139,7 @@ Partial Class WAT
         '
         Me.Panel3.BackColor = System.Drawing.SystemColors.ActiveCaption
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Right
-        Me.Panel3.Location = New System.Drawing.Point(266, 28)
+        Me.Panel3.Location = New System.Drawing.Point(272, 28)
         Me.Panel3.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(6, 173)
@@ -152,7 +152,7 @@ Partial Class WAT
         Me.Panel4.Location = New System.Drawing.Point(6, 195)
         Me.Panel4.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel4.Name = "Panel4"
-        Me.Panel4.Size = New System.Drawing.Size(260, 6)
+        Me.Panel4.Size = New System.Drawing.Size(266, 6)
         Me.Panel4.TabIndex = 4
         '
         'Button4
@@ -164,7 +164,7 @@ Partial Class WAT
         Me.Button4.Location = New System.Drawing.Point(6, 28)
         Me.Button4.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(260, 167)
+        Me.Button4.Size = New System.Drawing.Size(266, 167)
         Me.Button4.TabIndex = 5
         Me.Button4.UseVisualStyleBackColor = False
         '
@@ -181,7 +181,7 @@ Partial Class WAT
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.ActiveCaption
-        Me.ClientSize = New System.Drawing.Size(272, 201)
+        Me.ClientSize = New System.Drawing.Size(278, 201)
         Me.ControlBox = False
         Me.Controls.Add(Me.Button4)
         Me.Controls.Add(Me.PictureBox1)
@@ -189,6 +189,7 @@ Partial Class WAT
         Me.Controls.Add(Me.Panel3)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.Panel1)
+        Me.DoubleBuffered = True
         Me.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
