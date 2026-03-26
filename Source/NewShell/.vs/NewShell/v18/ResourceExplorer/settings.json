@@ -11,6 +11,7 @@
   ],
   "VisibleColumnKeys": [
     "name",
+    "type",
     "neutral-value"
   ]
 }

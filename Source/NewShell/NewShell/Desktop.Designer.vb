@@ -34,6 +34,7 @@ Partial Class Desktop
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
         Me.ArrangeIconsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GridSnappingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HideIconsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RefreshToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.PasteToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -65,7 +66,7 @@ Partial Class Desktop
         '
         'ViewToolStripMenuItem
         '
-        Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExtraLargeToolStripMenuItem, Me.LargeIconsToolStripMenuItem, Me.MediumIconsToolStripMenuItem, Me.SmallIconsToolStripMenuItem, Me.MiniIconsToolStripMenuItem, Me.ToolStripSeparator3, Me.ArrangeIconsToolStripMenuItem, Me.GridSnappingToolStripMenuItem})
+        Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExtraLargeToolStripMenuItem, Me.LargeIconsToolStripMenuItem, Me.MediumIconsToolStripMenuItem, Me.SmallIconsToolStripMenuItem, Me.MiniIconsToolStripMenuItem, Me.ToolStripSeparator3, Me.ArrangeIconsToolStripMenuItem, Me.GridSnappingToolStripMenuItem, Me.HideIconsToolStripMenuItem})
         Me.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem"
         Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
         Me.ViewToolStripMenuItem.Text = "View"
@@ -73,49 +74,55 @@ Partial Class Desktop
         'ExtraLargeToolStripMenuItem
         '
         Me.ExtraLargeToolStripMenuItem.Name = "ExtraLargeToolStripMenuItem"
-        Me.ExtraLargeToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.ExtraLargeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ExtraLargeToolStripMenuItem.Text = "Extra Large Icons"
         '
         'LargeIconsToolStripMenuItem
         '
         Me.LargeIconsToolStripMenuItem.Name = "LargeIconsToolStripMenuItem"
-        Me.LargeIconsToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.LargeIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.LargeIconsToolStripMenuItem.Text = "Large Icons"
         '
         'MediumIconsToolStripMenuItem
         '
         Me.MediumIconsToolStripMenuItem.Name = "MediumIconsToolStripMenuItem"
-        Me.MediumIconsToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.MediumIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.MediumIconsToolStripMenuItem.Text = "Medium Icons"
         '
         'SmallIconsToolStripMenuItem
         '
         Me.SmallIconsToolStripMenuItem.Name = "SmallIconsToolStripMenuItem"
-        Me.SmallIconsToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.SmallIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SmallIconsToolStripMenuItem.Text = "Small Icons"
         '
         'MiniIconsToolStripMenuItem
         '
         Me.MiniIconsToolStripMenuItem.Name = "MiniIconsToolStripMenuItem"
-        Me.MiniIconsToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.MiniIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.MiniIconsToolStripMenuItem.Text = "Mini Icons"
         '
         'ToolStripSeparator3
         '
         Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
-        Me.ToolStripSeparator3.Size = New System.Drawing.Size(160, 6)
+        Me.ToolStripSeparator3.Size = New System.Drawing.Size(177, 6)
         '
         'ArrangeIconsToolStripMenuItem
         '
         Me.ArrangeIconsToolStripMenuItem.Name = "ArrangeIconsToolStripMenuItem"
-        Me.ArrangeIconsToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.ArrangeIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ArrangeIconsToolStripMenuItem.Text = "Arrange Icons"
         '
         'GridSnappingToolStripMenuItem
         '
         Me.GridSnappingToolStripMenuItem.Name = "GridSnappingToolStripMenuItem"
-        Me.GridSnappingToolStripMenuItem.Size = New System.Drawing.Size(163, 22)
+        Me.GridSnappingToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.GridSnappingToolStripMenuItem.Text = "Grid Snapping"
+        '
+        'HideIconsToolStripMenuItem
+        '
+        Me.HideIconsToolStripMenuItem.Name = "HideIconsToolStripMenuItem"
+        Me.HideIconsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.HideIconsToolStripMenuItem.Text = "Hide icons"
         '
         'RefreshToolStripMenuItem
         '
@@ -211,4 +218,5 @@ Partial Class Desktop
     Friend WithEvents NewFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents NewFolderToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents NewLinkToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents HideIconsToolStripMenuItem As ToolStripMenuItem
 End Class

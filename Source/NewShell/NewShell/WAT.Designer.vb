@@ -120,7 +120,7 @@ Partial Class WAT
         Me.PictureBox1.Location = New System.Drawing.Point(6, 28)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(266, 167)
+        Me.PictureBox1.Size = New System.Drawing.Size(266, 29)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox1.TabIndex = 1
         Me.PictureBox1.TabStop = False
@@ -132,7 +132,7 @@ Partial Class WAT
         Me.Panel2.Location = New System.Drawing.Point(0, 28)
         Me.Panel2.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(6, 173)
+        Me.Panel2.Size = New System.Drawing.Size(6, 35)
         Me.Panel2.TabIndex = 2
         '
         'Panel3
@@ -142,14 +142,14 @@ Partial Class WAT
         Me.Panel3.Location = New System.Drawing.Point(272, 28)
         Me.Panel3.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(6, 173)
+        Me.Panel3.Size = New System.Drawing.Size(6, 35)
         Me.Panel3.TabIndex = 3
         '
         'Panel4
         '
         Me.Panel4.BackColor = System.Drawing.SystemColors.ActiveCaption
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.Panel4.Location = New System.Drawing.Point(6, 195)
+        Me.Panel4.Location = New System.Drawing.Point(6, 57)
         Me.Panel4.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(266, 6)
@@ -164,7 +164,7 @@ Partial Class WAT
         Me.Button4.Location = New System.Drawing.Point(6, 28)
         Me.Button4.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(266, 167)
+        Me.Button4.Size = New System.Drawing.Size(266, 29)
         Me.Button4.TabIndex = 5
         Me.Button4.UseVisualStyleBackColor = False
         '
@@ -181,7 +181,7 @@ Partial Class WAT
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.ActiveCaption
-        Me.ClientSize = New System.Drawing.Size(278, 201)
+        Me.ClientSize = New System.Drawing.Size(278, 63)
         Me.ControlBox = False
         Me.Controls.Add(Me.Button4)
         Me.Controls.Add(Me.PictureBox1)
@@ -195,7 +195,7 @@ Partial Class WAT
         Me.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(168, 62)
+        Me.MinimumSize = New System.Drawing.Size(168, 65)
         Me.Name = "WAT"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False

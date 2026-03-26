@@ -151,40 +151,30 @@ Public Class Startmenu
             Return imageList.Images.IndexOfKey(cacheKey)
         End If
 
-        Dim shfi As New SHFILEINFO()
-
-        Dim iconSizeFlag As UInteger = If(useLargeIcons, SHGFI_LARGEICON, SHGFI_SMALLICON)
-        Dim flags As UInteger = SHGFI_ICON Or iconSizeFlag
-
-        If Not isDirectory And Not isLink Then
-            flags = flags Or SHGFI_USEFILEATTRIBUTES
-        End If
-
-        Dim result As IntPtr
+        Dim targetSize As Integer = If(useLargeIcons, 48, 16)
 
         Try
-            result = SHGetFileInfo(
-            filePath,
-            fileAttributes,
-            shfi,
-            CUInt(Marshal.SizeOf(shfi)),
-            flags)
-        Catch ex As Exception
-            result = IntPtr.Zero
-        End Try
+            Dim bitmapIcon As Bitmap = DirectCast(Desktop.GetOptimizedIcon(filePath, targetSize), Bitmap)
 
-        If result <> IntPtr.Zero Then
-            Try
-                Dim icon As Icon = Icon.FromHandle(shfi.hIcon)
-                imageList.Images.Add(cacheKey, icon)
-                DestroyIcon(shfi.hIcon)
+            If bitmapIcon IsNot Nothing Then
+                Dim hIcon As IntPtr = bitmapIcon.GetHicon()
+
+                Dim newIcon As Icon = Icon.FromHandle(hIcon)
+
+                imageList.Images.Add(cacheKey, newIcon)
+
+                DestroyIcon(hIcon)
+
+                newIcon.Dispose()
+                bitmapIcon.Dispose()
+
                 Return imageList.Images.IndexOfKey(cacheKey)
-            Catch
+            Else
                 Return If(isDirectory, GENERIC_FOLDER_INDEX, GENERIC_FILE_INDEX)
-            End Try
-        Else
+            End If
+        Catch ex As Exception
             Return If(isDirectory, GENERIC_FOLDER_INDEX, GENERIC_FILE_INDEX)
-        End If
+        End Try
     End Function
     Public FST As Boolean = False
     Private Sub Startmenu_Deactivate(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Deactivate
@@ -194,35 +184,34 @@ Public Class Startmenu
 
             Dim liveBar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
 
-            If liveBar IsNot Nothing Then
-                liveBar.Invoke(Sub()
-                                   Select Case defValue
+            liveBar?.Invoke(Sub()
+                                Select Case defValue
 
-                                       Case 1 : Try
-                                               Dim customImage As Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
-                                               If customImage IsNot Nothing Then
-                                                   liveBar.Start.BackgroundImage = customImage
-                                               Else
-                                                   liveBar.Start.BackgroundImage = My.Resources.StartRight
-                                               End If
+                                    Case 1 : Try
+                                            Dim customImage As Image = Image.FromFile(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Normal", ""))
+                                            If customImage IsNot Nothing Then
+                                                liveBar.Start.BackgroundImage = customImage
+                                            Else
+                                                liveBar.Start.BackgroundImage = My.Resources.StartRight
+                                            End If
 
-                                           Catch ex As Exception
-                                               liveBar.Start.BackgroundImage = My.Resources.StartRight
-                                           End Try
+                                        Catch ex As Exception
+                                            liveBar.Start.BackgroundImage = My.Resources.StartRight
+                                        End Try
 
-                                       Case 2 : Try
-                                               liveBar.Start.BackgroundImage = liveBar.OrbNormal
-                                           Catch ex As Exception
-                                               liveBar.Start.BackgroundImage = My.Resources.StartRight
-                                           End Try
+                                    Case 2 : Try
+                                            liveBar.Start.BackgroundImage = liveBar.OrbNormal
+                                        Catch ex As Exception
+                                            liveBar.Start.BackgroundImage = My.Resources.StartRight
+                                        End Try
 
-                                       Case Else
-                                           liveBar.Start.BackgroundImage = My.Resources.StartRight
+                                    Case Else
+                                        liveBar.Start.BackgroundImage = My.Resources.StartRight
 
-                                   End Select
-                               End Sub) : End If
+                                End Select
+                            End Sub) : End If
             Me.Hide()
-        End If
+
     End Sub
     Dim canClose As Boolean = False
     Private Sub Startmenu_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
@@ -257,8 +246,78 @@ Public Class Startmenu
 
         Return String.Empty
     End Function
-
+    Public StartMenuFolder As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs")
+    Public StartMenuFolderPublic As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "Programs")
     Private Sub Startmenu_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        ' Theme
+        ApplyStartTheme()
+
+        Try ' Size
+            Dim newWidth As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\", "StartLastWidth", 500)
+            Dim newHeight As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\", "StartLastHeight", 560)
+
+            Dim result As Integer
+
+            If Integer.TryParse(newWidth, result) Then newWidth = result Else newWidth = 500
+            If Integer.TryParse(newHeight, result) Then newHeight = result Else newHeight = 560
+
+            Me.Size = New Size(newWidth, newHeight) : Catch ex As Exception
+
+            ' On Error:
+            Me.Size = New Size(500, 560)
+        End Try
+
+        ' Location
+        Me.Location = StartDefaultLocation
+
+        ' TreeView
+        ComboBox1.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "DefaultFolder", "0")
+
+        If TreeView2.Nodes.Count = 0 Then
+            Select Case ComboBox1.SelectedIndex
+                Case 0
+                    LoadItemsIntoTreeView(StartMenuFolder)
+                Case Else
+                    LoadItemsIntoTreeView(StartMenuFolderPublic)
+            End Select
+        End If
+
+        ' Tiles
+
+        ReloadTiles()
+
+        'Account Picture Detection
+
+        Try
+            Dim imagePath As String = GetCurrentUserImagePath()
+            usr_Picture.BackgroundImage = Image.FromFile(imagePath)
+
+        Catch ex As Exception
+            Debug.WriteLine("Error loading profile image: " & ex.Message)
+            usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
+        End Try
+
+        ' Buttons
+
+        Try : cmd_btn4.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 95, False).ToBitmap : Catch ex As Exception : cmd_btn4.BackgroundImage = My.Resources.RunDialogIcon : End Try
+        Try : If AppBar.UseExplorerFM = True Then : cmd_btn3.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\explorer.exe", 1, False).ToBitmap : Else : If File.Exists(AppBar.CustomFMPath) Then : cmd_btn3.BackgroundImage = Icon.ExtractAssociatedIcon(AppBar.CustomFMPath).ToBitmap : Else : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End If : End If : Catch ex As Exception : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End Try
+        Try : cmd_btn2.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap : Catch ex As Exception : cmd_btn2.BackgroundImage = My.Resources.Settings : End Try
+        Try : cmd_btn1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap : Catch ex As Exception : cmd_btn1.BackgroundImage = My.Resources.ActionCenter : End Try
+
+        Dim mainclr As Color = Color.FromArgb(20, 255, 255, 255)
+        Dim mainclr1 As Color = Color.FromArgb(20, 210, 210, 210)
+
+        'cmd_btn1.BackColor = mainclr
+        'cmd_btn2.BackColor = mainclr1
+        'cmd_btn3.BackColor = mainclr
+        'cmd_btn4.BackColor = mainclr1
+
+        ' Normal
+
+        SetForegroundWindow(Me.Handle)
+    End Sub
+
+    Public Sub ApplyStartTheme()
         Try
             Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "Mode", "0")
                 Case 0
@@ -285,65 +344,29 @@ Public Class Startmenu
         Catch ex As Exception
             MsgBox("Failed to apply Start menu theme! " & ex.Message)
         End Try
+    End Sub
 
-        ' TreeView
-
-        Me.Location = New Point(0 - SystemInformation.BorderSize.Width, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height + SystemInformation.BorderSize.Height)
-
-        If TreeView2.Nodes.Count = 0 Then
-            Select Case ComboBox1.SelectedIndex
-                Case 0
-                    LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
-                Case Else
-                    LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
-            End Select
-        End If
-
-        ComboBox1.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "DefaultFolder", "0")
-
-        Try
-            Me.Width = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\", "StartLastWidth", 500)
-            Me.Height = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\", "StartLastHeight", 560)
-        Catch ex As Exception
-            Me.Size = New Size(500, 560)
-        End Try
-
-        ' Tiles
-
-        ReloadTiles()
-
-        'Account Picture Detection
-
+    Public Function GetUserAccountPicture() As Image
         Try
             Dim imagePath As String = GetCurrentUserImagePath()
 
             If Not String.IsNullOrEmpty(imagePath) AndAlso File.Exists(imagePath) Then
-                usr_Picture.BackgroundImage = Image.FromFile(imagePath)
+                Return Image.FromFile(imagePath)
             Else
                 Dim defaultPath As String = "C:\ProgramData\Microsoft\User Account Pictures\user.png"
                 If File.Exists(defaultPath) Then
-                    usr_Picture.BackgroundImage = Image.FromFile(defaultPath)
+                    Return Image.FromFile(defaultPath)
                 Else
-                    usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
+                    Return Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
                 End If
             End If
+
         Catch ex As Exception
-            MessageBox.Show("Error loading profile image: " & ex.Message)
-            usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
+            Debug.WriteLine("Error loading profile image: " & ex.Message)
+            Return My.Resources.DefaultUserPicture
         End Try
+    End Function
 
-        ' Buttons
-
-        Try : cmd_btn4.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 95, False).ToBitmap : Catch ex As Exception : cmd_btn4.BackgroundImage = My.Resources.RunDialogIcon : End Try
-        Try : If AppBar.UseExplorerFM = True Then : cmd_btn3.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\explorer.exe", 1, False).ToBitmap : Else : If File.Exists(AppBar.CustomFMPath) Then : cmd_btn3.BackgroundImage = Icon.ExtractAssociatedIcon(AppBar.CustomFMPath).ToBitmap : Else : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End If : End If : Catch ex As Exception : cmd_btn3.BackgroundImage = My.Resources.FileExplorerSmall : End Try
-        Try : cmd_btn2.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\imageres.dll", 22, False).ToBitmap : Catch ex As Exception : cmd_btn2.BackgroundImage = My.Resources.Settings : End Try
-        Try : cmd_btn1.BackgroundImage = GetIcon(Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\system32\shell32.dll", 112, False).ToBitmap : Catch ex As Exception : cmd_btn1.BackgroundImage = My.Resources.ActionCenter : End Try
-
-        ' Normal
-
-        SetForegroundWindow(Me.Handle)
-    End Sub
-    Dim PinnedAppsPath As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned"
     Public Sub ReloadTiles()
         ToolStrip1.Items.Clear()
 
@@ -397,7 +420,7 @@ Public Class Startmenu
 
                             ' Image/Icon
                             Try
-                                Dim bmp As Bitmap = AppBar.GetFileIcon(FI.FullName, True).ToBitmap
+                                Dim bmp As Bitmap = Desktop.GetOptimizedIcon(FI.FullName, 48)
 
                                 If bmp IsNot Nothing Then .Image = bmp Else .Image = My.Resources.ProgramMedium
                             Catch ex As Exception
@@ -461,74 +484,6 @@ Public Class Startmenu
         End If
     End Sub
 
-    Public Sub ReloadTilesOld()
-        ToolStrip1.Items.Clear()
-
-        Try
-            If Directory.Exists(PinnedAppsPath.Trim) = True Then
-                Dim DirectoryInformation As New DirectoryInfo(PinnedAppsPath)
-
-                For Each i As DirectoryInfo In DirectoryInformation.GetDirectories
-                    Dim item As New ToolStripMenuItem(i.Name)
-                    With item
-                        .AutoSize = False
-                        .Text = i.Name
-                        .TextAlign = ContentAlignment.BottomCenter
-                        .TextImageRelation = TextImageRelation.Overlay
-                        .ImageAlign = ContentAlignment.MiddleCenter
-                        If Me.BackColor.R >= 150 OrElse Me.BackColor.G >= 130 AndAlso Me.BackColor.B >= 130 Then
-                            .ForeColor = Color.Black
-                        Else
-                            .ForeColor = Color.White
-                        End If
-
-                        Try
-                            .ToolTipText = IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\Program")
-                        Catch ex As Exception
-                            .ToolTipText = "Unknown Program."
-                        End Try
-
-                        Try
-                            Dim ico As Icon = Icon.ExtractAssociatedIcon(IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\Program"))
-                            .Image = ico.ToBitmap
-                        Catch ex As Exception
-                            .Image = My.Resources.Program
-                        End Try
-
-                        Try
-                            If IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\SizeType") = 1 Then
-                                .Size = New Size(96, 96)
-                            ElseIf IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\SizeType") = 2 Then
-                                .Size = New Size(192, 96)
-                            ElseIf IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\SizeType") = 3 Then
-                                .Size = New Size(192, 192)
-                            Else
-                                .Size = New Size(96, 96)
-                            End If
-                        Catch ex As Exception
-                            .Size = New Size(96, 96)
-                        End Try
-
-                        .Tag = IO.File.ReadAllText(DirectoryInformation.FullName & "\" & i.Name & "\SizeType")
-                        AddHandler item.MouseUp, AddressOf TileClick
-                    End With
-
-                    ToolStrip1.Items.Add(item)
-                Next
-
-            Else
-                ' Action when the Startmenu will not detect a directory.
-                ' In my case, we will create it.
-
-                Directory.CreateDirectory(Environment.GetFolderPath(PinnedAppsPath))
-
-            End If
-
-        Catch ex As Exception
-            MsgBox(ex.Message)
-        End Try
-    End Sub
-
     Private Sub TileClick(ByVal sender As System.Object, ByVal e As Windows.Forms.MouseEventArgs)
 
         Dim regName As String = CType(sender, ToolStripButton).Text
@@ -560,33 +515,19 @@ Public Class Startmenu
         End If
     End Sub
 
-    Private Sub TileClickOld(ByVal sender As System.Object, ByVal e As Windows.Forms.MouseEventArgs)
-
-        Dim DirectoryInformation As New DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\Pinned")
-
-        If e.Button = MouseButtons.Right Then
-            TileCM.Show(Control.MousePosition)
-            TileCM.Tag = CType(sender, ToolStripMenuItem).Text
-        ElseIf e.Button = MouseButtons.Left Then
-            If IO.File.Exists(DirectoryInformation.FullName & "\" & CType(sender, ToolStripMenuItem).Text & "\Arguments") = True Then
-                Dim SI As New ProcessStartInfo(IO.File.ReadAllText(DirectoryInformation.FullName & "\" & CType(sender, ToolStripMenuItem).Text & "\Program")) With {
-                    .Arguments = IO.File.ReadAllText(DirectoryInformation.FullName & "\" & CType(sender, ToolStripMenuItem).Text & "\Arguments")
-                }
-                Process.Start(SI)
-            Else
-                Process.Start(IO.File.ReadAllText(DirectoryInformation.FullName & "\" & CType(sender, ToolStripMenuItem).Text & "\Program"))
-            End If
-        End If
-    End Sub
-
     Private Sub PopulateTreeView(ByVal directoryPath As String, ByVal targetNodeCollection As TreeNodeCollection)
+        Dim cutoff As Integer = 20
 
-        Try
+        Try ' Directories
             Dim subDirectories() As String = Directory.GetDirectories(directoryPath)
 
             For Each dirPath As String In subDirectories
                 Dim directoryInfo As New DirectoryInfo(dirPath)
                 Dim folderNode As New TreeNode(directoryInfo.Name)
+
+                If directoryInfo.Name.Length > cutoff Then
+                    folderNode.Text = directoryInfo.Name.Substring(0, cutoff - 3) & "..."
+                End If
 
                 Dim iconIndex As Integer = GetFileIconIndex(dirPath, treeImageList, True)
 
@@ -606,8 +547,7 @@ Public Class Startmenu
 
         End Try
 
-
-        Try
+        Try ' Files
             Dim files() As String = Directory.GetFiles(directoryPath)
 
             For Each filePath As String In files
@@ -617,10 +557,25 @@ Public Class Startmenu
                 If Not fileInfo.Name = "desktop.ini" Then
                     Dim iconIndex As Integer = GetFileIconIndex(fileInfo.FullName, treeImageList, True)
 
+                    If fileInfo.Extension.ToLower = ".lnk" Then
+                        fileNode.Text = Path.GetFileNameWithoutExtension(filePath)
+
+                        Try
+                            fileNode.ToolTipText = AppBar.GetShortcutTarget(fileInfo.FullName)
+                        Catch ex As Exception
+                            fileNode.ToolTipText = fileInfo.FullName
+                        End Try
+                    Else
+                        fileNode.ToolTipText = fileInfo.FullName
+                    End If
+
+                    If fileInfo.Name.Length > cutoff Then
+                        fileNode.Text = fileInfo.Name.Substring(0, cutoff - 3) & "..."
+                    End If
+
                     fileNode.ImageIndex = iconIndex
                     fileNode.SelectedImageIndex = iconIndex
                     fileNode.Tag = filePath
-                    fileNode.ToolTipText = fileInfo.FullName
 
                     targetNodeCollection.Add(fileNode)
                 End If
@@ -628,7 +583,6 @@ Public Class Startmenu
         Catch ex As Exception
 
         End Try
-
     End Sub
 
     Public Sub LoadItemsIntoTreeView(ByVal rootPath As String)
@@ -645,6 +599,8 @@ Public Class Startmenu
     End Sub
 
     Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmd_btn3.Click
+        On Error Resume Next
+
         If AppBar.UseExplorerFM = True Then
             Process.Start("explorer.exe", "shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
         Else
@@ -656,60 +612,35 @@ Public Class Startmenu
         canClose = True
         Me.Close()
     End Sub
-
+    Public StartDefaultLocation As New Point(0 - SystemInformation.BorderSize.Width, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height + SystemInformation.BorderSize.Height)
     Private Sub Startmenu_LocationChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.LocationChanged
-        If Not Me.Location = New Point(0 - SystemInformation.BorderSize.Width, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height + SystemInformation.BorderSize.Height) Then
-            Me.Location = New Point(0 - SystemInformation.BorderSize.Width, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height + SystemInformation.BorderSize.Height)
+        If Not Me.Location = StartDefaultLocation Then
+            Me.Location = StartDefaultLocation
         End If
+    End Sub
+
+    Private Sub Startmenu_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
+        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
+
+        StartDefaultLocation = New Point(0 - SystemInformation.BorderSize.Width, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height + SystemInformation.BorderSize.Height)
     End Sub
 
     Private Sub Startmenu_VisibleChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.VisibleChanged
         If Me.Visible = True Then
+
             If TreeView2.Nodes.Count = 0 Then
                 Select Case ComboBox1.SelectedIndex
                     Case 0
-                        LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
+                        LoadItemsIntoTreeView(StartMenuFolder)
                     Case Else
-                        LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
+                        LoadItemsIntoTreeView(StartMenuFolderPublic)
                 End Select
             End If
 
-            Me.Location = New Point(0, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height)
-
-            Try
-                Select Case My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "Mode", "0")
-                    Case 0
-                        Me.BackColor = Color.Black
-                        TreeView2.BackColor = Color.Black
-                        Panel2.BackColor = Color.Black
-
-                        Dim side As side = side
-                        side.Left = -1
-                        side.Right = -1
-                        side.Top = -1
-                        side.Bottom = -1
-                        Dim result As Integer = DwmExtendFrameIntoClientArea(Me.Handle, side)
-                    Case 1
-                        Panel2.BackColor = SystemColors.ControlLight
-                        Me.BackColor = SystemColors.Control
-                        TreeView2.BackColor = SystemColors.MenuBar
-
-                        Dim side As side = side
-                        side.Left = 0
-                        side.Right = 0
-                        side.Top = 0
-                        side.Bottom = 0
-                        Dim result As Integer = DwmExtendFrameIntoClientArea(Me.Handle, side)
-                    Case Else
-                        Panel2.BackColor = Color.Transparent
-
-
-                End Select
-            Catch ex As Exception
-                MsgBox("Failed to apply Start menu theme! " & ex.Message)
-            End Try
+            usr_Picture.BackgroundImage = GetUserAccountPicture()
+            ApplyStartTheme()
         Else
-            ' When Startmenu become UnVisible
+            ' When Startmenu is not visible
         End If
     End Sub
 
@@ -773,9 +704,9 @@ Public Class Startmenu
         Dim targetPath As String = String.Empty
         Select Case ComboBox1.SelectedIndex
             Case 0
-                targetPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\"
+                targetPath = StartMenuFolder
             Case 1
-                targetPath = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs"
+                targetPath = StartMenuFolderPublic
             Case Else
                 targetPath = TreeView2.SelectedNode.Tag & "\"
         End Select
@@ -786,46 +717,31 @@ Public Class Startmenu
             .Tag = "[NewFolder]"
         End With
 
-        If TreeView2.SelectedNode IsNot Nothing Then
-            If Directory.Exists(TreeView2.SelectedNode.Tag) Then
-                TreeView2.SelectedNode.Expand()
-                TreeView2.SelectedNode.Nodes.Add(newFolder)
+        If targetPath IsNot Nothing AndAlso Directory.Exists(targetPath) Then
+            TreeView2.SelectedNode.Expand()
+            TreeView2.SelectedNode.Nodes.Add(newFolder)
 
-                lastNodeTag = TreeView2.SelectedNode.Tag
+            lastNodeTag = targetPath
 
-                TreeView2.SelectedNode = newFolder
-                TreeView2.SelectedNode.BeginEdit()
-            End If
-        End If
-    End Sub
-
-    Public Sub NewFolderCreationOld()
-        If TreeView2.SelectedNode IsNot Nothing Then
-            NFD.PATH = TreeView2.SelectedNode.Tag & "\"
-        Else
-            NFD.PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\"
-        End If
-        If NFD.ShowDialog = Windows.Forms.DialogResult.OK Then
-            Select Case ComboBox1.SelectedIndex
-                Case 0
-                    LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
-                Case Else
-                    LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
-            End Select
+            TreeView2.SelectedNode = newFolder
+            TreeView2.SelectedNode.BeginEdit()
         End If
     End Sub
 
     Private Sub ts5_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ts5.Click
         If MessageBox.Show("Are you sure do you want remove " & TreeView2.SelectedNode.Tag & " ?", "Delete Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = Windows.Forms.DialogResult.Yes Then
+
+            Dim targetPath As String = TreeView2.SelectedNode.Tag
+
             Try
-                If IO.Directory.Exists(TreeView2.SelectedNode.Tag) = True Then
-                    My.Computer.FileSystem.DeleteDirectory(TreeView2.SelectedNode.Tag, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                If IO.Directory.Exists(targetPath) = True Then
+                    My.Computer.FileSystem.DeleteDirectory(targetPath, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
                     TreeView2.SelectedNode.Remove()
-                ElseIf IO.File.Exists(TreeView2.SelectedNode.Tag) = True Then
-                    My.Computer.FileSystem.DeleteFile(TreeView2.SelectedNode.Tag, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin, FileIO.UICancelOption.DoNothing)
+                ElseIf IO.File.Exists(targetPath) = True Then
+                    My.Computer.FileSystem.DeleteFile(targetPath, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin, FileIO.UICancelOption.DoNothing)
                     TreeView2.SelectedNode.Remove()
                 Else
-                    MessageBox.Show("Failed to delete: " & TreeView2.SelectedNode.Tag & ". Check if the File/Directory still exists.", "File/Directory not found", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show("Failed to delete: """ & targetPath & """. Check if the File/Directory still exists.", "File/Directory not found", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End If
 
             Catch uex As UnauthorizedAccessException
@@ -841,11 +757,12 @@ Public Class Startmenu
 
     Private Sub RefleshToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RefreshToolStripMenuItem.Click
         TreeView2.Update()
+
         Select Case ComboBox1.SelectedIndex
             Case 0
-                LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
+                LoadItemsIntoTreeView(StartMenuFolder)
             Case Else
-                LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
+                LoadItemsIntoTreeView(StartMenuFolderPublic)
         End Select
     End Sub
 
@@ -856,11 +773,10 @@ Public Class Startmenu
     End Sub
 
     Private Sub Button27_Click(sender As Object, e As EventArgs) Handles cmd_btn4.Click
-        RunDialog.Show(AppBar)
-        RunDialog.Activate()
+        On Error Resume Next
+        RunDialog.Show(Me)
 
-        canClose = True
-        Me.Close()
+        Task.Delay(100).ContinueWith(Sub() Me.Hide())
     End Sub
     Private Sub ts1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ts1.Click
         Select Case ts1.Text
@@ -930,19 +846,25 @@ Public Class Startmenu
         End If
     End Sub
 
-    Private Sub Startmenu_ResizeEnd(sender As Object, e As EventArgs) Handles Me.ResizeEnd
-        If Not Me.Location = New Point(0, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height) Then
-            Me.Location = New Point(0, My.Computer.Screen.Bounds.Height - Me.Height - AppBar.Height)
-        End If
-    End Sub
-
     Private Sub RefleshToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles RefleshToolStripMenuItem1.Click
         ReloadTiles()
         Me.Invalidate()
     End Sub
 
     Private Sub LocateInExplorerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LocateInExplorerToolStripMenuItem.Click
-        Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
+        On Error Resume Next
+
+        Dim targetPath As String
+        If ComboBox1.SelectedIndex = 0 Then targetPath = StartMenuFolder Else targetPath = StartMenuFolderPublic
+
+        Dim pr As New ProcessStartInfo("", targetPath)
+        If AppBar.UseExplorerFM Then
+            pr.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe")
+        Else
+            pr.FileName = AppBar.CustomFMPath
+        End If
+
+        Process.Start(pr)
     End Sub
 
     Private Sub ShortcutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShortcutToolStripMenuItem.Click
@@ -950,16 +872,17 @@ Public Class Startmenu
         If TreeView2.SelectedNode IsNot Nothing Then
             LinkCreator.PATH = TreeView2.SelectedNode.Tag & "\"
         Else
-            LinkCreator.PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\"
+            If ComboBox1.SelectedIndex = 0 Then LinkCreator.PATH = StartMenuFolder Else LinkCreator.PATH = StartMenuFolderPublic
         End If
 
         If LinkCreator.ShowDialog = Windows.Forms.DialogResult.OK Then
             Select Case ComboBox1.SelectedIndex
                 Case 0
-                    LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
+                    LoadItemsIntoTreeView(StartMenuFolder)
                 Case Else
-                    LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
+                    LoadItemsIntoTreeView(StartMenuFolderPublic)
             End Select
+
             TreeView2.Nodes.Find(LinkCreator.Result, True)
         End If
     End Sub
@@ -978,64 +901,33 @@ Public Class Startmenu
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles cmd_btn1.Click
+        On Error Resume Next
+
         SA.ShowDialog(AppBar)
     End Sub
 
-    Private Sub LockScreenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LockScreenToolStripMenuItem.Click
-        On Error Resume Next
-        Process.Start("RunDll32.exe", "user32.dll,LockWorkStation")
-    End Sub
-
-    Private Sub SwitchUserToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SwitchUserToolStripMenuItem.Click
-        On Error Resume Next
-        Process.Start("tsdiscon.exe")
-    End Sub
-
-    Private Sub LogoffToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LogoffToolStripMenuItem.Click
-        On Error Resume Next
-        If MessageBox.Show("This will log off your Windows session, Are you sure do you want log off?", "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
-            Process.Start("shutdown.exe", "/l")
-        End If
-    End Sub
+    'If MessageBox.Show("This will log off your Windows session, Are you sure do you want log off?", "Confirm Box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
 
     Private Sub AccountSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AccountSettingsToolStripMenuItem.Click
         On Error Resume Next
-        Process.Start("control", "/name Microsoft.UserAccounts")
+        Process.Start(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Settings", "control"), "/name Microsoft.UserAccounts")
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles usr_Picture.Click
         LoginMenuS.Show(Control.MousePosition)
     End Sub
 
+    <DllImport("shell32.dll", EntryPoint:="#60", CharSet:=CharSet.Auto)>
+    Private Shared Function ShowClassicShutdownDialog(hwndOwner As IntPtr) As UInt32
+    End Function
+
     Private Sub ShutdownActionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShutdownActionsToolStripMenuItem.Click
-        On Error Resume Next
-
-        Dim objShell As Object
-        objShell = CreateObject("Shell.Application")
-        objShell.ShutdownWindows()
-        objShell = Nothing
-    End Sub
-
-    Private Sub ShutdownWithFastBootToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShutdownWithFastBootToolStripMenuItem.Click
-        On Error Resume Next
-        Shell("shutdown.exe /s /hybrid /t 0")
-    End Sub
-
-    Private Sub HibernateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HibernateToolStripMenuItem.Click
-        Shell("shutdown.exe /h")
-    End Sub
-
-    Private Sub SleepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SleepToolStripMenuItem.Click
-        Shell("RunDll32.exe powrprof.dll,SetSuspendState")
-    End Sub
-
-    Private Sub RestartToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestartToolStripMenuItem.Click
-        On Error Resume Next
-        Shell("shutdown.exe /r /t 0")
+        ShowClassicShutdownDialog(AppBar.Handle)
     End Sub
 
     Private Sub PowerSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PowerSettingsToolStripMenuItem.Click
-        Shell("control /name Microsoft.PowerOptions")
+        On Error Resume Next
+        Process.Start(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Settings", "control"), "/name Microsoft.PowerOptions")
     End Sub
 
     Private Sub DeleteToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DeleteToolStripMenuItem.Click
@@ -1094,7 +986,6 @@ Public Class Startmenu
             End Using
         End Using
     End Sub
-
     Dim lastNodeTag As String = String.Empty
     Private Sub TreeView2_AfterLabelEdit(ByVal sender As Object, ByVal e As System.Windows.Forms.NodeLabelEditEventArgs) Handles TreeView2.AfterLabelEdit
         If Not e.Node.Tag = "[NewFolder]" Then
@@ -1181,28 +1072,25 @@ Public Class Startmenu
 
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "DefaultFolder", ComboBox1.SelectedIndex, RegistryValueKind.DWord)
+
         Select Case ComboBox1.SelectedIndex
             Case 0
-                LoadItemsIntoTreeView(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\")
-                TreeView2.Tag = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Microsoft\Windows\Start Menu\Programs\"
+                LoadItemsIntoTreeView(StartMenuFolder)
+                TreeView2.Tag = StartMenuFolder
             Case Else
-                LoadItemsIntoTreeView("C:\ProgramData\Microsoft\Windows\Start Menu\Programs")
-                TreeView2.Tag = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs"
+                LoadItemsIntoTreeView(StartMenuFolderPublic)
+                TreeView2.Tag = StartMenuFolderPublic
         End Select
     End Sub
 
     Private Sub Startmenu_BackColorChanged(sender As Object, e As EventArgs) Handles Me.BackColorChanged
-        If Me.BackColor.R >= 150 OrElse Me.BackColor.G >= 130 AndAlso Me.BackColor.B >= 130 Then
-            Me.ForeColor = Color.Black
-            Label2.ForeColor = Color.Black
-            Label3.ForeColor = Color.Black
-            TreeView2.ForeColor = Color.Black
-        Else
-            Me.ForeColor = Color.White
-            Label2.ForeColor = Color.White
-            Label3.ForeColor = Color.White
-            TreeView2.ForeColor = Color.White
-        End If
+        Dim luminance As Double = (0.299 * Me.BackColor.R + 0.587 * Me.BackColor.G + 0.114 * Me.BackColor.B) / 255
+
+        Dim contrastColor As Color = If(luminance > 0.5, Color.Black, Color.White)
+
+        For Each ctrl As Control In Me.Controls
+            ctrl.ForeColor = contrastColor
+        Next
     End Sub
 
     Public Function ColorMixer(Color1 As Color, Color2 As Color) As Color
@@ -1214,11 +1102,11 @@ Public Class Startmenu
         Dim g2 As Integer = Color2.G
         Dim b2 As Integer = Color2.B
 
-        Dim smichanaR As Integer = (r1 + r2) \ 2
-        Dim smichanaG As Integer = (g1 + g2) \ 2
-        Dim smichanaB As Integer = (b1 + b2) \ 2
+        Dim newR As Integer = (r1 + r2) \ 2
+        Dim newG As Integer = (g1 + g2) \ 2
+        Dim newB As Integer = (b1 + b2) \ 2
 
-        Return Color.FromArgb(smichanaR, smichanaG, smichanaB)
+        Return Color.FromArgb(newR, newG, newB)
     End Function
 
     Private Sub PropertiesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PropertiesToolStripMenuItem.Click
@@ -1229,87 +1117,89 @@ Public Class Startmenu
     Public endColor As Color = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "BackColor2", "#000000"))
 
     Private Sub Startmenu_Paint(sender As Object, e As PaintEventArgs) Handles Me.Paint
-        If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "Mode", "2") = 2 Then
+        Dim mode As Integer = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "Mode", "2")
+        If mode <> 2 Then Exit Sub
 
-            If My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "UseSystemColor", "1") = 1 Then
-                Dim accentColor As Color = WindowsColorSettings.GetAccentColor
+        Dim useSystemColor As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "UseSystemColor", "1")
+        If useSystemColor = 1 Then
+            Dim accentColor As Color = WindowsColorSettings.GetAccentColor
 
-                startColor = accentColor
-                endColor = accentColor
-            Else
+            startColor = accentColor
+            endColor = accentColor
+        Else
 
-                startColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "BackColor", "#000000"))
-                endColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "BackColor2", "#000000"))
+            startColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "BackColor", "#000000"))
+            endColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "BackColor2", "#000000"))
+        End If
+
+        Dim rv1 As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "ColorPos", "0")
+        Dim rv2 As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "ColorPos2", "0")
+
+        If rv1 = 0 Then
+            If rv2 = 0 Then
+                Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
+                            New Point(Me.ClientSize.Width, 0),
+                            New Point(0, 0),
+                            startColor,
+                            endColor)
+                    e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
+                End Using
+
+            ElseIf rv2 = 1 Then
+
+                Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
+                            New Point(0, 0),
+                            New Point(Me.ClientSize.Width, 0),
+                            startColor,
+                            endColor)
+                    e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
+                End Using
             End If
-
-            Dim rv1 As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "ColorPos", "0")
-            Dim rv2 As String = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\StartMenu", "ColorPos2", "0")
-
-            If rv1 = 0 Then
-                If rv2 = 0 Then
-                    Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
-                            New Point(Me.ClientSize.Width, 0),
-                            New Point(0, 0),
-                            startColor,
-                            endColor)
-                        e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
-                    End Using
-
-                ElseIf rv2 = 1 Then
-
-                    Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
-                            New Point(0, 0),
-                            New Point(Me.ClientSize.Width, 0),
-                            startColor,
-                            endColor)
-                        e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
-                    End Using
-                End If
-            ElseIf rv1 = 1 Then
-                If rv2 = 0 Then
-                    Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
+        ElseIf rv1 = 1 Then
+            If rv2 = 0 Then
+                Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
               New Point(Me.ClientSize.Width, Me.ClientSize.Height),
               New Point(0, 0),
               startColor,
               endColor)
-                        e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
-                    End Using
+                    e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
+                End Using
 
-                ElseIf rv2 = 1 Then
+            ElseIf rv2 = 1 Then
 
-                    Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
+                Using gradientBrush As New System.Drawing.Drawing2D.LinearGradientBrush(
                             New Point(0, 0),
                             New Point(Me.ClientSize.Width, Me.ClientSize.Height),
                             startColor,
                             endColor)
-                        e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
-                    End Using
-                End If
+                    e.Graphics.FillRectangle(gradientBrush, Me.ClientRectangle)
+                End Using
             End If
-
-            Me.BackColor = ColorMixer(startColor, endColor)
-            TreeView2.BackColor = ColorMixer(startColor, endColor)
         End If
+
+        Me.BackColor = ColorMixer(startColor, endColor)
+        TreeView2.BackColor = ColorMixer(startColor, endColor)
     End Sub
 
     Private Sub SelectControl_Tick(sender As Object, e As EventArgs) Handles SelectControl.Tick
         Try
-            If IO.File.Exists(TreeView2.SelectedNode.Tag) Then
-                Dim ico As Icon = Icon.ExtractAssociatedIcon(TreeView2.SelectedNode.Tag)
-                usr_Picture.BackgroundImage = ico.ToBitmap
+            Dim targetPath As String = TreeView2.SelectedNode.Tag
+
+            If File.Exists(targetPath) Then
+                Dim bitmapIcon As Bitmap = Desktop.GetOptimizedIcon(targetPath, 52)
+
+                If bitmapIcon Is Nothing Then
+                    bitmapIcon = Icon.ExtractAssociatedIcon(targetPath).ToBitmap
+                End If
+
+                usr_Picture.BackgroundImage = bitmapIcon
+
+                'bitmapIcon.Dispose()
             Else
-                Try
-                    usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
-                Catch ex1 As Exception
-                    usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
-                End Try
+                usr_Picture.BackgroundImage = GetUserAccountPicture()
             End If
         Catch ex As Exception
-            Try
-                usr_Picture.BackgroundImage = Image.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) & "\AppData\Local\Temp\" & Environment.UserName & ".bmp")
-            Catch ex1 As Exception
-                usr_Picture.BackgroundImage = My.Resources.DefaultUserPicture
-            End Try
+            usr_Picture.BackgroundImage = GetUserAccountPicture()
         End Try
 
         SelectControl.Enabled = False
@@ -1324,30 +1214,21 @@ Public Class Startmenu
             TreeView2.SelectedNode = e.Node
             FCM.Show(MousePosition)
         Else
-            If Directory.Exists(e.Node.Tag) Then
-                If e.Node.Nodes.Count > 0 Then
-                    If e.Node.IsExpanded = True Then
-                        e.Node.Collapse()
-                    Else
-                        e.Node.Expand()
-                    End If
-                End If
+            If Directory.Exists(e.Node.Tag) AndAlso e.Node.Nodes.Count > 0 Then
+
+                If e.Node.IsExpanded = True Then e.Node.Collapse() Else e.Node.Expand()
+
             ElseIf File.Exists(e.Node.Tag) Then
 
                 SelectControl.Enabled = True
 
                 Try
-                    Dim pr As New Process()
+                    Dim pr As New ProcessStartInfo(e.Node.Tag)
 
-                    pr.StartInfo.FileName = e.Node.Tag
+                    Dim prr As Process = Process.Start(pr)
+                    prr.WaitForInputIdle()
 
-                    pr.Start()
-
-                    pr.WaitForInputIdle()
-
-                    canClose = True
                     Me.Visible = False
-                    Me.Close()
                 Catch ex As Exception
 
                 End Try
@@ -1357,10 +1238,6 @@ Public Class Startmenu
 
     Private Sub TreeView2_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles TreeView2.AfterSelect
         If File.Exists(e.Node.Tag) Then SelectControl.Enabled = True
-    End Sub
-
-    Private Sub Startmenu_SizeChanged(sender As Object, e As EventArgs) Handles Me.SizeChanged
-        If Not Me.WindowState = FormWindowState.Normal Then Me.WindowState = FormWindowState.Normal
     End Sub
 
     Private Sub OpenFileLocationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenFileLocationToolStripMenuItem.Click
@@ -1546,5 +1423,59 @@ Public Class Startmenu
 
             myKey.Close()
         End If
+    End Sub
+
+    Private Sub LoginMenuS_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles LoginMenuS.Opening
+        LoginMenuS.Items.Clear()
+
+        Dim sessionActions As String() = {"Lock", "Switch User", "Log Off"}
+
+        For Each act In sessionActions
+            Dim item As New ToolStripMenuItem(act)
+            AddHandler item.Click, AddressOf SessionButtonPressed
+            LoginMenuS.Items.Add(item)
+        Next
+
+        ' Final items
+        LoginMenuS.Items.Add(New ToolStripSeparator)
+        LoginMenuS.Items.Add(AccountSettingsToolStripMenuItem)
+    End Sub
+
+    Private Sub PowerMenuS_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles PowerMenuS.Opening
+        PowerMenuS.Items.Clear()
+
+        Dim powerActions = PowerManager.GetAvailablePowerActions
+
+        For Each act In powerActions
+            Dim item As New ToolStripMenuItem(act)
+            AddHandler item.Click, AddressOf PowerButtonPressed
+            PowerMenuS.Items.Add(item)
+        Next
+
+        ' Final items
+        PowerMenuS.Items.Add(New ToolStripSeparator)
+        PowerMenuS.Items.Add(ShutdownActionsToolStripMenuItem)
+        PowerMenuS.Items.Add(New ToolStripSeparator)
+        PowerMenuS.Items.Add(PowerSettingsToolStripMenuItem)
+    End Sub
+
+    Private Sub PowerButtonPressed(sender As Object, e As EventArgs)
+        Dim item = DirectCast(sender, ToolStripMenuItem)
+
+        Dim isBrutalMode As Boolean = False
+        Dim isForceMode As Boolean = False
+
+        If (ModifierKeys And Keys.Control) = Keys.Control Then
+            isBrutalMode = True ' EWX_FORCE
+        ElseIf SA.chkForceMode.Checked Then
+            isForceMode = True ' EWX_FORCEIFHUNG
+        End If
+
+        PowerManager.ExecuteAction(item.Text, isForceMode, 0, PowerManager.IsFastStartupEnabled, SA.chkDisableWakeEvent.Checked, isBrutalMode)
+    End Sub
+
+    Private Sub SessionButtonPressed(sender As Object, e As EventArgs)
+        Dim item = DirectCast(sender, ToolStripMenuItem)
+        PowerManager.ExecuteSessionAction(item.Text)
     End Sub
 End Class

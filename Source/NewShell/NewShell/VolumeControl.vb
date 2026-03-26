@@ -80,29 +80,25 @@ Public Class VolumeControl
 
             Dim curVol As Integer = GetCurrentVolume() * 100
 
-            If liveBar IsNot Nothing Then
-                liveBar.Invoke(Sub()
-                                   If curVol = 0 Then
-                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeZero
+            liveBar?.Invoke(Sub()
+                                If curVol = 0 Then
+                                    liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeZero
 
-                                   ElseIf curVol < 50 AndAlso Not curVol = 0 Then
-                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeBelow50
+                                ElseIf curVol < 50 AndAlso Not curVol = 0 Then
+                                    liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeBelow50
 
-                                   ElseIf curVol >= 50 AndAlso Not curVol = 100 Then
-                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeAbove50.ToBitmap
+                                ElseIf curVol >= 50 AndAlso Not curVol = 100 Then
+                                    liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeAbove50
 
-                                   ElseIf curVol = 100 Then
-                                       liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeFull
+                                ElseIf curVol = 100 Then
+                                    liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeFull
 
-                                   End If
-                               End Sub)
-            End If
+                                End If
+                            End Sub)
         Else
-            If liveBar IsNot Nothing Then
-                liveBar.Invoke(Sub()
-                                   liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeMute
-                               End Sub)
-            End If
+            liveBar?.Invoke(Sub()
+                                liveBar.ToolStripButton1.BackgroundImage = My.Resources.VolumeMute
+                            End Sub)
         End If
     End Sub
 

@@ -26,6 +26,7 @@ Public Class DesktopProperties
 
     Private Async Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
         ApplyTheme()
+
         Await Desktop.BackUpdate()
 
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
@@ -99,7 +100,18 @@ Public Class DesktopProperties
             Case 0
                 SetWallpaper()
 
+                Dim selectedStyle As WallpaperStyle = CType([Enum].Parse(GetType(WallpaperStyle), ComboBox1.SelectedItem.ToString()), WallpaperStyle)
+                SetWallpaperStyle(selectedStyle)
+
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "IsDesktopIniVisible", CheckBox7.Checked, RegistryValueKind.DWord)
+                Desktop.IsDesktopIniVisible = CheckBox7.Checked
+
             Case 1
+                My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Desktop", "IsDesktopIniVisible", CheckBox7.Checked, RegistryValueKind.DWord)
+                Desktop.IsDesktopIniVisible = CheckBox7.Checked
+
+                NotifySystemChange()
+
                 Dim indices As New List(Of Integer)
                 Dim values As New List(Of UInteger)
 
@@ -139,16 +151,24 @@ Public Class DesktopProperties
     Public regWallpaperHistory As String = "Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers\"
     Public regDefaultWallpaper As String = "Control Panel\Desktop"
 
+    Private ReadOnly HWND_BROADCAST As New IntPtr(&HFFFF)
+    Private Const SMTO_ABORTIFHUNG As UInteger = &H2
+
     Private Sub DesktopProperties_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         'Desktop.SendToBack()
         Me.BringToFront()
 
         ComboBox2.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\" & regDefaultWallpaper, "Wallpaper", Nothing)
+        ComboBox3.SelectedIndex = 0
 
         ImageList1.Images.Clear()
         ListView1.Items.Clear()
 
         BackUpdateList()
+        LoadWallpaperStyles()
+
+        LoadDefaults()
+
         BackUpdate()
 
         R_NUD.Value = SystemColors.Desktop.R
@@ -159,6 +179,55 @@ Public Class DesktopProperties
 
         LoadSchemesToComboBox()
         LoadAllFromRegistry()
+    End Sub
+
+    Public Sub NotifySystemChange()
+        Dim result As IntPtr
+        SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, IntPtr.Zero, "ImmersiveColorSet", SMTO_ABORTIFHUNG, 2000, result)
+    End Sub
+
+    Public Sub LoadDefaults()
+        On Error Resume Next
+
+        isLoadingControls = True
+
+        ComboBox4.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 0)
+        ComboBox5.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", 1)
+
+        CheckBox3.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "AutoColorization", 0)
+
+        CheckBox4.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "ColorPrevalence", 1)
+        CheckBox5.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM", "ColorPrevalence", 1)
+
+        CheckBox6.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", 1)
+
+        CheckBox7.Checked = Desktop.IsDesktopIniVisible
+
+        isLoadingControls = False
+    End Sub
+
+    Public Sub LoadWallpaperStyles()
+        ComboBox1.Items.Clear()
+
+        For Each styleName As String In [Enum].GetNames(GetType(WallpaperStyle))
+            ComboBox1.Items.Add(styleName)
+        Next
+
+        Try
+            Dim currentStyleVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", "0"))
+            Dim currentTileVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", "0"))
+
+            Dim currentStyle As WallpaperStyle
+            If currentStyleVal = "0" AndAlso currentTileVal = "1" Then
+                currentStyle = WallpaperStyle.Tiled
+            Else
+                currentStyle = CType([Enum].Parse(GetType(WallpaperStyle), currentStyleVal), WallpaperStyle)
+            End If
+
+            ComboBox1.SelectedItem = [Enum].GetName(GetType(WallpaperStyle), currentStyle)
+        Catch
+            If ComboBox1.Items.Count > 0 Then ComboBox1.SelectedIndex = 0
+        End Try
     End Sub
 
     Public Sub BackUpdateList()
@@ -231,12 +300,13 @@ Public Class DesktopProperties
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         Try
-            Dim OFD As New OpenFileDialog
+            Dim OFD As New OpenFileDialog With {
+                .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+                .Title = "Select a Background Image to appear on your Desktop!",
+                .Filter = "Picture formats (*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif",
+                .FileName = ""
+            }
 
-            OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
-            OFD.Title = "Select a Background Image to appear on your Desktop!"
-            OFD.Filter = "Picture formats (*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.png;*.pneg;*.jpg;*.jpeg;*.bmp;*.gif"
-            OFD.FileName = ""
             If OFD.ShowDialog = DialogResult.OK Then
                 ComboBox2.Text = OFD.FileName
                 BackUpdate()
@@ -323,61 +393,66 @@ Public Class DesktopProperties
 
     Public Sub BackUpdate()
         Dim curWallpaper As String = GetCurrentWallpaperPath()
-        Dim curWallpaperStyle As WallpaperStyle = GetCurrentWallpaperStyle()
+        Dim curStyle As WallpaperStyle = GetCurrentWallpaperStyle()
 
-        If File.Exists(curWallpaper) Then
+        If BackPreview.BackgroundImage IsNot Nothing Then BackPreview.BackgroundImage.Dispose()
+        BackPreview.BackgroundImage = Nothing
 
-            If Not IsValidImage(curWallpaper) Then
-                BackPreview.BackgroundImage = Nothing
+        If File.Exists(curWallpaper) AndAlso IsValidImage(curWallpaper) Then
+            Try
+                Dim imgOriginal As Image
+                Using fs As New FileStream(curWallpaper, FileMode.Open, FileAccess.Read)
+                    imgOriginal = Image.FromStream(fs)
+                End Using
+
+                Dim previewBmp As New Bitmap(BackPreview.Width, BackPreview.Height)
+
+                Using g As Graphics = Graphics.FromImage(previewBmp)
+                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                    g.Clear(SystemColors.Desktop)
+
+                    Dim canvasW As Integer = BackPreview.Width
+                    Dim canvasH As Integer = BackPreview.Height
+
+                    Select Case curStyle
+                        Case WallpaperStyle.Stretched
+                            g.DrawImage(imgOriginal, 0, 0, canvasW, canvasH)
+
+                        Case WallpaperStyle.Centered
+                            Dim x As Integer = (canvasW - imgOriginal.Width) \ 2
+                            Dim y As Integer = (canvasH - imgOriginal.Height) \ 2
+                            g.DrawImage(imgOriginal, x, y, imgOriginal.Width, imgOriginal.Height)
+
+                        Case WallpaperStyle.Fit
+                            Dim ratio = Math.Min(canvasW / imgOriginal.Width, canvasH / imgOriginal.Height)
+                            Dim newW = CInt(imgOriginal.Width * ratio)
+                            Dim newH = CInt(imgOriginal.Height * ratio)
+                            g.DrawImage(imgOriginal, (canvasW - newW) \ 2, (canvasH - newH) \ 2, newW, newH)
+
+                        Case WallpaperStyle.Fill, WallpaperStyle.Span
+                            Dim ratio = Math.Max(canvasW / imgOriginal.Width, canvasH / imgOriginal.Height)
+                            Dim newW = CInt(imgOriginal.Width * ratio)
+                            Dim newH = CInt(imgOriginal.Height * ratio)
+                            g.DrawImage(imgOriginal, (canvasW - newW) \ 2, (canvasH - newH) \ 2, newW, newH)
+
+                        Case WallpaperStyle.Tiled
+                            Using tb As New TextureBrush(imgOriginal)
+                                tb.WrapMode = Drawing2D.WrapMode.Tile
+                                g.FillRectangle(tb, 0, 0, canvasW, canvasH)
+                            End Using
+                    End Select
+                End Using
+
+                BackPreview.BackgroundImage = previewBmp
+                BackPreview.BackgroundImageLayout = ImageLayout.None
                 pbb_Preview.Visible = False
-                Exit Sub
-            End If
 
-            BackPreview.BackgroundImage = Image.FromFile(curWallpaper)
-            pbb_Preview.Image = Image.FromFile(curWallpaper)
-            pbb_Preview.Visible = True
+                imgOriginal.Dispose()
 
-            Select Case curWallpaperStyle
-                Case WallpaperStyle.Centered
-                    BackPreview.BackgroundImageLayout = ImageLayout.Center
-
-                    pbb_Preview.Visible = True
-                    pbb_Preview.SizeMode = PictureBoxSizeMode.CenterImage
-
-                    rbb_Center.Checked = True
-
-                Case WallpaperStyle.Tiled
-                    BackPreview.BackgroundImageLayout = ImageLayout.Tile
-
-                    pbb_Preview.Visible = False
-
-                    rbb_Tile.Checked = True
-
-                Case WallpaperStyle.Stretched, WallpaperStyle.Fill
-                    BackPreview.BackgroundImageLayout = ImageLayout.Stretch
-
-                    pbb_Preview.Visible = True
-                    pbb_Preview.SizeMode = PictureBoxSizeMode.StretchImage
-
-                    rbb_Stretch.Checked = True
-
-                Case WallpaperStyle.Fit
-                    BackPreview.BackgroundImageLayout = ImageLayout.Zoom
-
-                    pbb_Preview.Visible = True
-                    pbb_Preview.SizeMode = PictureBoxSizeMode.Zoom
-
-                    rbb_Zoom.Checked = True
-
-                Case Else
-                    BackPreview.BackgroundImageLayout = ImageLayout.None
-                    pbb_Preview.SizeMode = PictureBoxSizeMode.Normal
-
-                    rbb_None.Checked = True
-
-            End Select
+            Catch ex As Exception
+                Debug.WriteLine("Preview Error: " & ex.Message)
+            End Try
         Else
-            BackPreview.BackgroundImage = Nothing
             pbb_Preview.Visible = False
         End If
     End Sub
@@ -395,20 +470,6 @@ Public Class DesktopProperties
                 BackUpdate()
                 Await Desktop.BackUpdate()
             End If
-        End If
-    End Sub
-
-    Private Sub pbb_Preview_LoadCompleted(sender As Object, e As AsyncCompletedEventArgs) Handles pbb_Preview.LoadCompleted, pbb_Preview.LoadCompleted
-        If pbb_Preview.Image.Width > 224 Then
-            pbb_Preview.Width = pbb_Preview.Image.Width
-        Else
-            pbb_Preview.Width = 224
-        End If
-
-        If pbb_Preview.Image.Height > 128 Then
-            pbb_Preview.Height = pbb_Preview.Image.Height
-        Else
-            pbb_Preview.Height = 128
         End If
     End Sub
 
@@ -490,26 +551,6 @@ Public Class DesktopProperties
     Private Sub R_NUD_ValueChanged(sender As Object, e As EventArgs) Handles R_NUD.ValueChanged, G_NUD.ValueChanged, B_NUD.ValueChanged
         On Error Resume Next
         Panel1.BackColor = Color.FromArgb(R_NUD.Value, G_NUD.Value, B_NUD.Value)
-    End Sub
-
-    Private Sub rbb_None_CheckedChanged(sender As Object, e As EventArgs) Handles rbb_None.CheckedChanged
-        SetWallpaperStyle(WallpaperStyle.Span)
-    End Sub
-
-    Private Sub rbb_Stretch_CheckedChanged(sender As Object, e As EventArgs) Handles rbb_Stretch.CheckedChanged
-        SetWallpaperStyle(WallpaperStyle.Stretched)
-    End Sub
-
-    Private Sub rbb_Tile_CheckedChanged(sender As Object, e As EventArgs) Handles rbb_Tile.CheckedChanged
-        SetWallpaperStyle(WallpaperStyle.Tiled)
-    End Sub
-
-    Private Sub rbb_Center_CheckedChanged(sender As Object, e As EventArgs) Handles rbb_Center.CheckedChanged
-        SetWallpaperStyle(WallpaperStyle.Centered)
-    End Sub
-
-    Private Sub rbb_Zoom_CheckedChanged(sender As Object, e As EventArgs) Handles rbb_Zoom.CheckedChanged
-        SetWallpaperStyle(WallpaperStyle.Fit)
     End Sub
 
     Private Async Sub LinkLabel4_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel4.LinkClicked
@@ -1171,5 +1212,115 @@ Public Class DesktopProperties
 
     Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
         ComboBoxSchemes.Enabled = CheckBox2.Checked
+    End Sub
+
+    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+        Dim selectedStyle As WallpaperStyle = CType([Enum].Parse(GetType(WallpaperStyle), ComboBox1.SelectedItem.ToString()), WallpaperStyle)
+        SetWallpaperStyle(selectedStyle)
+
+        BackUpdate()
+    End Sub
+
+    Private Sub LinkLabel5_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel5.LinkClicked
+        ' Coming soon...
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        If ComboBox3.SelectedItem Is Nothing Then Return
+
+        Dim selectedKey As String = ComboBox3.SelectedItem.ToString()
+
+        Using cd As New ColorDialog
+            Try
+                Dim historyPath As String = "Software\Microsoft\Windows\CurrentVersion\Themes\History\Colors"
+                Using key = Registry.CurrentUser.OpenSubKey(historyPath)
+                    If key IsNot Nothing Then
+                        Dim customColArray(15) As Integer
+
+                        For i As Integer = 0 To 15
+                            customColArray(i) = &HFFFFFF
+                        Next
+
+                        For i As Integer = 0 To 15
+                            Dim val = key.GetValue("ColorHistory" & i)
+
+                            If val IsNot Nothing Then
+                                Dim rawColor As UInteger = CUInt(val)
+
+                                Dim r As Byte = CByte((rawColor >> 16) And &HFF)
+                                Dim g As Byte = CByte((rawColor >> 8) And &HFF)
+                                Dim b As Byte = CByte(rawColor And &HFF)
+
+                                customColArray(i) = RGB(r, g, b)
+                            End If
+                        Next
+
+                        cd.CustomColors = customColArray
+                    End If
+                End Using
+            Catch ex As Exception
+                Debug.WriteLine("Failed to load color history: " & ex.Message)
+            End Try
+
+            cd.Color = Panel4.BackColor
+
+            If cd.ShowDialog() = DialogResult.OK Then
+                Panel4.BackColor = cd.Color
+
+                Select Case ComboBox3.SelectedIndex
+                    Case 0 ' Accent
+                        Desktop.SetAccentColor(Panel4.BackColor)
+
+                    Case 1 ' Inactive
+                        Desktop.SetInactiveAccentColor(Panel4.BackColor)
+
+                End Select
+            End If
+        End Using
+    End Sub
+    Public isLoadingControls As Boolean = False
+    Private Sub ComboBox4_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox4.SelectedIndexChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", ComboBox4.SelectedIndex, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub ComboBox5_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox5.SelectedIndexChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", ComboBox5.SelectedIndex, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub CheckBox4_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox4.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "ColorPrevalence", CheckBox4.Checked, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub CheckBox5_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox5.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM", "ColorPrevalence", CheckBox5.Checked, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub CheckBox6_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox6.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", CheckBox6.Checked, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub CheckBox3_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox3.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "AutoColorization", CheckBox3.Checked, RegistryValueKind.DWord)
+        If Not isLoadingControls Then NotifySystemChange()
+    End Sub
+
+    Private Sub ComboBox3_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox3.SelectedIndexChanged
+        isLoadingControls = True
+
+        Select Case ComboBox3.SelectedIndex
+            Case 0 ' Accent
+                Panel4.BackColor = AppBar.GetAccentColor
+
+            Case 1 ' Inactive
+                Panel4.BackColor = AppBar.GetInactiveAccentColor
+
+        End Select
+
+        isLoadingControls = False
     End Sub
 End Class

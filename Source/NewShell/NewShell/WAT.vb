@@ -93,24 +93,33 @@ Public Class WAT
     End Function
 
     Private TargetBounds As Rectangle
-    Private WithEvents AnimTimer As New Timer With {.Interval = 10} ' Mírně vyšší interval uleví CPU
+    Private WithEvents AnimTimer As New Timer With {.Interval = 10}
     Private ReadOnly Smoothness As Double = 0.3
-    Private ReadOnly Epsilon As Integer = 1 ' Práh pro zastavení v pixelech
+    Private ReadOnly Epsilon As Integer = 1
 
-    Public Sub MoveTo(newBounds As Rectangle)
+    Public Sub MoveTo(ByVal newBounds As Rectangle)
         If Me.IsDisposed OrElse Me.Disposing Then Return
 
-        ' KRITICKÁ KONTROLA: Pokud už na toto místo míříme, nic nedělej
-        If TargetBounds = newBounds AndAlso Me.Visible Then
+        Dim maxWidth As Integer = 500
+        Dim finalRect As Rectangle = newBounds
+
+        If finalRect.Width > maxWidth Then
+            Dim widthDifference As Integer = finalRect.Width - maxWidth
+            Dim newX As Integer = finalRect.X + (widthDifference / 2)
+
+            finalRect = New Rectangle(newX, finalRect.Y, maxWidth, finalRect.Height)
+        End If
+        ' ------------------------
+
+        If TargetBounds = finalRect AndAlso Me.Visible Then
             Return
         End If
 
-        TargetBounds = newBounds
+        TargetBounds = finalRect
 
         If Not Me.Visible Then
             Me.Opacity = 0
-            ' Nastavíme počáteční pozici, aby Slide-up začínal zespodu
-            Me.SetBounds(newBounds.X, newBounds.Y, newBounds.Width, newBounds.Height)
+            Me.SetBounds(finalRect.X, finalRect.Y, finalRect.Width, finalRect.Height)
             MyBase.Show()
         End If
 
@@ -123,34 +132,26 @@ Public Class WAT
             Return
         End If
 
-        ' 1. Animace Opacity - děláme jen, pokud je potřeba
         If Me.Opacity < 1.0 Then
             Me.Opacity = Math.Min(1.0, Me.Opacity + 0.1)
         End If
 
-        ' 2. Výpočet vzdáleností
         Dim dX As Double = TargetBounds.X - Me.Left
         Dim dY As Double = TargetBounds.Y - Me.Top
         Dim dW As Double = TargetBounds.Width - Me.Width
         Dim dH As Double = TargetBounds.Height - Me.Height
 
-        ' 3. Kontrola, zda jsme v cíli (Epsilon)
-        ' Pokud jsou všechny rozdíly pod 1 pixel, okamžitě zastavíme
         If Math.Abs(dX) < Epsilon AndAlso Math.Abs(dY) < Epsilon AndAlso
        Math.Abs(dW) < Epsilon AndAlso Math.Abs(dH) < Epsilon Then
 
             Me.Bounds = TargetBounds
-            ' Zastavíme timer, jen pokud je i Opacity na max
             If Me.Opacity >= 1.0 Then AnimTimer.Stop()
         Else
-            ' Výpočet nové pozice s plynulým dojezdem
-            ' Používáme Floor, abychom předešli sub-pixelovému kmitání
             Dim nextL As Integer = CInt(Me.Left + (dX * Smoothness))
             Dim nextT As Integer = CInt(Me.Top + (dY * Smoothness))
             Dim nextW As Integer = CInt(Me.Width + (dW * Smoothness))
             Dim nextH As Integer = CInt(Me.Height + (dH * Smoothness))
 
-            ' Změníme velikost a pozici najednou (méně překreslování)
             Me.SetBounds(nextL, nextT, nextW, nextH)
         End If
     End Sub
@@ -213,11 +214,9 @@ Public Class WAT
     Private Sub WAT_MouseHover(sender As Object, e As EventArgs) Handles Me.MouseLeave, Button4.MouseLeave, Button1.MouseLeave, Button2.MouseLeave, Button3.MouseLeave, Panel1.MouseLeave, Panel4.MouseLeave, Label1.MouseLeave
         Dim liveBar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
 
-        If liveBar IsNot Nothing Then
-            liveBar.Invoke(Sub()
-                               liveBar.CloseTimer.Start()
-                           End Sub)
-        End If
+        liveBar?.Invoke(Sub()
+                            liveBar.CloseTimer.Start()
+                        End Sub)
     End Sub
 
     Private Sub Button4_MouseEnter1(sender As Object, e As EventArgs) Handles Button4.MouseEnter
@@ -226,15 +225,14 @@ Public Class WAT
     End Sub
 
     Private Sub Button4_MouseEnter(sender As Object, e As EventArgs) Handles Button4.MouseEnter, Me.MouseEnter, Button1.MouseEnter, Button2.MouseEnter, Button3.MouseEnter, Panel1.MouseEnter, Panel4.MouseEnter, Label1.MouseEnter
-        TimerPeek.Start()
+        If AppBar.isAeroPeekEnabled Then TimerPeek.Start()
 
         Dim liveBar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
 
-        If liveBar IsNot Nothing Then
-            liveBar.Invoke(Sub()
-                               liveBar.CloseTimer.Stop()
-                           End Sub)
-        End If
+        liveBar?.Invoke(Sub()
+                            liveBar.CloseTimer.Stop()
+                        End Sub)
+
     End Sub
 
     Private Sub Button4_MouseLeave(sender As Object, e As EventArgs) Handles Button4.MouseLeave, Me.MouseLeave, Button1.MouseLeave, Button2.MouseLeave, Button3.MouseLeave, Panel1.MouseLeave, Panel4.MouseLeave, Label1.MouseLeave
@@ -336,6 +334,8 @@ Public Class WAT
 
     Private Sub TimerPeek_Tick(sender As Object, e As EventArgs) Handles TimerPeek.Tick
         TimerPeek.Stop()
+
+        If Not AppBar.isAeroPeekEnabled Then Exit Sub
 
         If Me.Tag IsNot Nothing AndAlso TypeOf Me.Tag Is IntPtr Then
             Dim targetHWnd As IntPtr = CType(Me.Tag, IntPtr)

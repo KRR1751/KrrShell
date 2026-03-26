@@ -138,6 +138,21 @@ WARNING: DO NOT INCLUDE SYSTEM PROCESSES! OR THIS SHELL CAN CRASH YOUR SYSTEM SI
   <data name="RadioButton6.ToolTip" xml:space="preserve">
     <value>Applies the DWM render to the Taskbar. Don't select when you have Windows 10/11 with Titlebar colors to White or Black. When you use OpenGlass or any other title theme, it will apply here as well. (looks beatiful on Windows 7)</value>
   </data>
+  <data name="GroupBox19.ToolTip" xml:space="preserve">
+    <value>Here you can save/set bunch of your app list in a "preference" so instead adding another programs to the easy access
+one-by-one, now you can have something like "Streaming" preference and have there just shortcuts for your tools
+for streaming or you get the idea.
+
+"Coming soon..."</value>
+  </data>
+  <data name="CheckBox20.ToolTip" xml:space="preserve">
+    <value>When you check this, instead of relying on your custom set of paths/programs you want to execute
+it will rather check in your pinned apps (similar to explorer.exe) and key WIN+1 will for exp. start
+your first pinned program you have in the pinned bar etc.
+
+But to let you have control over this or if you want to use those keys as a whole new "steam deck"
+I prefer that you can change your list. And also switch between different preferences.</value>
+  </data>
   <data name="CheckBox14.ToolTip" xml:space="preserve">
     <value>Everytime you switch between Presets, the Working Area will be set automatically without clicking on the "Set Working Area" manually each time.
 

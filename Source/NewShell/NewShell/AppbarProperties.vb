@@ -1,6 +1,7 @@
 ﻿Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Security.Cryptography
+Imports System.Security.Principal
 Imports System.Windows.Forms
 Imports NewShell.AppBar
 
@@ -123,10 +124,18 @@ Public Class AppbarProperties
         CheckBox12.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\ShutdownDialog", "Style", False)
 
         CheckBox18.Checked = AppBar.UseLegacyVolumeSlider
+        CheckBox19.Checked = AppBar.isAeroPeekEnabled
+        CheckBox20.Checked = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell", "UseHotkeysForPinned", True)
+        CheckBox21.Checked = AppBar.ShowKeyboardButton
 
         GroupBox3.Enabled = CheckBox6.Checked
 
         ComboBox5.SelectedIndex = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\", "CombineMode", "0")
+
+        ComboBox11.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "SearchApp", Nothing)
+        ComboBox12.Text = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Assistant", Nothing)
+
+        TrackBar2.Value = BrightnessEngine.GetBrightness(Me.Handle)
 
         Try
             TrackBar1.Value = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "TransparencyLevel", "90")
@@ -148,11 +157,6 @@ Public Class AppbarProperties
                 Button16.Enabled = True
                 Label12.Enabled = True
 
-                'AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
-                'AppBar.TransparencyKey = Nothing
-
-                'AppBar.Opacity = 1
-
             Case 1
                 RadioButton1.Checked = True
 
@@ -160,14 +164,9 @@ Public Class AppbarProperties
                 Button16.Enabled = True
                 Label12.Enabled = True
 
-                'AppBar.BackColor = ColorTranslator.FromHtml(My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "BackColor", "#B77358"))
-                'AppBar.TransparencyKey = Nothing
-
                 Label6.Enabled = True
                 TrackBar1.Enabled = True
                 NumericUpDown3.Enabled = True
-
-                'AppBar.Opacity = TrackBar1.Value / 100
 
             Case 2
                 RadioButton7.Checked = True
@@ -243,9 +242,6 @@ Public Class AppbarProperties
             RadioButton10.Checked = True
             If ComboBox1.Text IsNot Nothing AndAlso File.Exists(ComboBox1.Text) Then
                 PictureBox7.Image = Image.FromFile(ComboBox1.Text)
-
-                'AppBar.LoadAndSplitOrb(ComboBox1.Text)
-
             End If
         End If
 
@@ -555,11 +551,13 @@ Public Class AppbarProperties
     End Sub
 
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button16.Click
-        Dim CD As New ColorDialog
-        CD.AllowFullOpen = True
-        CD.AnyColor = True
-        CD.FullOpen = True
-        CD.Color = AppBar.BackColor
+        Dim CD As New ColorDialog With {
+            .AllowFullOpen = True,
+            .AnyColor = True,
+            .FullOpen = True,
+            .Color = AppBar.BackColor
+        }
+
         If CD.ShowDialog(Me) = DialogResult.OK Then
             Label12.BackColor = CD.Color
             PictureBox1.BackColor = CD.Color
@@ -645,11 +643,13 @@ Public Class AppbarProperties
     End Sub
 
     Private Sub Button12_Click(sender As Object, e As EventArgs) Handles Button12.Click
-        Dim CD As New ColorDialog
-        CD.AllowFullOpen = True
-        CD.AnyColor = True
-        CD.FullOpen = True
-        CD.Color = AppBar.Splitter1.BackColor
+        Dim CD As New ColorDialog With {
+            .AllowFullOpen = True,
+            .AnyColor = True,
+            .FullOpen = True,
+            .Color = AppBar.Splitter1.BackColor
+        }
+
         If CD.ShowDialog(Me) = DialogResult.OK Then
             Label4.BackColor = CD.Color
             AppBar.Splitter1.BackColor = CD.Color
@@ -668,7 +668,7 @@ Public Class AppbarProperties
             If ComboBox2.Text IsNot Nothing AndAlso File.Exists(ComboBox2.Text) Then
                 AppBar.BackgroundImage = Image.FromFile(ComboBox2.Text)
             Else
-                AppBar.BackgroundImage = My.Resources.AppBarMainTransparent
+                AppBar.BackgroundImage = My.Resources.AppBarMain
             End If
         Else
             GroupBox18.Enabled = False
@@ -700,12 +700,12 @@ Public Class AppbarProperties
     End Sub
 
     Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click
-        Dim ofd As New OpenFileDialog()
-
-        ofd.AutoUpgradeEnabled = AppBar.UseExplorerFP
-        ofd.Title = "Open a ""Appbar"" image for to show in the Appbar"
-        ofd.CheckFileExists = True
-        ofd.Multiselect = False
+        Dim ofd As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .Title = "Open a ""Appbar"" image for to show in the Appbar",
+            .CheckFileExists = True,
+            .Multiselect = False
+        }
         If IO.File.Exists(ComboBox2.Text) = True Then
             Dim fi As New FileInfo(ComboBox2.Text)
             ofd.InitialDirectory = fi.DirectoryName
@@ -778,13 +778,14 @@ Public Class AppbarProperties
 
     Private Sub PictureBox4_Click(sender As Object, e As EventArgs) Handles PictureBox4.Click
         On Error Resume Next
-        Dim OFD As New OpenFileDialog
+        Dim OFD As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .Title = "Select a Custom Image for ""Default"" button state",
+            .CheckFileExists = True,
+            .FileName = "",
+            .Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
+        }
 
-        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
-        OFD.Title = "Select a Custom Image for ""Default"" button state"
-        OFD.CheckFileExists = True
-        OFD.FileName = ""
-        OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
         If OFD.ShowDialog = DialogResult.OK Then
             PictureBox4.Image = Image.FromFile(OFD.FileName)
             AppBar.Start.BackgroundImage = Image.FromFile(OFD.FileName)
@@ -794,13 +795,14 @@ Public Class AppbarProperties
 
     Private Sub PictureBox5_Click(sender As Object, e As EventArgs) Handles PictureBox5.Click
         On Error Resume Next
-        Dim OFD As New OpenFileDialog
+        Dim OFD As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .Title = "Select a Custom Image for ""Hover"" button state",
+            .CheckFileExists = True,
+            .FileName = "",
+            .Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
+        }
 
-        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
-        OFD.Title = "Select a Custom Image for ""Hover"" button state"
-        OFD.CheckFileExists = True
-        OFD.FileName = ""
-        OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
         If OFD.ShowDialog = DialogResult.OK Then
             PictureBox5.Image = Image.FromFile(OFD.FileName)
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Hover", OFD.FileName)
@@ -809,13 +811,14 @@ Public Class AppbarProperties
 
     Private Sub PictureBox6_Click(sender As Object, e As EventArgs) Handles PictureBox6.Click
         On Error Resume Next
-        Dim OFD As New OpenFileDialog
+        Dim OFD As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .Title = "Select a Custom Image for ""Pressed"" button state",
+            .CheckFileExists = True,
+            .FileName = "",
+            .Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
+        }
 
-        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
-        OFD.Title = "Select a Custom Image for ""Pressed"" button state"
-        OFD.CheckFileExists = True
-        OFD.FileName = ""
-        OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
         If OFD.ShowDialog = DialogResult.OK Then
             PictureBox6.Image = Image.FromFile(OFD.FileName)
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\StartButton", "Pressed", OFD.FileName)
@@ -844,9 +847,8 @@ Public Class AppbarProperties
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar\", "CombineMode", ComboBox5.SelectedIndex, Microsoft.Win32.RegistryValueKind.DWord)
 
         Dim taskbar = Application.OpenForms.OfType(Of AppBar)().FirstOrDefault()
-        If taskbar IsNot Nothing Then
-            taskbar.LoadApps()
-        End If
+
+        taskbar?.LoadApps()
     End Sub
 
     Private Sub TrackBar1_Scroll(sender As Object, e As EventArgs) Handles TrackBar1.Scroll
@@ -872,6 +874,9 @@ Public Class AppbarProperties
         Else
             My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "UseSystemColor", 0, Microsoft.Win32.RegistryValueKind.DWord)
         End If
+
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "ColorPrevalence", CheckBox11.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+
     End Sub
 
     Private Sub CheckBox12_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox12.CheckedChanged
@@ -880,13 +885,14 @@ Public Class AppbarProperties
 
     Private Sub Button15_Click(sender As Object, e As EventArgs) Handles Button15.Click
         On Error Resume Next
-        Dim OFD As New OpenFileDialog
+        Dim OFD As New OpenFileDialog With {
+            .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+            .Title = "Select a Custom ORB for your Start Menu",
+            .CheckFileExists = True,
+            .FileName = "",
+            .Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
+        }
 
-        OFD.AutoUpgradeEnabled = AppBar.UseExplorerFP
-        OFD.Title = "Select a Custom ORB for your Start Menu"
-        OFD.CheckFileExists = True
-        OFD.FileName = ""
-        OFD.Filter = "Image Support Formats (*.png;*.jpg*;*.gif;*.bmp)|*.png;*.jpg*;*.gif;*.bmp|All files (*.*)|*.*"
         If OFD.ShowDialog = DialogResult.OK Then
             PictureBox7.Image = Image.FromFile(OFD.FileName)
             ComboBox1.Text = OFD.FileName
@@ -1118,7 +1124,7 @@ Public Class AppbarProperties
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "DisableCLSIDsWarnings", CheckBox16.Checked, Microsoft.Win32.RegistryValueKind.DWord)
     End Sub
 
-    Private Sub hotkeyBtnClick(btn As Button)
+    Private Sub HotkeyBtnClick(btn As Button)
         Dim ofd As New OpenFileDialog With {
             .AutoUpgradeEnabled = AppBar.UseExplorerFP,
             .CheckFileExists = True,
@@ -1149,7 +1155,7 @@ Public Class AppbarProperties
         End If
     End Sub
 
-    Private Sub hotkeyBtnRClick(sender As Object, e As MouseEventArgs)
+    Private Sub HotkeyBtnRClick(sender As Object, e As MouseEventArgs)
         If e.Button = MouseButtons.Right Then
             If MessageBox.Show("Are you sure do you want remove this program?", "Confirm box", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
 
@@ -1165,62 +1171,62 @@ Public Class AppbarProperties
         End If
     End Sub
 
-    Private Sub hotkeyBTN1_Click(sender As Object, e As EventArgs) Handles hotkeyBTN1.Click
-        hotkeyBtnClick(hotkeyBTN1)
+    Private Sub HotkeyBTN1_Click(sender As Object, e As EventArgs) Handles hotkeyBTN1.Click
+        HotkeyBtnClick(hotkeyBTN1)
 
         My.Computer.Registry.SetValue(hotkeyStart, "1", hotkeyBTN1.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN2_Click(sender As Object, e As EventArgs) Handles hotkeyBTN2.Click
-        hotkeyBtnClick(hotkeyBTN2)
+    Private Sub HotkeyBTN2_Click(sender As Object, e As EventArgs) Handles hotkeyBTN2.Click
+        HotkeyBtnClick(hotkeyBTN2)
 
         My.Computer.Registry.SetValue(hotkeyStart, "2", hotkeyBTN2.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN3_Click(sender As Object, e As EventArgs) Handles hotkeyBTN3.Click
-        hotkeyBtnClick(hotkeyBTN3)
+    Private Sub HotkeyBTN3_Click(sender As Object, e As EventArgs) Handles hotkeyBTN3.Click
+        HotkeyBtnClick(hotkeyBTN3)
 
         My.Computer.Registry.SetValue(hotkeyStart, "3", hotkeyBTN3.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN4_Click(sender As Object, e As EventArgs) Handles hotkeyBTN4.Click
-        hotkeyBtnClick(hotkeyBTN4)
+    Private Sub HotkeyBTN4_Click(sender As Object, e As EventArgs) Handles hotkeyBTN4.Click
+        HotkeyBtnClick(hotkeyBTN4)
 
         My.Computer.Registry.SetValue(hotkeyStart, "4", hotkeyBTN4.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN5_Click(sender As Object, e As EventArgs) Handles hotkeyBTN5.Click
-        hotkeyBtnClick(hotkeyBTN5)
+    Private Sub HotkeyBTN5_Click(sender As Object, e As EventArgs) Handles hotkeyBTN5.Click
+        HotkeyBtnClick(hotkeyBTN5)
 
         My.Computer.Registry.SetValue(hotkeyStart, "5", hotkeyBTN5.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN6_Click(sender As Object, e As EventArgs) Handles hotkeyBTN6.Click
-        hotkeyBtnClick(hotkeyBTN6)
+    Private Sub HotkeyBTN6_Click(sender As Object, e As EventArgs) Handles hotkeyBTN6.Click
+        HotkeyBtnClick(hotkeyBTN6)
 
         My.Computer.Registry.SetValue(hotkeyStart, "6", hotkeyBTN6.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN7_Click(sender As Object, e As EventArgs) Handles hotkeyBTN7.Click
-        hotkeyBtnClick(hotkeyBTN7)
+    Private Sub HotkeyBTN7_Click(sender As Object, e As EventArgs) Handles hotkeyBTN7.Click
+        HotkeyBtnClick(hotkeyBTN7)
 
         My.Computer.Registry.SetValue(hotkeyStart, "7", hotkeyBTN7.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN8_Click(sender As Object, e As EventArgs) Handles hotkeyBTN8.Click
-        hotkeyBtnClick(hotkeyBTN8)
+    Private Sub HotkeyBTN8_Click(sender As Object, e As EventArgs) Handles hotkeyBTN8.Click
+        HotkeyBtnClick(hotkeyBTN8)
 
         My.Computer.Registry.SetValue(hotkeyStart, "8", hotkeyBTN8.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN9_Click(sender As Object, e As EventArgs) Handles hotkeyBTN9.Click
-        hotkeyBtnClick(hotkeyBTN9)
+    Private Sub HotkeyBTN9_Click(sender As Object, e As EventArgs) Handles hotkeyBTN9.Click
+        HotkeyBtnClick(hotkeyBTN9)
 
         My.Computer.Registry.SetValue(hotkeyStart, "9", hotkeyBTN9.Tag.ToString)
     End Sub
 
-    Private Sub hotkeyBTN0_Click(sender As Object, e As EventArgs) Handles hotkeyBTN0.Click
-        hotkeyBtnClick(hotkeyBTN0)
+    Private Sub HotkeyBTN0_Click(sender As Object, e As EventArgs) Handles hotkeyBTN0.Click
+        HotkeyBtnClick(hotkeyBTN0)
 
         My.Computer.Registry.SetValue(hotkeyStart, "0", hotkeyBTN0.Tag.ToString)
     End Sub
@@ -1245,12 +1251,86 @@ Public Class AppbarProperties
     Private Sub RestartShellToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestartShellToolStripMenuItem.Click
         AppBar.CanClose = True
         Desktop.CanClose = True
-        Application.Restart()
+
+        Dim cmdPath As String = Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\cmd.exe"
+
+        If Not File.Exists(cmdPath) Then Application.Restart()
+
+        Dim psi As New ProcessStartInfo(cmdPath) With {
+            .CreateNoWindow = True,
+            .UseShellExecute = True,
+            .ErrorDialog = True,
+            .WindowStyle = ProcessWindowStyle.Hidden,
+            .Arguments = "/c timeout 1 && start " & Application.ExecutablePath & " && exit"}
+
+        Process.Start(psi)
+
+        Task.Delay(20).ContinueWith(Sub() Application.Exit())
     End Sub
 
     Private Sub RestartAndRunAsAdministratorToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestartAndRunAsAdministratorToolStripMenuItem.Click
+        If Not IsUserAnAdmin() Then
+            Dim result As DialogResult = MessageBox.Show(
+                "Do you want to restart this program with an administrator privilages?",
+                "Restart As Administrator",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question)
 
+            If result = DialogResult.Yes Then
+                Try
+                    AppBar.CanClose = True
+                    Desktop.CanClose = True
+
+                    Dim cmdPath As String = Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\cmd.exe"
+
+                    If Not File.Exists(cmdPath) Then Application.Restart()
+
+                    Dim psi As New ProcessStartInfo(cmdPath) With {
+                    .CreateNoWindow = True,
+                    .UseShellExecute = True,
+                    .ErrorDialog = True,
+                    .WindowStyle = ProcessWindowStyle.Hidden,
+                    .Arguments = "/c timeout 1 && start " & Application.ExecutablePath & " && exit",
+                    .Verb = "runas"}
+
+                    Process.Start(psi)
+
+                    Task.Delay(20).ContinueWith(Sub() Application.Exit())
+                Catch ex As Exception
+                    MessageBox.Show("Failed to gain Admin permissions " & ex.Message)
+                End Try
+            Else
+                ' Shell runs as normal User
+            End If
+        Else
+            If MessageBox.Show("Shell already runs as Administrator, restart anyway?", "Admin permissions already gained", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+                AppBar.CanClose = True
+                Desktop.CanClose = True
+
+                Dim cmdPath As String = Environment.GetFolderPath(Environment.SpecialFolder.Windows) & "\System32\cmd.exe"
+
+                If Not File.Exists(cmdPath) Then Application.Restart()
+
+                Dim psi As New ProcessStartInfo(cmdPath) With {
+                    .CreateNoWindow = True,
+                    .UseShellExecute = True,
+                    .ErrorDialog = True,
+                    .WindowStyle = ProcessWindowStyle.Hidden,
+                    .Arguments = "/c timeout 1 && start " & Application.ExecutablePath & " && exit",
+                    .Verb = "runas"}
+
+                Process.Start(psi)
+
+                Task.Delay(20).ContinueWith(Sub() Application.Exit())
+            End If
+        End If
     End Sub
+
+    Private Function IsUserAnAdmin() As Boolean
+        Dim identity = WindowsIdentity.GetCurrent()
+        Dim principal = New WindowsPrincipal(identity)
+        Return principal.IsInRole(WindowsBuiltInRole.Administrator)
+    End Function
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         StartmenuProperties.Show()
@@ -1264,6 +1344,105 @@ Public Class AppbarProperties
     Private Sub CheckBox18_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox18.CheckedChanged
         My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Volume", "UseLegacy", CheckBox18.Checked, Microsoft.Win32.RegistryValueKind.DWord)
         AppBar.UseLegacyVolumeSlider = CheckBox18.Checked
+    End Sub
+
+    Private Sub CheckBox19_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox19.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM", "EnableAeroPeek", CheckBox19.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+        AppBar.isAeroPeekEnabled = CheckBox19.Checked
+    End Sub
+
+    Private Sub CheckBox20_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox20.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell", "UseHotkeysForPinned", CheckBox20.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+
+        If CheckBox20.Checked = True Then
+            Panel4.Enabled = False
+        Else
+            Panel4.Enabled = True
+        End If
+    End Sub
+
+    Private Sub ComboBox11_TextChanged(sender As Object, e As EventArgs) Handles ComboBox11.TextChanged
+        If File.Exists(ComboBox11.Text) Then
+            Dim fi As New FileInfo(ComboBox11.Text)
+
+            If fi.Extension.ToLower = ".exe" Then My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "SearchApp", ComboBox11.Text) Else Exit Sub
+        Else
+            Exit Sub
+        End If
+    End Sub
+
+    Private Sub ComboBox12_TextChanged(sender As Object, e As EventArgs) Handles ComboBox12.TextChanged
+        If File.Exists(ComboBox12.Text) Then
+            Dim fi As New FileInfo(ComboBox12.Text)
+
+            If fi.Extension.ToLower = ".exe" Then My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\CustomPaths", "Assistant", ComboBox12.Text) Else Exit Sub
+        Else
+            Exit Sub
+        End If
+    End Sub
+
+    Private Sub Button23_Click(sender As Object, e As EventArgs) Handles Button23.Click
+        Dim ofd As New OpenFileDialog With {
+    .AutoUpgradeEnabled = AppBar.UseExplorerFP,
+    .CheckFileExists = True,
+    .Title = "Pick a program/file you want to execute after hotkey pressed.",
+    .Filter = "Executable (*.exe;*.pif)|*.exe;*.pif|All files (*.*)|*.*",
+    .Multiselect = False,
+    .SupportMultiDottedExtensions = True,
+    .ValidateNames = True}
+
+
+        If File.Exists(ComboBox11.Text) Then
+            Dim fi As New FileInfo(ComboBox11.Text)
+            ofd.InitialDirectory = fi.DirectoryName
+            ofd.FileName = fi.Name
+        Else
+            ofd.FileName = String.Empty
+        End If
+
+        'Hotkey setup
+        If ofd.ShowDialog(Me) = DialogResult.OK Then
+
+            ComboBox11.Text = ofd.FileName
+
+        End If
+    End Sub
+
+    Private Sub Button24_Click(sender As Object, e As EventArgs) Handles Button24.Click
+        Dim ofd As New OpenFileDialog With {
+.AutoUpgradeEnabled = AppBar.UseExplorerFP,
+.CheckFileExists = True,
+.Title = "Pick a program/file you want to execute after hotkey pressed.",
+.Filter = "Executable (*.exe;*.pif)|*.exe;*.pif|All files (*.*)|*.*",
+.Multiselect = False,
+.SupportMultiDottedExtensions = True,
+.ValidateNames = True}
+
+
+        If File.Exists(ComboBox12.Text) Then
+            Dim fi As New FileInfo(ComboBox12.Text)
+            ofd.InitialDirectory = fi.DirectoryName
+            ofd.FileName = fi.Name
+        Else
+            ofd.FileName = String.Empty
+        End If
+
+        'Hotkey setup
+        If ofd.ShowDialog(Me) = DialogResult.OK Then
+
+            ComboBox12.Text = ofd.FileName
+
+        End If
+    End Sub
+
+    Private Sub TrackBar2_Scroll(sender As Object, e As EventArgs) Handles TrackBar2.Scroll
+        BrightnessEngine.SetBrightness(Me.Handle, TrackBar2.Value)
+    End Sub
+
+    Private Sub CheckBox21_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox21.CheckedChanged
+        My.Computer.Registry.SetValue("HKEY_CURRENT_USER\Software\Shell\Appbar", "ShowKeyboard", CheckBox21.Checked, Microsoft.Win32.RegistryValueKind.DWord)
+
+        AppBar.ShowKeyboardButton = CheckBox21.Checked
     End Sub
 End Class
 

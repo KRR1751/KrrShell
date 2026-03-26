@@ -1,9 +1,10 @@
-﻿Imports System.ComponentModel
+﻿Imports System.Collections.Specialized
+Imports System.ComponentModel
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Text
 Imports Microsoft.Win32
-Imports System.Collections.Specialized
+Imports NewShell.DesktopProperties
 
 <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto)>
 Public Structure SHFILEINFO
@@ -54,10 +55,16 @@ End Structure
 Public Class Desktop
     Private Const REG_KEY_PATH As String = "DesktopBackground\Shell"
 
+    Private Const WM_SETTINGCHANGE As Integer = &H1A
+    Private Const SPI_SETDESKWALLPAPER As Integer = &H14
+
     Private Const SHGFI_ICON As UInteger = &H100
     Private Const SHGFI_SYSICONINDEX As UInteger = &H4000
     Private Const SHGFI_LARGEICON As UInteger = &H0
     Private Const SHGFI_SMALLICON As UInteger = &H1
+
+    Private iconWatcher As RegistryWatcher
+    Private wallpaperWatcher As RegistryWatcher
 
     <DllImport("shell32.dll", CharSet:=CharSet.Auto)>
     Public Shared Function SHGetFileInfo(pszPath As String, dwFileAttributes As UInteger, ByRef psfi As SHFILEINFO, cbFileInfo As UInteger, uFlags As UInteger) As IntPtr
@@ -95,10 +102,37 @@ Public Class Desktop
     Public Async Function BackUpdate() As Task
         Try
             Dim wallpaperPath As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", ""))
-            Dim styleVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", "0"))
-            Dim tileVal As String = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", "0"))
+            Dim styleVal As Integer = CInt(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "WallpaperStyle", 0))
+            Dim tileVal As Integer = CInt(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "TileWallpaper", 0))
 
-            If String.IsNullOrEmpty(wallpaperPath) OrElse Not File.Exists(wallpaperPath) Then Return
+            Dim pathToLoad As String = ""
+
+            Dim cachedDir As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\Windows\Themes\CachedFiles")
+            If Directory.Exists(cachedDir) Then
+                Dim files = Directory.GetFiles(cachedDir, "CachedImage*.jpg")
+                If files.Length > 0 Then
+                    pathToLoad = files.OrderByDescending(Function(f) File.GetLastWriteTime(f)).First()
+                End If
+            End If
+
+            If String.IsNullOrEmpty(pathToLoad) OrElse Not File.Exists(pathToLoad) Then
+                Dim transcoded As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft\Windows\Themes\TranscodedWallpaper")
+                If File.Exists(transcoded) Then pathToLoad = transcoded
+            End If
+
+            If String.IsNullOrEmpty(pathToLoad) OrElse Not File.Exists(pathToLoad) Then
+                pathToLoad = CStr(Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers", "BackgroundHistoryPath0", ""))
+            End If
+
+            If String.IsNullOrEmpty(pathToLoad) OrElse Not File.Exists(pathToLoad) Then
+                pathToLoad = CStr(Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", ""))
+            End If
+
+            If String.IsNullOrEmpty(pathToLoad) OrElse Not File.Exists(pathToLoad) Then Return
+
+            ' Logic to load.
+            Dim currentStyle As WallpaperStyle = CType(styleVal, WallpaperStyle)
+            If styleVal = 0 AndAlso tileVal = 1 Then currentStyle = WallpaperStyle.Tiled
 
             Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
             Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
@@ -110,70 +144,136 @@ Public Class Desktop
                                    Dim ms As New MemoryStream(bytes)
                                    Dim tempImg As Image = Image.FromStream(ms)
 
-                                   Dim isGif As Boolean = tempImg.RawFormat.Equals(Drawing.Imaging.ImageFormat.Gif)
-
-                                   If isGif Then
+                                   ' Check if it is a GIF wallpaper
+                                   If tempImg.RawFormat.Equals(Drawing.Imaging.ImageFormat.Gif) Then
                                        finalImage = tempImg
                                    Else
-                                       Dim needsResize As Boolean = (tempImg.Width > screenWidth OrElse tempImg.Height > screenHeight) AndAlso
-                                                              (styleVal = "2" OrElse styleVal = "6" OrElse styleVal = "10" OrElse styleVal = "22")
-
-                                       If needsResize Then
+                                       ' --- LOGIC FOR SPECIAL WALLPAPERS ---
+                                       If currentStyle = WallpaperStyle.Fill OrElse currentStyle = WallpaperStyle.Span Then
+                                           ' FILL/SPAN
                                            Dim bmp As New Bitmap(screenWidth, screenHeight)
                                            Using g As Graphics = Graphics.FromImage(bmp)
                                                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-                                               g.DrawImage(tempImg, 0, 0, screenWidth, screenHeight)
+                                               g.Clear(SystemColors.Desktop)
+
+                                               Dim ratioWidth As Double = screenWidth / tempImg.Width
+                                               Dim ratioHeight As Double = screenHeight / tempImg.Height
+                                               Dim scale As Double = Math.Max(ratioWidth, ratioHeight)
+
+                                               Dim newWidth As Integer = CInt(tempImg.Width * scale)
+                                               Dim newHeight As Integer = CInt(tempImg.Height * scale)
+                                               Dim posX As Integer = (screenWidth - newWidth) \ 2
+                                               Dim posY As Integer = (screenHeight - newHeight) \ 2
+
+                                               g.DrawImage(tempImg, posX, posY, newWidth, newHeight)
+                                           End Using
+                                           finalImage = bmp
+                                       ElseIf currentStyle = WallpaperStyle.Tiled Then
+                                           ' TILE
+                                           Dim bmp As New Bitmap(screenWidth, screenHeight)
+                                           Using g As Graphics = Graphics.FromImage(bmp)
+                                               Using tb As New TextureBrush(tempImg)
+                                                   tb.WrapMode = Drawing2D.WrapMode.Tile
+                                                   g.FillRectangle(tb, 0, 0, screenWidth, screenHeight)
+                                               End Using
                                            End Using
                                            finalImage = bmp
                                        Else
+                                           ' OTHERS
                                            finalImage = New Bitmap(tempImg)
                                        End If
-
                                        tempImg.Dispose()
                                        ms.Dispose()
                                    End If
-                               Catch ex As Exception
-                                   Debug.WriteLine("Hybrid Update Error: " & ex.Message)
-                               End Try
+                               Catch : End Try
                            End Sub)
 
+            ' Setting up...
             If finalImage IsNot Nothing Then
-                If PictureBoxWallpaper.Image IsNot Nothing Then
-                    Dim oldImg = PictureBoxWallpaper.Image
-                    PictureBoxWallpaper.Image = Nothing
-                    oldImg.Dispose()
-                End If
-
+                If PictureBoxWallpaper.Image IsNot Nothing Then PictureBoxWallpaper.Image.Dispose()
                 PictureBoxWallpaper.Image = finalImage
-                ApplyWallpaperStyle(styleVal, tileVal)
+                ApplyWallpaperStyle(currentStyle)
                 PictureBoxWallpaper.Visible = True
-            End If
 
-        Catch ex As Exception
-            Debug.WriteLine("BackUpdate Main Error: " & ex.Message)
-        End Try
+                ' Automatically sets a primary color from a Wallpaper
+                Dim autoColor As Boolean = My.Computer.Registry.GetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "AutoColorization", 0)
+
+                If autoColor = True Then
+                    Dim mainWallColor As Color = GetMainColorFromWallpaper(finalImage)
+                    SetAccentColor(mainWallColor)
+                End If
+            End If
+        Catch : End Try
     End Function
 
-    Private Sub ApplyWallpaperStyle(style As String, tile As String)
+    Public Sub ApplyWallpaperStyle(style As WallpaperStyle)
         ' 0 = Center (Tile=0), 2 = Stretch, 6 = Fit (Zoom), 10 = Fill (Center + Zoom), 22 = Span
 
         Select Case style
-            Case "0"
-                If tile = "1" Then
-                    PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Normal
-                Else
-                    PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.CenterImage
-                End If
-            Case "2"
+            Case WallpaperStyle.Centered
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.CenterImage
+
+            Case WallpaperStyle.Stretched
                 PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.StretchImage
-            Case "6"
+
+            Case WallpaperStyle.Fit
                 PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Zoom
-            Case "10", "22" ' Fill
-                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Zoom
+
+            Case WallpaperStyle.Fill, WallpaperStyle.Span, WallpaperStyle.Tiled
+                PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.CenterImage
+
             Case Else
                 PictureBoxWallpaper.SizeMode = PictureBoxSizeMode.Normal
         End Select
     End Sub
+    Public LastAccentColor As Color = Color.Blue
+    Public LastAccentInactiveColor As Color = Color.White
+    Public Sub SetAccentColor(ByVal c As Color)
+        Dim abgr As Integer = (CInt(&HFF) << 24) Or (CInt(c.B) << 16) Or (CInt(c.G) << 8) Or CInt(c.R)
+        Dim argb As Integer = (CInt(&HFF) << 24) Or (CInt(c.R) << 16) Or (CInt(c.G) << 8) Or CInt(c.B)
+
+        Using key As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\Microsoft\Windows\DWM", True)
+            key?.SetValue("ColorizationColor", argb, RegistryValueKind.DWord)
+            key?.SetValue("AccentColor", abgr, RegistryValueKind.DWord)
+        End Using
+
+        Select Case DesktopProperties.ComboBox3.SelectedIndex
+            Case 0
+                DesktopProperties.Panel4.BackColor = c
+        End Select
+
+        DesktopProperties.NotifySystemChange()
+    End Sub
+
+    Public Sub SetInactiveAccentColor(ByVal c As Color)
+        Dim abgr As Integer = (CInt(&HFF) << 24) Or (CInt(c.B) << 16) Or (CInt(c.G) << 8) Or CInt(c.R)
+        Dim argb As Integer = (CInt(&HFF) << 24) Or (CInt(c.R) << 16) Or (CInt(c.G) << 8) Or CInt(c.B)
+
+        Using key As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\Microsoft\Windows\DWM", True)
+            key?.SetValue("ColorizationColorInactive", argb, RegistryValueKind.DWord)
+            key?.SetValue("AccentColorInactive", abgr, RegistryValueKind.DWord)
+        End Using
+
+        Select Case DesktopProperties.ComboBox3.SelectedIndex
+            Case 1
+                DesktopProperties.Panel4.BackColor = c
+        End Select
+
+        DesktopProperties.NotifySystemChange()
+    End Sub
+
+    Public Function GetMainColorFromWallpaper(bmp As Bitmap) As Color
+        Dim tempBmp As New Bitmap(1, 1)
+        Using g As Graphics = Graphics.FromImage(tempBmp)
+            g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+            g.DrawImage(bmp, 0, 0, 1, 1)
+        End Using
+
+        Dim accent As Color = tempBmp.GetPixel(0, 0)
+        tempBmp.Dispose()
+
+        Return Color.FromArgb(255, accent.R, accent.G, accent.B)
+    End Function
 
     Public Function GetFileIcon(path As String) As Image
         Dim largeIcon(0) As IntPtr
@@ -184,7 +284,7 @@ Public Class Desktop
         Return SystemIcons.Application.ToBitmap()
     End Function
 
-    Private Function GetOptimizedIcon(path As String, targetSize As Integer) As Image
+    Public Function GetOptimizedIcon(path As String, targetSize As Integer) As Image
         If path.ToLower.StartsWith("shell:::") Then
             Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(path.Replace("shell:::", ""))
 
@@ -247,9 +347,8 @@ Public Class Desktop
             SHGetImageList(iconSizeFlag, iidImageList, iml)
 
             Dim hIcon As IntPtr = IntPtr.Zero
-            If iml IsNot Nothing Then
-                iml.GetIcon(shinfo.iIcon, 1, hIcon)
-            End If
+
+            iml?.GetIcon(shinfo.iIcon, 1, hIcon)
 
             If hIcon <> IntPtr.Zero Then
                 Dim bmp As Bitmap = Icon.FromHandle(hIcon).ToBitmap()
@@ -264,7 +363,7 @@ Public Class Desktop
 
     End Function
 
-    Private Shared ReadOnly HWND_BOTTOM As IntPtr = New IntPtr(1)
+    Private Shared ReadOnly HWND_BOTTOM As New IntPtr(1)
     Private Const SWP_NOSIZE As UInt32 = &H1
     Private Const SWP_NOMOVE As UInt32 = &H2
     Private Const SWP_NOACTIVATE As UInt32 = &H10
@@ -280,6 +379,8 @@ Public Class Desktop
     Public IsShowDesktopMode As Boolean = False
 
     Private Sub FormDesktop_Deactivate(sender As Object, e As EventArgs) Handles Me.Deactivate
+        PictureBoxWallpaper.Invalidate()
+
         If IsShowDesktopMode Then
             IsShowDesktopMode = False
             Me.TopMost = False
@@ -295,6 +396,21 @@ Public Class Desktop
         Me.Activate()
     End Sub
 
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
+    Private Shared Function SystemParametersInfo(uAction As Integer, uParam As Integer, lpvParam As String, fuWinIni As Integer) As Boolean
+    End Function
+
+    Private Const SPIF_UPDATEINIFILE As Integer = &H1
+    Private Const SPIF_SENDCHANGE As Integer = &H2
+
+    Public Async Function SetWallpaperForce(ByVal path As String) As Task
+        Registry.SetValue("HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", path)
+
+        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE Or SPIF_SENDCHANGE)
+
+        Await BackUpdate()
+    End Function
+
     Private Const WM_WINDOWPOSCHANGING As Integer = &H46
     <StructLayout(LayoutKind.Sequential)>
     Private Structure WINDOWPOS
@@ -308,6 +424,28 @@ Public Class Desktop
     End Structure
 
     Protected Overrides Sub WndProc(ByRef m As Message)
+        If m.Msg = WM_SETTINGCHANGE Then
+            Try
+                Dim isWallpaperChange As Boolean = (m.WParam.ToInt32() = SPI_SETDESKWALLPAPER)
+
+                If m.LParam <> IntPtr.Zero Then
+                    Dim lParamStr As String = Marshal.PtrToStringAuto(m.LParam)
+                    If lParamStr IsNot Nothing AndAlso lParamStr.Equals("Wallpaper", StringComparison.OrdinalIgnoreCase) Then
+                        isWallpaperChange = True
+                    End If
+                End If
+
+                If isWallpaperChange Then
+                    Task.Delay(500).ContinueWith(Sub()
+                                                     Me.Invoke(Sub()
+                                                                   Dim t = BackUpdate()
+                                                               End Sub)
+                                                 End Sub)
+                End If
+            Catch ex As Exception
+            End Try
+        End If
+
         If m.Msg = WM_WINDOWPOSCHANGING AndAlso Not IsShowDesktopMode Then
             Dim wp As WINDOWPOS = CType(Marshal.PtrToStructure(m.LParam, GetType(WINDOWPOS)), WINDOWPOS)
             wp.hwndInsertAfter = New IntPtr(1)
@@ -315,6 +453,7 @@ Public Class Desktop
 
             Marshal.StructureToPtr(wp, m.LParam, True)
         End If
+
         MyBase.WndProc(m)
     End Sub
 
@@ -484,11 +623,43 @@ Public Class Desktop
         If clsidGUID = CLSID_RECYCLEBIN Then Return True
         Return False
     End Function
+    Public IsDesktopIniVisible As Boolean = False
+    Private Function AreDesktopIconsEnabled() As Boolean
+        Try
+            Dim noDesktop = Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoDesktop", 0)
+            If CInt(noDesktop) = 1 Then Return False
+
+            Dim hideIcons = Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideIcons", 0)
+            If CInt(hideIcons) = 1 Then Return False
+
+            Return True
+        Catch
+            Return True
+        End Try
+    End Function
+
+    Private Function ShouldShowHiddenFiles() As Boolean
+        Try
+            ' 1 = Show hidden, 2 = Don't show hidden
+            Dim val = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Hidden", 2)
+            Return CInt(val) = 1
+        Catch
+            Return False
+        End Try
+    End Function
 
     Public Sub LoadDesktopIcons()
+        If Not AreDesktopIconsEnabled() Then
+            Icons.Clear()
+            Me.Invalidate()
+            Return
+        End If
+
         Dim ICON_WIDTH As Integer = SystemInformation.IconSpacingSize.Width
         Dim ICON_HEIGHT As Integer = SystemInformation.IconSpacingSize.Height
-        Dim SPACE As Integer = 5 'SystemInformation.IconSize.Height
+        'Dim SPACE As Integer = 5
+
+        Dim showHidden As Boolean = ShouldShowHiddenFiles()
 
         Dim targetPath As String = DesktopDir
         Dim targetPathPublic As String = DesktopDirPublic
@@ -501,78 +672,75 @@ Public Class Desktop
         Icons.Clear()
 
         Dim Items As New List(Of String)()
-
         If IsShellIconVisible(CLSID_THISPC) Then Items.Add(CLSID_THISPC)
         If IsShellIconVisible(CLSID_USERFILES) Then Items.Add(CLSID_USERFILES)
         If IsShellIconVisible(CLSID_NETWORK) Then Items.Add(CLSID_NETWORK)
         If IsShellIconVisible(CLSID_RECYCLEBIN) Then Items.Add(CLSID_RECYCLEBIN)
         If IsShellIconVisible(CLSID_CONTROL_PANEL) Then Items.Add(CLSID_CONTROL_PANEL)
 
-        Dim directories() As String = Directory.GetDirectories(targetPath)
-        Dim files() As String = Directory.GetFiles(targetPath)
-
-        Dim publicdirectories() As String = Directory.GetDirectories(targetPathPublic)
-        Dim publicfiles() As String = Directory.GetFiles(targetPathPublic)
-
-        Items.AddRange(directories)
-        Items.AddRange(publicdirectories)
-
-        Items.AddRange(files)
-        Items.AddRange(publicfiles)
+        Items.AddRange(Directory.GetDirectories(targetPath))
+        Items.AddRange(Directory.GetDirectories(targetPathPublic))
+        Items.AddRange(Directory.GetFiles(targetPath))
+        Items.AddRange(Directory.GetFiles(targetPathPublic))
 
         For i As Integer = 0 To Items.Count - 1
-            Dim isShellItem As Boolean = Items(i).StartsWith("::{")
-            Dim isDirectory As Boolean = Directory.Exists(Items(i))
-            Dim isFile As Boolean = File.Exists(Items(i))
+            Dim currentPath As String = Items(i)
+            Dim isShellItem As Boolean = currentPath.StartsWith("::{")
+            Dim isDirectory As Boolean = Directory.Exists(currentPath)
+            Dim isFile As Boolean = File.Exists(currentPath)
 
-            If isFile = False AndAlso isDirectory = False AndAlso isShellItem = False Then Continue For
+            If Not isFile AndAlso Not isDirectory AndAlso Not isShellItem Then Continue For
 
-            Dim DesktopItem As New DesktopIcon
+            If Not isShellItem Then
+                Dim fileName As String = Path.GetFileName(currentPath)
 
-            DesktopItem.Bounds = New Rectangle(0, 0, 100, 100)
+                If fileName.ToLower() = "desktop.ini" AndAlso Not IsDesktopIniVisible Then
+                    Continue For
+                End If
 
-            If isFile = True Then
-                Dim FI As New FileInfo(Items(i))
+                If Not showHidden Then
+                    Dim attr As FileAttributes
+                    If isFile Then
+                        attr = New FileInfo(currentPath).Attributes
+                    Else
+                        attr = New DirectoryInfo(currentPath).Attributes
+                    End If
 
+                    If (attr And FileAttributes.Hidden) = FileAttributes.Hidden Then
+                        Continue For
+                    End If
+                End If
+            End If
+
+            Dim DesktopItem As New DesktopIcon With {
+            .Bounds = New Rectangle(0, 0, 100, 100)
+        }
+
+            If isFile Then
+                Dim FI As New FileInfo(currentPath)
                 Try
                     DesktopItem.IconImage = GetOptimizedIcon(FI.FullName, BaseIconSize.Width + 10)
-                Catch ex As Exception
+                Catch
                     DesktopItem.IconImage = SystemIcons.Application.ToBitmap
                 End Try
+                DesktopItem.Name = If(FI.Extension.ToLower = ".lnk", Path.GetFileNameWithoutExtension(FI.FullName), FI.Name)
+                DesktopItem.FilePath = currentPath
 
-                If FI.Extension.ToLower = ".lnk" Then
-                    DesktopItem.Name = Path.GetFileNameWithoutExtension(FI.FullName)
-                Else
-                    DesktopItem.Name = FI.Name
-                End If
-
-                DesktopItem.FilePath = Items(i)
-
-            ElseIf isDirectory = True Then
-                Dim DI As New DirectoryInfo(Items(i))
-
+            ElseIf isDirectory Then
+                Dim DI As New DirectoryInfo(currentPath)
                 Try
                     DesktopItem.IconImage = GetOptimizedIcon(DI.FullName, BaseIconSize.Width + 10)
-                Catch ex As Exception
+                Catch
                     DesktopItem.IconImage = SystemIcons.Question.ToBitmap
                 End Try
-
                 DesktopItem.Name = DI.Name
-                DesktopItem.FilePath = Items(i)
-
+                DesktopItem.FilePath = currentPath
 
             ElseIf isShellItem Then
-                Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(Items(i))
-
+                Dim info As ShellHelpers.ShellItemInfo = ShellHelpers.GetShellItemInfo(currentPath)
                 DesktopItem.Name = info.DisplayName
-
-                If info.Icon IsNot Nothing Then
-                    DesktopItem.IconImage = info.Icon
-                Else
-                    DesktopItem.IconImage = SystemIcons.Application.ToBitmap
-                End If
-
-                DesktopItem.FilePath = "shell:" & Items(i)
+                DesktopItem.IconImage = If(info.Icon, SystemIcons.Application.ToBitmap)
+                DesktopItem.FilePath = "shell:" & currentPath
             End If
 
             Icons.Add(DesktopItem)
@@ -759,8 +927,9 @@ Public Class Desktop
         Dim paths As String() = selectedIcons.Select(Function(x) x.FilePath).ToArray()
         Dim mainPath As String = paths(0)
 
-        Dim cms As New ContextMenuStrip()
-        cms.RenderMode = ToolStripRenderMode.System
+        Dim cms As New ContextMenuStrip With {
+            .RenderMode = ToolStripRenderMode.System
+        }
 
         RegistryMenuManager.ShowRegistryMenu(paths, displayPoint)
     End Sub
@@ -841,18 +1010,29 @@ Public Class Desktop
         Await BackUpdate()
         LoadDesktopIcons()
 
+        iconWatcher = New RegistryWatcher("Software\Microsoft\Windows\CurrentVersion\Explorer", Sub()
+                                                                                                    Me.Invoke(Sub() LoadDesktopIcons())
+                                                                                                End Sub)
+        iconWatcher.Start()
+
+        wallpaperWatcher = New RegistryWatcher("Control Panel\Desktop", Sub()
+                                                                            Me.Invoke(Async Sub() Await BackUpdate())
+                                                                        End Sub)
+        wallpaperWatcher.Start()
+
         Dim ShellIconsKey As String = "Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
         If Registry.CurrentUser.OpenSubKey(ShellIconsKey) Is Nothing Then
             Registry.CurrentUser.CreateSubKey(ShellIconsKey)
 
-            Registry.SetValue(ShellIconsKey, CLSID_RECYCLEBIN, "0")
+            Registry.SetValue(ShellIconsKey, CLSID_RECYCLEBIN.Substring(2), "0")
         End If
 
         LoadSettings()
 
-        FSW = New IO.FileSystemWatcher()
-        FSW.Path = DesktopDir
-        FSW.EnableRaisingEvents = True
+        FSW = New IO.FileSystemWatcher With {
+            .Path = DesktopDir,
+            .EnableRaisingEvents = True
+        }
 
         InitScrollbar()
 
@@ -989,13 +1169,28 @@ Public Class Desktop
             End If
 
             ' Hover
+
+            Dim selectionBrush As SolidBrush
+            Dim selectionPen As Pen
+
+            If Me.ContainsFocus Then
+                selectionBrush = New SolidBrush(Color.FromArgb(100, 51, 153, 255))
+                selectionPen = New Pen(Color.DodgerBlue, 1)
+            Else
+                selectionBrush = New SolidBrush(Color.FromArgb(100, 180, 180, 180))
+                selectionPen = New Pen(Color.FromArgb(150, 150, 150, 150), 1)
+            End If
+
             If item.IsSelected Then
-                g.FillRectangle(New SolidBrush(Color.FromArgb(100, 51, 153, 255)), item.Bounds)
-                g.DrawRectangle(New Pen(Color.DodgerBlue, 1), item.Bounds)
+                g.FillRectangle(selectionBrush, item.Bounds)
+                g.DrawRectangle(selectionPen, item.Bounds)
             ElseIf item.IsHovered Then
                 g.FillRectangle(New SolidBrush(Color.FromArgb(60, 51, 153, 255)), item.Bounds)
                 g.DrawRectangle(New Pen(Color.FromArgb(150, 51, 153, 255), 1), item.Bounds)
             End If
+
+            selectionBrush.Dispose()
+            selectionPen.Dispose()
 
             ' Icon
             Dim imgRect As New Rectangle(
@@ -1126,11 +1321,11 @@ Public Class Desktop
         If item Is Nothing Then Return
 
         RenamingIcon = item
-        RenameBox = New TextBox()
-
-        RenameBox.Text = item.Name
-        RenameBox.TextAlign = HorizontalAlignment.Center
-        RenameBox.Multiline = True
+        RenameBox = New TextBox With {
+            .Text = item.Name,
+            .TextAlign = HorizontalAlignment.Center,
+            .Multiline = True
+        }
 
         Dim rect = item.Bounds
         RenameBox.Bounds = New Rectangle(rect.X, rect.Y + (rect.Height - 30), rect.Width, 30)
@@ -1349,8 +1544,9 @@ Public Class Desktop
     End Sub
 
     Private Function ReadRegistryKey(ByVal subKey As RegistryKey, ByVal subKeyName As String) As ContextMenuItem
-        Dim item As New ContextMenuItem()
-        item.Name = subKeyName
+        Dim item As New ContextMenuItem With {
+            .Name = subKeyName
+        }
 
         Dim textValue As Object = subKey.GetValue("MUIVerb")
 
@@ -1559,6 +1755,9 @@ Public Class Desktop
         SmallIconsToolStripMenuItem.Checked = False
         MiniIconsToolStripMenuItem.Checked = False
 
+        Dim div As Boolean = AreDesktopIconsEnabled()
+        If div = True Then HideIconsToolStripMenuItem.Checked = False Else HideIconsToolStripMenuItem.Checked = True
+
         PasteToolStripMenuItem.Enabled = Clipboard.ContainsFileDropList
 
         Select Case ZoomLevel
@@ -1710,7 +1909,7 @@ Public Class Desktop
     End Sub
 
     Private Sub PropertiesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PropertiesToolStripMenuItem.Click
-        DesktopProperties.ShowDialog(Me)
+        If DesktopProperties.Visible = True Then DesktopProperties.Activate() Else DesktopProperties.Show(Me)
     End Sub
 
     Private Sub PictureBoxWallpaper_KeyUp(sender As Object, e As KeyEventArgs) Handles PictureBoxWallpaper.KeyUp, Me.KeyUp
@@ -1718,7 +1917,7 @@ Public Class Desktop
             For Each desktopIcon In Icons
                 desktopIcon.IsSelected = True
             Next
-            PictureBoxWallpaper.Invalidate() ' Překreslíme plochu, aby byl vidět výběr
+            PictureBoxWallpaper.Invalidate()
             e.Handled = True
             Return
         End If
@@ -1743,7 +1942,6 @@ Public Class Desktop
 
             ' --- DELETE / SHIFT + DELETE ---
         ElseIf e.KeyCode = Keys.Delete Then
-            ' Shift+Delete = Permanentní smazání (bez koše)
             Dim recycleBin As FileIO.RecycleOption = If(e.Shift, FileIO.RecycleOption.DeletePermanently, FileIO.RecycleOption.SendToRecycleBin)
             Dim msg = If(e.Shift, "Are you sure do you want permanently delete those selected items?", "Move items into the Recycle Bin?")
 
@@ -1776,6 +1974,23 @@ Public Class Desktop
             Next
             e.Handled = True
         End If
+    End Sub
+
+    Private Sub Desktop_Activated(sender As Object, e As EventArgs) Handles Me.Activated
+        PictureBoxWallpaper.Invalidate()
+    End Sub
+
+    Private Sub HideIconsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HideIconsToolStripMenuItem.Click
+        Dim regValue As Integer = If(HideIconsToolStripMenuItem.Checked, 0, 1)
+
+        Try
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideIcons", regValue, Microsoft.Win32.RegistryValueKind.DWord)
+
+            LoadDesktopIcons()
+
+        Catch ex As Exception
+            MessageBox.Show("Failed to change icons visibillity: " & ex.Message)
+        End Try
     End Sub
 End Class
 
@@ -1929,6 +2144,73 @@ Public Class ShellHelpers
             Case Else : Return "Unknown Item"
         End Select
     End Function
+End Class
+
+Public Class RegistryWatcher
+    <DllImport("advapi32.dll", SetLastError:=True)>
+    Private Shared Function RegOpenKeyEx(hKey As IntPtr, lpSubKey As String, ulOptions As UInteger, samDesired As Integer, ByRef phkResult As IntPtr) As Integer
+    End Function
+
+    <DllImport("advapi32.dll", SetLastError:=True)>
+    Private Shared Function RegNotifyChangeKeyValue(hKey As IntPtr, watchSubtree As Boolean, notifyFilter As UInteger, hEvent As IntPtr, asynchronous As Boolean) As Integer
+    End Function
+
+    <DllImport("advapi32.dll", SetLastError:=True)>
+    Private Shared Function RegCloseKey(hKey As IntPtr) As Integer
+    End Function
+
+    Private Const HKEY_CURRENT_USER As Long = &H80000001
+    Private Const HKEY_LOCAL_MACHINE As Long = &H80000002
+
+    Private Const REG_NOTIFY_CHANGE_NAME As UInteger = &H1
+    Private Const REG_NOTIFY_CHANGE_LAST_SET As UInteger = &H4 ' Změna hodnoty
+    Private Const KEY_READ As Integer = &H20019
+
+    Private ReadOnly _worker As BackgroundWorker
+    Private ReadOnly _keyPath As String
+    Private ReadOnly _callback As Action
+    Private ReadOnly _ishkcm As Boolean
+
+    Public Sub New(keyPath As String, callback As Action, Optional isHKCM As Boolean = False)
+        _keyPath = keyPath
+        _callback = callback
+        _ishkcm = isHKCM
+        _worker = New BackgroundWorker()
+        AddHandler _worker.DoWork, AddressOf WatchLoop
+    End Sub
+
+    Public Sub Start()
+        If Not _worker.IsBusy Then _worker.RunWorkerAsync()
+    End Sub
+
+    Private Sub WatchLoop(sender As Object, e As DoWorkEventArgs)
+        Dim hKeyRoot As IntPtr
+        If _ishkcm Then
+            hKeyRoot = New IntPtr(HKEY_LOCAL_MACHINE)
+        Else
+            hKeyRoot = New IntPtr(HKEY_CURRENT_USER)
+        End If
+
+        While Not _worker.CancellationPending
+            Dim hKey As IntPtr
+
+            If RegOpenKeyEx(hKeyRoot, _keyPath, 0, KEY_READ, hKey) = 0 Then
+                Try
+                    Dim result = RegNotifyChangeKeyValue(hKey, True, REG_NOTIFY_CHANGE_NAME Or REG_NOTIFY_CHANGE_LAST_SET, IntPtr.Zero, False)
+
+                    If result = 0 Then
+                        _callback.Invoke()
+                    Else
+                        Threading.Thread.Sleep(1000)
+                    End If
+                Finally
+                    RegCloseKey(hKey)
+                End Try
+            Else
+                Task.Delay(5000)
+            End If
+        End While
+    End Sub
 End Class
 
 Public Module ShellIconHelper

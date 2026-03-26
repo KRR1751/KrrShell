@@ -15,7 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
+    <PublishUrl>C:\Windows\NewShell\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -29,10 +29,10 @@
     <TargetCulture>en-001</TargetCulture>
     <ProductName>KrrShell</ProductName>
     <PublisherName>KRR1751</PublisherName>
-    <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>0.0.4.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -94,11 +94,12 @@
     <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisRuleSet>CppCoreCheckRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ConcurrencyRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <WarningsAsErrors>
     </WarningsAsErrors>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>
@@ -106,6 +107,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>40EB12C0CB40A6A689B92B9B77236582A8857126</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>NewShell_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -237,7 +250,18 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FileOperations.vb" />
+    <Compile Include="My Project\Resources.Designer.vb">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Include="RegistryMenuManager.vb" />
+    <Compile Include="ScreenDrawer.Designer.vb">
+      <DependentUpon>ScreenDrawer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ScreenDrawer.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ShellApi.vb" />
     <Compile Include="FolderCreator.designer.vb">
       <DependentUpon>FolderCreator.vb</DependentUpon>
@@ -256,11 +280,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
       <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="My Project\Resources.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -355,16 +374,19 @@
       <DependentUpon>LinkCreator.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
+      <SubType>Designer</SubType>
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="RunDialog.resx">
       <DependentUpon>RunDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SA.resx">
       <DependentUpon>SA.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ScreenDrawer.resx">
+      <DependentUpon>ScreenDrawer.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Startmenu.resx">
       <DependentUpon>Startmenu.vb</DependentUpon>
@@ -396,8 +418,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="NewShell.ruleset" />
+    <None Include="NewShell_TemporaryKey.pfx" />
     <None Include="packages.config" />
-    <None Include="Resources\main.png" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Shell32">
@@ -411,31 +434,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\main1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\#120.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\#121.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\#122.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\#124.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\#3048.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\fixed1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Gradient-Wallpaper-3008832671.jpg" />
+    <None Include="Resources\StartOriginal.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\EmptyWin7Dog.png" />
@@ -445,28 +444,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Program.ico" />
-    <None Include="Resources\Program.bmp" />
     <None Include="Resources\Program.png" />
     <None Include="Resources\FileExplorer.png" />
     <None Include="Resources\FileExplorerSmall.png" />
-    <None Include="Resources\146.png" />
     <None Include="Resources\Settings.png" />
-    <None Include="Resources\left.png" />
     <None Include="Resources\Clock.png" />
     <None Include="Resources\Information.png" />
-    <None Include="Resources\mainTransparent.png" />
-    <None Include="Resources\mainTransparent1.png" />
     <None Include="Resources\Minimize.png" />
     <None Include="Resources\Normalize.png" />
     <None Include="Resources\Maximize.png" />
     <None Include="Resources\Pin.png" />
     <None Include="Resources\Close.png" />
-    <None Include="Resources\026.png" />
-    <None Include="Resources\Nothing.png" />
     <None Include="Resources\ProgramSmall.png" />
     <None Include="Resources\ProgramMedium.png" />
-    <None Include="Resources\#123.ico" />
-    <Content Include="RunDialogIcon.png" />
+    <None Include="Resources\AppBarMain.png" />
+    <None Include="Resources\keyboard.png" />
+    <Content Include="Resources\RunDialogIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
@@ -481,7 +474,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <PublishFile Include="RunDialogIcon.png">
+    <PublishFile Include="Resources\RunDialogIcon.png">
       <Visible>False</Visible>
       <Group>
       </Group>

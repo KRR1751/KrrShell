@@ -120,4 +120,25 @@
   <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>108, 17</value>
   </metadata>
+  <data name="chkForceMode.ToolTip" xml:space="preserve">
+    <value>Forces the action without waiting while apps will all be closed.
+
+Useful when you want Shutdown the computer fast. But Microsoft don't recommends it.
+This is some sort of the "mild" version that will call EWX_FORCEIFHUNG API, which will
+terminate just the processes who said "no, I have work to do" and the rest will be shutdowned
+normally.</value>
+  </data>
+  <metadata name="ToolTip2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>206, 17</value>
+  </metadata>
+  <data name="chkBrutalForce.ToolTip" xml:space="preserve">
+    <value>This is a "total" force mode that will basically "kill" your system when you perform Shutdown/Restart,...
+Applications will have no chance to save their "work" or no "time" to close propertly.
+
+By this it will call the EWX_FORCE API, which will terminate every single process. Microsoft don't recommends it
+but if it is in the API, you can use it by your own risk.
+
+Useful if your system will stop working, then you can choose this. But I guess un-plugging the PC will be the
+right way still :DD</value>
+  </data>
 </root>

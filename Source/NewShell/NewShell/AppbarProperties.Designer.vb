@@ -52,7 +52,9 @@ Partial Class AppbarProperties
         Me.CheckBox6 = New System.Windows.Forms.CheckBox()
         Me.Controller = New System.Windows.Forms.Timer(Me.components)
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox19 = New System.Windows.Forms.CheckBox()
         Me.ComboBox5 = New System.Windows.Forms.ComboBox()
+        Me.CheckBox18 = New System.Windows.Forms.CheckBox()
         Me.CheckBox8 = New System.Windows.Forms.CheckBox()
         Me.ComboBox9 = New System.Windows.Forms.ComboBox()
         Me.CheckBox17 = New System.Windows.Forms.CheckBox()
@@ -100,15 +102,26 @@ Partial Class AppbarProperties
         Me.RadioButton9 = New System.Windows.Forms.RadioButton()
         Me.RadioButton8 = New System.Windows.Forms.RadioButton()
         Me.TabPage4 = New System.Windows.Forms.TabPage()
-        Me.GroupBox10 = New System.Windows.Forms.GroupBox()
+        Me.GroupBox20 = New System.Windows.Forms.GroupBox()
+        Me.TrackBar2 = New System.Windows.Forms.TrackBar()
+        Me.Label24 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.GroupBox10 = New System.Windows.Forms.GroupBox()
         Me.CheckBox12 = New System.Windows.Forms.CheckBox()
         Me.TabPage5 = New System.Windows.Forms.TabPage()
         Me.GroupBox16 = New System.Windows.Forms.GroupBox()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.GroupBox15 = New System.Windows.Forms.GroupBox()
-        Me.Label24 = New System.Windows.Forms.Label()
+        Me.ComboBox12 = New System.Windows.Forms.ComboBox()
+        Me.Button24 = New System.Windows.Forms.Button()
+        Me.ComboBox11 = New System.Windows.Forms.ComboBox()
+        Me.Button23 = New System.Windows.Forms.Button()
+        Me.Label5 = New System.Windows.Forms.Label()
         Me.Panel4 = New System.Windows.Forms.Panel()
+        Me.GroupBox19 = New System.Windows.Forms.GroupBox()
+        Me.Button9 = New System.Windows.Forms.Button()
+        Me.Button8 = New System.Windows.Forms.Button()
+        Me.ComboBox10 = New System.Windows.Forms.ComboBox()
         Me.hotkeyPanel = New System.Windows.Forms.Panel()
         Me.hotkeyBTN0 = New System.Windows.Forms.Button()
         Me.hotkeyBTN1 = New System.Windows.Forms.Button()
@@ -125,6 +138,8 @@ Partial Class AppbarProperties
         Me.Button21 = New System.Windows.Forms.Button()
         Me.Label20 = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
+        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.CheckBox20 = New System.Windows.Forms.CheckBox()
         Me.TabPage6 = New System.Windows.Forms.TabPage()
         Me.CheckBox13 = New System.Windows.Forms.CheckBox()
         Me.Panel3 = New System.Windows.Forms.Panel()
@@ -171,7 +186,7 @@ Partial Class AppbarProperties
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.RestartShellToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RestartAndRunAsAdministratorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.CheckBox18 = New System.Windows.Forms.CheckBox()
+        Me.CheckBox21 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -196,13 +211,17 @@ Partial Class AppbarProperties
         CType(Me.PictureBox5, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabPage4.SuspendLayout()
+        Me.GroupBox20.SuspendLayout()
+        CType(Me.TrackBar2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox10.SuspendLayout()
         Me.TabPage5.SuspendLayout()
         Me.GroupBox16.SuspendLayout()
         Me.GroupBox15.SuspendLayout()
         Me.Panel4.SuspendLayout()
+        Me.GroupBox19.SuspendLayout()
         Me.hotkeyPanel.SuspendLayout()
         Me.GroupBox14.SuspendLayout()
+        Me.Panel1.SuspendLayout()
         Me.TabPage6.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.GroupBox11.SuspendLayout()
@@ -255,6 +274,7 @@ Partial Class AppbarProperties
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.CheckBox21)
         Me.GroupBox1.Controls.Add(Me.CheckBox5)
         Me.GroupBox1.Controls.Add(Me.CheckBox9)
         Me.GroupBox1.Controls.Add(Me.CheckBox4)
@@ -532,6 +552,7 @@ Partial Class AppbarProperties
         '
         'GroupBox5
         '
+        Me.GroupBox5.Controls.Add(Me.CheckBox19)
         Me.GroupBox5.Controls.Add(Me.ComboBox5)
         Me.GroupBox5.Controls.Add(Me.CheckBox18)
         Me.GroupBox5.Controls.Add(Me.CheckBox8)
@@ -545,6 +566,16 @@ Partial Class AppbarProperties
         Me.GroupBox5.TabStop = False
         Me.GroupBox5.Text = "Appbar Options"
         '
+        'CheckBox19
+        '
+        Me.CheckBox19.AutoSize = True
+        Me.CheckBox19.Location = New System.Drawing.Point(131, 43)
+        Me.CheckBox19.Name = "CheckBox19"
+        Me.CheckBox19.Size = New System.Drawing.Size(84, 19)
+        Me.CheckBox19.TabIndex = 13
+        Me.CheckBox19.Text = "Aero Peek?"
+        Me.CheckBox19.UseVisualStyleBackColor = True
+        '
         'ComboBox5
         '
         Me.ComboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
@@ -553,8 +584,18 @@ Partial Class AppbarProperties
         Me.ComboBox5.Location = New System.Drawing.Point(7, 50)
         Me.ComboBox5.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.ComboBox5.Name = "ComboBox5"
-        Me.ComboBox5.Size = New System.Drawing.Size(139, 23)
+        Me.ComboBox5.Size = New System.Drawing.Size(117, 23)
         Me.ComboBox5.TabIndex = 11
+        '
+        'CheckBox18
+        '
+        Me.CheckBox18.AutoEllipsis = True
+        Me.CheckBox18.Location = New System.Drawing.Point(131, 9)
+        Me.CheckBox18.Name = "CheckBox18"
+        Me.CheckBox18.Size = New System.Drawing.Size(104, 35)
+        Me.CheckBox18.TabIndex = 12
+        Me.CheckBox18.Text = "Use System's Volume Slider"
+        Me.CheckBox18.UseVisualStyleBackColor = True
         '
         'CheckBox8
         '
@@ -648,7 +689,7 @@ Partial Class AppbarProperties
         'PictureBox1
         '
         Me.PictureBox1.BackColor = System.Drawing.Color.Blue
-        Me.PictureBox1.Image = Global.NewShell.My.Resources.Resources.AppBarMainTransparent
+        Me.PictureBox1.Image = Global.NewShell.My.Resources.Resources.AppBarMain
         Me.PictureBox1.Location = New System.Drawing.Point(7, 59)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.PictureBox1.Name = "PictureBox1"
@@ -1092,38 +1133,71 @@ Partial Class AppbarProperties
         '
         'TabPage4
         '
+        Me.TabPage4.Controls.Add(Me.GroupBox20)
+        Me.TabPage4.Controls.Add(Me.Label7)
         Me.TabPage4.Controls.Add(Me.GroupBox10)
         Me.TabPage4.Location = New System.Drawing.Point(4, 24)
         Me.TabPage4.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
         Me.TabPage4.Name = "TabPage4"
         Me.TabPage4.Size = New System.Drawing.Size(540, 368)
         Me.TabPage4.TabIndex = 3
-        Me.TabPage4.Text = "Shutdown Dialog"
+        Me.TabPage4.Text = "Shutdown Dialog and Screen"
         Me.TabPage4.UseVisualStyleBackColor = True
         '
-        'GroupBox10
+        'GroupBox20
         '
-        Me.GroupBox10.Controls.Add(Me.Label7)
-        Me.GroupBox10.Controls.Add(Me.CheckBox12)
-        Me.GroupBox10.Location = New System.Drawing.Point(4, 3)
-        Me.GroupBox10.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
-        Me.GroupBox10.Name = "GroupBox10"
-        Me.GroupBox10.Padding = New System.Windows.Forms.Padding(4, 3, 4, 3)
-        Me.GroupBox10.Size = New System.Drawing.Size(532, 359)
-        Me.GroupBox10.TabIndex = 0
-        Me.GroupBox10.TabStop = False
-        Me.GroupBox10.Text = "Style"
+        Me.GroupBox20.Controls.Add(Me.TrackBar2)
+        Me.GroupBox20.Controls.Add(Me.Label24)
+        Me.GroupBox20.Location = New System.Drawing.Point(11, 71)
+        Me.GroupBox20.Name = "GroupBox20"
+        Me.GroupBox20.Size = New System.Drawing.Size(237, 70)
+        Me.GroupBox20.TabIndex = 22
+        Me.GroupBox20.TabStop = False
+        Me.GroupBox20.Text = "Monitor Options"
+        '
+        'TrackBar2
+        '
+        Me.TrackBar2.AutoSize = False
+        Me.TrackBar2.BackColor = System.Drawing.SystemColors.ControlLightLight
+        Me.TrackBar2.Location = New System.Drawing.Point(6, 33)
+        Me.TrackBar2.Maximum = 100
+        Me.TrackBar2.Name = "TrackBar2"
+        Me.TrackBar2.Size = New System.Drawing.Size(229, 25)
+        Me.TrackBar2.TabIndex = 20
+        Me.TrackBar2.TickStyle = System.Windows.Forms.TickStyle.None
+        Me.TrackBar2.Value = 20
+        '
+        'Label24
+        '
+        Me.Label24.AutoSize = True
+        Me.Label24.Location = New System.Drawing.Point(6, 18)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(180, 15)
+        Me.Label24.TabIndex = 22
+        Me.Label24.Text = "Normal Brightness (if supported)"
         '
         'Label7
         '
         Me.Label7.AutoSize = True
         Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(209, 192)
+        Me.Label7.Location = New System.Drawing.Point(223, 254)
         Me.Label7.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(88, 15)
         Me.Label7.TabIndex = 19
         Me.Label7.Text = "Coming soon..."
+        '
+        'GroupBox10
+        '
+        Me.GroupBox10.Controls.Add(Me.CheckBox12)
+        Me.GroupBox10.Location = New System.Drawing.Point(4, 3)
+        Me.GroupBox10.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.GroupBox10.Name = "GroupBox10"
+        Me.GroupBox10.Padding = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.GroupBox10.Size = New System.Drawing.Size(532, 62)
+        Me.GroupBox10.TabIndex = 0
+        Me.GroupBox10.TabStop = False
+        Me.GroupBox10.Text = "Shutdown Dialog"
         '
         'CheckBox12
         '
@@ -1141,6 +1215,7 @@ Partial Class AppbarProperties
         Me.TabPage5.Controls.Add(Me.GroupBox16)
         Me.TabPage5.Controls.Add(Me.GroupBox15)
         Me.TabPage5.Controls.Add(Me.Panel4)
+        Me.TabPage5.Controls.Add(Me.Panel1)
         Me.TabPage5.Location = New System.Drawing.Point(4, 24)
         Me.TabPage5.Name = "TabPage5"
         Me.TabPage5.Size = New System.Drawing.Size(540, 368)
@@ -1152,9 +1227,9 @@ Partial Class AppbarProperties
         '
         Me.GroupBox16.Controls.Add(Me.Label11)
         Me.GroupBox16.Enabled = False
-        Me.GroupBox16.Location = New System.Drawing.Point(285, 207)
+        Me.GroupBox16.Location = New System.Drawing.Point(278, 218)
         Me.GroupBox16.Name = "GroupBox16"
-        Me.GroupBox16.Size = New System.Drawing.Size(252, 158)
+        Me.GroupBox16.Size = New System.Drawing.Size(259, 147)
         Me.GroupBox16.TabIndex = 3
         Me.GroupBox16.TabStop = False
         Me.GroupBox16.Text = "Custom Hotkey"
@@ -1162,7 +1237,7 @@ Partial Class AppbarProperties
         'Label11
         '
         Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(68, 75)
+        Me.Label11.Location = New System.Drawing.Point(68, 64)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(112, 15)
         Me.Label11.TabIndex = 0
@@ -1170,35 +1245,117 @@ Partial Class AppbarProperties
         '
         'GroupBox15
         '
-        Me.GroupBox15.Controls.Add(Me.Label24)
-        Me.GroupBox15.Enabled = False
-        Me.GroupBox15.Location = New System.Drawing.Point(10, 207)
+        Me.GroupBox15.Controls.Add(Me.ComboBox12)
+        Me.GroupBox15.Controls.Add(Me.Button24)
+        Me.GroupBox15.Controls.Add(Me.ComboBox11)
+        Me.GroupBox15.Controls.Add(Me.Button23)
+        Me.GroupBox15.Controls.Add(Me.Label5)
+        Me.GroupBox15.Location = New System.Drawing.Point(3, 218)
         Me.GroupBox15.Name = "GroupBox15"
-        Me.GroupBox15.Size = New System.Drawing.Size(269, 158)
+        Me.GroupBox15.Size = New System.Drawing.Size(269, 147)
         Me.GroupBox15.TabIndex = 2
         Me.GroupBox15.TabStop = False
         Me.GroupBox15.Text = "Other Hotkeys"
         '
-        'Label24
+        'ComboBox12
         '
-        Me.Label24.AutoSize = True
-        Me.Label24.Location = New System.Drawing.Point(74, 75)
-        Me.Label24.Name = "Label24"
-        Me.Label24.Size = New System.Drawing.Size(112, 15)
-        Me.Label24.TabIndex = 1
-        Me.Label24.Text = "Under construction."
+        Me.ComboBox12.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
+        Me.ComboBox12.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem
+        Me.ComboBox12.FormattingEnabled = True
+        Me.ComboBox12.Location = New System.Drawing.Point(7, 80)
+        Me.ComboBox12.Name = "ComboBox12"
+        Me.ComboBox12.Size = New System.Drawing.Size(180, 23)
+        Me.ComboBox12.TabIndex = 16
+        '
+        'Button24
+        '
+        Me.Button24.Location = New System.Drawing.Point(193, 79)
+        Me.Button24.Name = "Button24"
+        Me.Button24.Size = New System.Drawing.Size(45, 23)
+        Me.Button24.TabIndex = 17
+        Me.Button24.Text = "..."
+        Me.Button24.UseVisualStyleBackColor = True
+        '
+        'ComboBox11
+        '
+        Me.ComboBox11.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
+        Me.ComboBox11.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem
+        Me.ComboBox11.FormattingEnabled = True
+        Me.ComboBox11.Location = New System.Drawing.Point(7, 35)
+        Me.ComboBox11.Name = "ComboBox11"
+        Me.ComboBox11.Size = New System.Drawing.Size(180, 23)
+        Me.ComboBox11.TabIndex = 14
+        '
+        'Button23
+        '
+        Me.Button23.Location = New System.Drawing.Point(193, 34)
+        Me.Button23.Name = "Button23"
+        Me.Button23.Size = New System.Drawing.Size(45, 23)
+        Me.Button23.TabIndex = 15
+        Me.Button23.Text = "..."
+        Me.Button23.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(7, 19)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(162, 60)
+        Me.Label5.TabIndex = 18
+        Me.Label5.Text = "WIN+S (Custom Search key)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "WIN+C (Custom Copilot key)"
         '
         'Panel4
         '
+        Me.Panel4.Controls.Add(Me.GroupBox19)
         Me.Panel4.Controls.Add(Me.hotkeyPanel)
         Me.Panel4.Controls.Add(Me.GroupBox14)
         Me.Panel4.Controls.Add(Me.Label20)
         Me.Panel4.Controls.Add(Me.Label19)
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Top
-        Me.Panel4.Location = New System.Drawing.Point(0, 0)
+        Me.Panel4.Location = New System.Drawing.Point(0, 22)
         Me.Panel4.Name = "Panel4"
-        Me.Panel4.Size = New System.Drawing.Size(540, 201)
+        Me.Panel4.Size = New System.Drawing.Size(540, 190)
         Me.Panel4.TabIndex = 1
+        '
+        'GroupBox19
+        '
+        Me.GroupBox19.Controls.Add(Me.Button9)
+        Me.GroupBox19.Controls.Add(Me.Button8)
+        Me.GroupBox19.Controls.Add(Me.ComboBox10)
+        Me.GroupBox19.Enabled = False
+        Me.GroupBox19.Location = New System.Drawing.Point(267, 124)
+        Me.GroupBox19.Name = "GroupBox19"
+        Me.GroupBox19.Size = New System.Drawing.Size(256, 57)
+        Me.GroupBox19.TabIndex = 15
+        Me.GroupBox19.TabStop = False
+        Me.GroupBox19.Text = "Preferences"
+        Me.ToolTip1.SetToolTip(Me.GroupBox19, resources.GetString("GroupBox19.ToolTip"))
+        '
+        'Button9
+        '
+        Me.Button9.Location = New System.Drawing.Point(174, 22)
+        Me.Button9.Name = "Button9"
+        Me.Button9.Size = New System.Drawing.Size(75, 23)
+        Me.Button9.TabIndex = 2
+        Me.Button9.Text = "Remove"
+        Me.Button9.UseVisualStyleBackColor = True
+        '
+        'Button8
+        '
+        Me.Button8.Location = New System.Drawing.Point(122, 22)
+        Me.Button8.Name = "Button8"
+        Me.Button8.Size = New System.Drawing.Size(47, 23)
+        Me.Button8.TabIndex = 1
+        Me.Button8.Text = "Add"
+        Me.Button8.UseVisualStyleBackColor = True
+        '
+        'ComboBox10
+        '
+        Me.ComboBox10.FormattingEnabled = True
+        Me.ComboBox10.Location = New System.Drawing.Point(6, 22)
+        Me.ComboBox10.Name = "ComboBox10"
+        Me.ComboBox10.Size = New System.Drawing.Size(110, 23)
+        Me.ComboBox10.TabIndex = 0
         '
         'hotkeyPanel
         '
@@ -1212,7 +1369,7 @@ Partial Class AppbarProperties
         Me.hotkeyPanel.Controls.Add(Me.hotkeyBTN7)
         Me.hotkeyPanel.Controls.Add(Me.hotkeyBTN8)
         Me.hotkeyPanel.Controls.Add(Me.hotkeyBTN9)
-        Me.hotkeyPanel.Location = New System.Drawing.Point(10, 49)
+        Me.hotkeyPanel.Location = New System.Drawing.Point(10, 40)
         Me.hotkeyPanel.Name = "hotkeyPanel"
         Me.hotkeyPanel.Size = New System.Drawing.Size(513, 51)
         Me.hotkeyPanel.TabIndex = 2
@@ -1322,15 +1479,17 @@ Partial Class AppbarProperties
         Me.GroupBox14.Controls.Add(Me.ComboBox7)
         Me.GroupBox14.Controls.Add(Me.Button21)
         Me.GroupBox14.Enabled = False
-        Me.GroupBox14.Location = New System.Drawing.Point(10, 133)
+        Me.GroupBox14.Location = New System.Drawing.Point(10, 124)
         Me.GroupBox14.Name = "GroupBox14"
-        Me.GroupBox14.Size = New System.Drawing.Size(506, 57)
+        Me.GroupBox14.Size = New System.Drawing.Size(251, 57)
         Me.GroupBox14.TabIndex = 14
         Me.GroupBox14.TabStop = False
-        Me.GroupBox14.Text = "Program info and options"
+        Me.GroupBox14.Text = "Program Options"
         '
         'ComboBox7
         '
+        Me.ComboBox7.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
+        Me.ComboBox7.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem
         Me.ComboBox7.FormattingEnabled = True
         Me.ComboBox7.Location = New System.Drawing.Point(6, 22)
         Me.ComboBox7.Name = "ComboBox7"
@@ -1349,7 +1508,7 @@ Partial Class AppbarProperties
         'Label20
         '
         Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(8, 115)
+        Me.Label20.Location = New System.Drawing.Point(8, 106)
         Me.Label20.Name = "Label20"
         Me.Label20.Size = New System.Drawing.Size(487, 15)
         Me.Label20.TabIndex = 12
@@ -1360,7 +1519,7 @@ Partial Class AppbarProperties
         '
         Me.Label19.AutoSize = True
         Me.Label19.Font = New System.Drawing.Font("Segoe UI Light", 20.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label19.Location = New System.Drawing.Point(3, 9)
+        Me.Label19.Location = New System.Drawing.Point(3, 0)
         Me.Label19.Name = "Label19"
         Me.Label19.Size = New System.Drawing.Size(229, 37)
         Me.Label19.TabIndex = 0
@@ -1368,6 +1527,26 @@ Partial Class AppbarProperties
         Me.ToolTip1.SetToolTip(Me.Label19, "Left Click on any of the following keys to then select a custom program that will" &
         " be executed after you press for exp. WIN+1,2,..." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Right Click to remove the h" &
         "otkey program.")
+        '
+        'Panel1
+        '
+        Me.Panel1.Controls.Add(Me.CheckBox20)
+        Me.Panel1.Dock = System.Windows.Forms.DockStyle.Top
+        Me.Panel1.Location = New System.Drawing.Point(0, 0)
+        Me.Panel1.Name = "Panel1"
+        Me.Panel1.Size = New System.Drawing.Size(540, 22)
+        Me.Panel1.TabIndex = 4
+        '
+        'CheckBox20
+        '
+        Me.CheckBox20.AutoSize = True
+        Me.CheckBox20.Location = New System.Drawing.Point(10, 3)
+        Me.CheckBox20.Name = "CheckBox20"
+        Me.CheckBox20.Size = New System.Drawing.Size(350, 19)
+        Me.CheckBox20.TabIndex = 0
+        Me.CheckBox20.Text = "Use WIN+1,2,3,...,0 hotkeys for Appbar's Pinned Apps instead."
+        Me.ToolTip1.SetToolTip(Me.CheckBox20, resources.GetString("CheckBox20.ToolTip"))
+        Me.CheckBox20.UseVisualStyleBackColor = True
         '
         'TabPage6
         '
@@ -1825,20 +2004,19 @@ Partial Class AppbarProperties
         '
         'RestartAndRunAsAdministratorToolStripMenuItem
         '
-        Me.RestartAndRunAsAdministratorToolStripMenuItem.Enabled = False
         Me.RestartAndRunAsAdministratorToolStripMenuItem.Name = "RestartAndRunAsAdministratorToolStripMenuItem"
         Me.RestartAndRunAsAdministratorToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.RestartAndRunAsAdministratorToolStripMenuItem.Text = "Restart with Administrator"
         '
-        'CheckBox18
+        'CheckBox21
         '
-        Me.CheckBox18.AutoEllipsis = True
-        Me.CheckBox18.Location = New System.Drawing.Point(131, 16)
-        Me.CheckBox18.Name = "CheckBox18"
-        Me.CheckBox18.Size = New System.Drawing.Size(104, 35)
-        Me.CheckBox18.TabIndex = 12
-        Me.CheckBox18.Text = "Use System's Volume Slider"
-        Me.CheckBox18.UseVisualStyleBackColor = True
+        Me.CheckBox21.AutoSize = True
+        Me.CheckBox21.Location = New System.Drawing.Point(149, 17)
+        Me.CheckBox21.Name = "CheckBox21"
+        Me.CheckBox21.Size = New System.Drawing.Size(76, 19)
+        Me.CheckBox21.TabIndex = 9
+        Me.CheckBox21.Text = "Keyboard"
+        Me.CheckBox21.UseVisualStyleBackColor = True
         '
         'AppbarProperties
         '
@@ -1895,6 +2073,10 @@ Partial Class AppbarProperties
         CType(Me.PictureBox5, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabPage4.ResumeLayout(False)
+        Me.TabPage4.PerformLayout()
+        Me.GroupBox20.ResumeLayout(False)
+        Me.GroupBox20.PerformLayout()
+        CType(Me.TrackBar2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox10.ResumeLayout(False)
         Me.GroupBox10.PerformLayout()
         Me.TabPage5.ResumeLayout(False)
@@ -1904,8 +2086,11 @@ Partial Class AppbarProperties
         Me.GroupBox15.PerformLayout()
         Me.Panel4.ResumeLayout(False)
         Me.Panel4.PerformLayout()
+        Me.GroupBox19.ResumeLayout(False)
         Me.hotkeyPanel.ResumeLayout(False)
         Me.GroupBox14.ResumeLayout(False)
+        Me.Panel1.ResumeLayout(False)
+        Me.Panel1.PerformLayout()
         Me.TabPage6.ResumeLayout(False)
         Me.TabPage6.PerformLayout()
         Me.Panel3.ResumeLayout(False)
@@ -2065,7 +2250,6 @@ Partial Class AppbarProperties
     Public WithEvents GroupBox15 As GroupBox
     Public WithEvents GroupBox16 As GroupBox
     Public WithEvents Label11 As Label
-    Public WithEvents Label24 As Label
     Public WithEvents GroupBox17 As GroupBox
     Public WithEvents LinkLabel2 As LinkLabel
     Public WithEvents ContextMenuStrip1 As ContextMenuStrip
@@ -2077,4 +2261,20 @@ Partial Class AppbarProperties
     Friend WithEvents Button7 As Button
     Friend WithEvents CheckBox9 As CheckBox
     Friend WithEvents CheckBox18 As CheckBox
+    Friend WithEvents CheckBox19 As CheckBox
+    Friend WithEvents Panel1 As Panel
+    Friend WithEvents CheckBox20 As CheckBox
+    Friend WithEvents GroupBox19 As GroupBox
+    Friend WithEvents Button9 As Button
+    Friend WithEvents Button8 As Button
+    Friend WithEvents ComboBox10 As ComboBox
+    Public WithEvents ComboBox12 As ComboBox
+    Public WithEvents Button24 As Button
+    Public WithEvents ComboBox11 As ComboBox
+    Public WithEvents Button23 As Button
+    Friend WithEvents Label5 As Label
+    Friend WithEvents TrackBar2 As TrackBar
+    Friend WithEvents GroupBox20 As GroupBox
+    Friend WithEvents Label24 As Label
+    Friend WithEvents CheckBox21 As CheckBox
 End Class
