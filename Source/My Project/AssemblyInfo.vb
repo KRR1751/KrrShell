@@ -1,0 +1,32 @@
+﻿Imports System
+Imports System.Reflection
+Imports System.Runtime.InteropServices
+
+' General Information about an assembly is controlled through the following
+' set of attributes. Change these attribute values to modify the information
+' associated with an assembly.
+
+' Review the values of the assembly attributes
+
+<Assembly: AssemblyTitle("Krr's Shell")>
+<Assembly: AssemblyDescription("This program replaces Windows' shell functions! Make your own Taskbar, Startmenu, Desktop and more! Made by one guy called @KRR1751 on YouTube :)")>
+<Assembly: AssemblyCompany("@Safrely-Production")>
+<Assembly: AssemblyProduct("KrrShell")>
+<Assembly: AssemblyCopyright("Copyright ©10. 7. 2026")>
+<Assembly: AssemblyTrademark("")>
+
+<Assembly: ComVisible(False)>
+
+'The following GUID is for the ID of the typelib if this project is exposed to COM
+<Assembly: Guid("309a1f87-08d5-435a-b686-bb96733d3d31")>
+
+' Version information for an assembly consists of the following four values:
+'
+'      Major Version
+'      Minor Version
+'      Build Number
+'      Revision
+'
+
+<Assembly: AssemblyVersion("0.6.0.0")>
+<Assembly: AssemblyFileVersion("0.6.0.0")>

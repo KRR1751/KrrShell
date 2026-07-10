@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="KrrShell.vbproj" Id="ef0e8aaf-fa9a-4ea6-8b88-3cdb5ba930dc">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+</Solution>
