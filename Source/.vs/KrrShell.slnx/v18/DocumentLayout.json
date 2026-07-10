@@ -1,0 +1,61 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 276,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AltTab.vb",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
+              "RelativeDocumentMoniker": "AltTab.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
+              "RelativeToolTip": "AltTab.vb",
+              "ViewState": "AgIAAIsBAAAAAAAAAAAAALQBAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-10T20:39:14.254Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AltTab.vb [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
+              "RelativeDocumentMoniker": "AltTab.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb [Design]",
+              "RelativeToolTip": "AltTab.vb [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-10T20:39:10.741Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

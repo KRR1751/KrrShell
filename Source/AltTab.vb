@@ -421,15 +421,20 @@ Public Class AltTab
         Select Case currentState
             Case "Normal"
                 ShowWindow(hWnd, SHOW_WINDOW.SW_SHOWNORMAL)
+                SetForegroundWindow(hWnd)
             Case "Maximized"
                 ShowWindow(hWnd, SHOW_WINDOW.SW_MAXIMIZE)
+                SetForegroundWindow(hWnd)
             Case "Minimized"
                 ShowWindow(hWnd, SHOW_WINDOW.SW_RESTORE)
+                SetForegroundWindow(hWnd)
             Case Else
                 ShowWindow(hWnd, SHOW_WINDOW.SW_RESTORE)
+                SetForegroundWindow(hWnd)
         End Select
 
         SwitchToThisWindow(hWnd, True)
+        SetForegroundWindow(hWnd)
 
         AppBar.ActiveWindowHandle = hWnd
     End Sub
