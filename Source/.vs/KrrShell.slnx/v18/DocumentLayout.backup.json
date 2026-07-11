@@ -3,11 +3,35 @@
   "WorkspaceRootPath": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:desktop.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:appbar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\screendrawer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:screendrawer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\screendrawer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:screendrawer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
       "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|c:\\users\\public\\documents\\krrshell\\source\\alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "AbsoluteMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|C:\\Users\\Public\\Documents\\KrrShell\\Source\\alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
       "RelativeMoniker": "D:0:0:{EF0E8AAF-FA9A-4EA6-8B88-3CDB5BA930DC}|KrrShell.vbproj|solutionrelative:alttab.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
     }
   ],
@@ -18,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 276,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,28 +54,102 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Desktop.vb",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\Desktop.vb",
+              "RelativeDocumentMoniker": "Desktop.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\Desktop.vb",
+              "RelativeToolTip": "Desktop.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:12:34.689Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Desktop.vb [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\Desktop.vb",
+              "RelativeDocumentMoniker": "Desktop.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\Desktop.vb [Design]",
+              "RelativeToolTip": "Desktop.vb [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:12:31.621Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "AppBar.vb",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AppBar.vb",
+              "RelativeDocumentMoniker": "AppBar.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AppBar.vb",
+              "RelativeToolTip": "AppBar.vb",
+              "ViewState": "AgIAABUAAAAAAAAAAAAwwMcAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:10:55.744Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ScreenDrawer.vb",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\ScreenDrawer.vb",
+              "RelativeDocumentMoniker": "ScreenDrawer.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\ScreenDrawer.vb",
+              "RelativeToolTip": "ScreenDrawer.vb",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:10:26.309Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ScreenDrawer.vb [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\ScreenDrawer.vb",
+              "RelativeDocumentMoniker": "ScreenDrawer.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\ScreenDrawer.vb [Design]",
+              "RelativeToolTip": "ScreenDrawer.vb [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:10:24.848Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AppBar.vb [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AppBar.vb",
+              "RelativeDocumentMoniker": "AppBar.vb",
+              "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AppBar.vb [Design]",
+              "RelativeToolTip": "AppBar.vb [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-11T15:09:11.308Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "AltTab.vb",
               "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
               "RelativeDocumentMoniker": "AltTab.vb",
               "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
               "RelativeToolTip": "AltTab.vb",
-              "ViewState": "AgIAAIsBAAAAAAAAAAAAALQBAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAJ8BAAAAAAAAAAAAwLQBAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
               "WhenOpened": "2026-07-10T20:39:14.254Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 7,
               "Title": "AltTab.vb [Design]",
               "DocumentMoniker": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb",
               "RelativeDocumentMoniker": "AltTab.vb",
               "ToolTip": "C:\\Users\\Public\\Documents\\KrrShell\\Source\\AltTab.vb [Design]",
               "RelativeToolTip": "AltTab.vb [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
-              "WhenOpened": "2026-07-10T20:39:10.741Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2026-07-10T20:39:10.741Z"
             }
           ]
         }

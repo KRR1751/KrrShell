@@ -195,7 +195,9 @@ Public Class AppBar
         Public Bottom As Integer
     End Structure
 
-    Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
+    <DllImport("user32.dll", SetLastError:=True)>
+    Private Shared Function GetWindowRect(ByVal hWnd As IntPtr, ByRef lpRect As RECT) As Boolean
+    End Function
 
     'Window Capturing
     <DllImport("user32.dll", SetLastError:=True)>
@@ -2696,23 +2698,48 @@ Public Class AppBar
                 End If
             Case EVENT_SYSTEM_MINIMIZESTART
                 Me.BeginInvoke(Sub()
-                                   Dim rect As New RECT()
-                                   GetWindowRect(hwnd, rect)
+                                   Dim targetHWnd As IntPtr = hwnd
 
-                                   If Not SavedWindowPositions.ContainsKey(hwnd) Then
-                                       SavedWindowPositions.Add(hwnd, New Point(rect.left, rect.top))
+                                   Dim myFormHandle As IntPtr = System.Windows.Forms.Application.OpenForms(0).Handle
+                                   Dim watHandle As IntPtr = WAT.Handle
+                                   Dim startMenuHandle As IntPtr = Startmenu.Handle
+                                   Dim processStripHandle As IntPtr = ProcessStrip.Handle
+                                   Dim aeroPeekHandle As IntPtr = AeroPeekScreen.Handle
+                                   Dim screenDrawerHandle As IntPtr = ScreenDrawer.Handle
+
+                                   If hwnd = Me.Handle OrElse
+                                  targetHWnd = watHandle OrElse
+                                  targetHWnd = startMenuHandle OrElse
+                                  targetHWnd = processStripHandle OrElse
+                                  targetHWnd = aeroPeekHandle OrElse
+                                  targetHWnd = screenDrawerHandle Then
+                                       Return
                                    End If
+
+                                   Try
+                                       Dim rect As New RECT()
+                                       GetWindowRect(hwnd, rect)
+
+                                       If Not SavedWindowPositions.ContainsKey(hwnd) Then
+                                           SavedWindowPositions.Add(hwnd, New Point(rect.left, rect.top))
+                                       End If
+                                   Catch
+                                   End Try
 
                                    AnimateMinimizeToButton(hwnd)
                                End Sub)
 
             Case EVENT_SYSTEM_MINIMIZEEND
                 Me.BeginInvoke(Sub()
-                                   If SavedWindowPositions.ContainsKey(hwnd) Then
-                                       Dim originalPos = SavedWindowPositions(hwnd)
+                                   Try
+                                       If SavedWindowPositions.ContainsKey(hwnd) Then
+                                           Dim originalPos = SavedWindowPositions(hwnd)
 
-                                       SavedWindowPositions.Remove(hwnd)
-                                   End If
+                                           SavedWindowPositions.Remove(hwnd)
+                                       End If
+                                   Catch
+                                   End Try
+
                                End Sub)
         End Select
     End Sub
@@ -2945,40 +2972,41 @@ Public Class AppBar
 
 
         ' Desktop
-        If SystemInformation.MonitorCount > 1 Then
-            Dim screens As Screen() = Screen.AllScreens
-            For Each screen As Screen In screens
-                Dim newDesktop As New Desktop With {
-                    .Location = screen.Bounds.Location,
-                    .Size = screen.Bounds.Size
-                }
-                newDesktop.Show()
-                newDesktop.SendToBack()
-            Next
-        Else
-            Desktop.Location = New Point(0, 0)
+        'If SystemInformation.MonitorCount > 1 Then
+        'Dim screens As Screen() = Screen.AllScreens
+        'For Each screen As Screen In screens
+        'Dim newDesktop As New Desktop With {
+        '.Location = screen.Bounds.Location,
+        '.Size = screen.Bounds.Size
+        '       }
+        'newDesktop.Show()
+        'newDesktop.SendToBack()
+        'Next
+        'Else
+        Desktop.Location = New Point(0, 0)
             Desktop.Size = SystemInformation.PrimaryMonitorSize
             Desktop.Show()
             Desktop.SendToBack()
-        End If
+        'End If
 
         ' Screen Filter
-        If SystemInformation.MonitorCount > 1 Then
-            Dim screens As Screen() = Screen.AllScreens
-            For Each screen As Screen In screens
-                Dim newFilter As New ScreenDrawer With {
-                    .Location = screen.Bounds.Location,
-                    .Size = screen.Bounds.Size
-                }
-                newFilter.Show()
-                newFilter.BringToFront()
-            Next
-        Else
-            ScreenDrawer.Location = New Point(0, 0)
-            ScreenDrawer.Size = SystemInformation.PrimaryMonitorSize
-            ScreenDrawer.Show()
-            ScreenDrawer.BringToFront()
-        End If
+        ScreenDrawer.Location = New Point(0, 0)
+        ScreenDrawer.Size = SystemInformation.PrimaryMonitorSize
+        ScreenDrawer.Show()
+        ScreenDrawer.BringToFront()
+
+        'If SystemInformation.MonitorCount > 1 Then
+        'Dim screens As Screen() = Screen.AllScreens
+        'For Each screen As Screen In screens
+        'Dim newFilter As New ScreenDrawer With {
+        '.Location = screen.Bounds.Location,
+        '.Size = screen.Bounds.Size
+        '}
+        'newFilter.Show()
+        'newFilter.BringToFront()
+        'Next
+        'Else
+        'End If
 
 
         ' Apply Theme and sizing
